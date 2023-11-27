@@ -11,6 +11,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +24,7 @@ public class User {
     private String phone;
 
     @Column(nullable = false)
-    private String login_id;
+    private String loginId;
 
     @Column(nullable = false)
     private String password;
@@ -44,7 +45,7 @@ public class User {
     public User(String name, String phone, String login_id, String password,int age){
         this.name = name;
         this.phone = phone;
-        this.login_id = login_id;
+        this.loginId = login_id;
         this.password = password;
         this.age =age;
         this.manner_point = 0L;
