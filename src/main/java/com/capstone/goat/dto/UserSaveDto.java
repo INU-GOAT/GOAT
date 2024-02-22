@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class UserSaveDto {
     @NotBlank
     private String password;
 
-    @NotBlank
+    @NotNull
     private int age;
 
     private int soccer_career;
