@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @Getter
 @RequiredArgsConstructor
 public enum Sport {
@@ -18,5 +20,10 @@ public enum Sport {
     private final String name;
     private final int player;
 
-
+    public static Sport getSport(String inputName) {
+        return Arrays.stream(Sport.values())
+                .filter(sport -> sport.getName().equals(inputName))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 이름의 스포츠를 찾을 수 없습니다"));
+    }
 }
