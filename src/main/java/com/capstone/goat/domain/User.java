@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false)
     private int age;
 
+    @Column(nullable = false)
+    private boolean isMan;
+
     private Long manner_point;
     private int manner_count;
 
@@ -42,12 +45,13 @@ public class User {
     private List<Position> position;
 
     @Builder
-    public User(String name, String phone, String login_id, String password,int age){
+    public User(String name, String phone, String login_id, String password,int age,boolean isMan){
         this.name = name;
         this.phone = phone;
         this.loginId = login_id;
         this.password = password;
-        this.age =age;
+        this.age = age;
+        this.isMan = isMan;
         this.manner_point = 0L;
         this.manner_count = 0;
 
