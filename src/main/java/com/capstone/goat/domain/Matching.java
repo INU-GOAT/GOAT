@@ -5,7 +5,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -20,28 +19,27 @@ public class Matching {
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private String latitude;
+    private Integer latitude;
 
-    private String longitude;
+    private Integer longitude;
 
     @CreationTimestamp
     private LocalDateTime matchingStartTime;
 
-    private LocalDateTime startTime;
+    private LocalDateTime startTime;    // 당일 매칭만 잡는 거면 0시부터 24시를 30분 단위로 쪼개어서 표시 ex)0430 1500 등
 
-    // boolean isSameSex 가 낫지 않나
     private String preferGender;
 
     private String preferCourt;
 
     // 그룹 매칭 하려면 group 테이블 생성하고 group id 가져와야 하지 않나?
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
-    public Matching(Integer id, Sport sport, String latitude, String longitude, LocalDateTime matchingStartTime, LocalDateTime startTime, String preferGender, String preferCourt, User user) {
-        this.id = id;
+    public Matching(Sport sport, Integer latitude, Integer longitude, LocalDateTime matchingStartTime, LocalDateTime startTime, String preferGender, String preferCourt, User user) {
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;
