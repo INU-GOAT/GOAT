@@ -44,6 +44,10 @@ public class User {
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Position> position;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private Group group;
+
     @Builder
     public User(String name, String phone, String login_id, String password,int age,boolean isMan){
         this.name = name;
