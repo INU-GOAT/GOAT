@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@Entity // TODO 매칭을 배열로 하니까 Entity로 DB에 저장할 필요 없을 듯 @Component로 변경
 public class Matching {
 
     @Id
@@ -26,20 +26,21 @@ public class Matching {
     @CreationTimestamp
     private LocalDateTime matchingStartTime;
 
-    private LocalDateTime startTime;    // 당일 매칭만 잡는 거면 0시부터 24시를 30분 단위로 쪼개어서 표시 ex)0430 1500 등
+    private String startTime;    // 당일 매칭만 잡는 거면 0시부터 24시를 30분 단위로 쪼개어서 표시 ex)0430 1500 등
 
     private String preferGender;
 
     private String preferCourt;
 
-    // 그룹 매칭 하려면 group 테이블 생성하고 group id 가져와야 하지 않나?
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Integer userCount;  // 유저 수
 
-    @JoinColumn(name = "user_id")
-    private User user;
+    /*@OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private Group group;*/
+    private Integer groupId;
 
     @Builder
-    public Matching(Sport sport, Integer latitude, Integer longitude, LocalDateTime matchingStartTime, LocalDateTime startTime, String preferGender, String preferCourt, User user) {
+    public Matching(Sport sport, Integer latitude, Integer longitude, LocalDateTime matchingStartTime, String startTime, String preferGender, String preferCourt, Integer userCount, Integer groupId) {
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -47,6 +48,7 @@ public class Matching {
         this.startTime = startTime;
         this.preferGender = preferGender;
         this.preferCourt = preferCourt;
-        this.user = user;
+        this.userCount = userCount;
+        this.groupId = groupId;
     }
 }
