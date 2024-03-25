@@ -1,9 +1,6 @@
 package com.capstone.goat.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -17,11 +14,17 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // 이건 왜 필요?
-    @Enumerated(EnumType.STRING)
-    private Sport sport;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @Builder
+    public Team(User user, Game game) {
+        this.user = user;
+        this.game = game;
+    }
 }

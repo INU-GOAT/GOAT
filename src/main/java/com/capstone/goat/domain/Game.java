@@ -22,10 +22,10 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Team> team1;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "team",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Team> team2;
 
     private LocalDateTime startTime;
