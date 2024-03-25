@@ -10,8 +10,8 @@ import java.util.List;
 @Repository // TODO @Component로 바꿔야 하나
 public class MemoryMatchMakingRepository implements MatchMakingRepository {
     private static final List<Matching>[][] store = new List[550][725];
-    private int LATINIT = 3861;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
-    private int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
+    private final int LATINIT = 3861;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
+    private final int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
 
     public MemoryMatchMakingRepository() {
         for (List<Matching>[] storeArray : store) {
