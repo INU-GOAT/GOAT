@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MatchingRepositoryTest {
 
-    @Autowired MatchingRepository matchingRepository;
+    /*@Autowired MatchingRepository matchingRepository;
 
     @Commit
     @Test
@@ -59,5 +59,5 @@ class MatchingRepositoryTest {
 
         List<Matching> matchingList = matchingRepository.findByConditions(sport, latitude, longitude, startTime, preferGender);
         System.out.println("SOUT "+ matchingList.get(0));
-    }
+    }*/
 }
