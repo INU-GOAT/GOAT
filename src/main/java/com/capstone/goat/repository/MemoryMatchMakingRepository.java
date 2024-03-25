@@ -10,13 +10,14 @@ import java.util.List;
 @Repository // TODO @Component로 바꿔야 하나
 public class MemoryMatchMakingRepository implements MatchMakingRepository {
     private static final List<Matching>[][] store = new List[550][725];
+    //Map<Integer, List<Matching>> store1; //1550725
     private final int LATINIT = 3861;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
     private final int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
 
     public MemoryMatchMakingRepository() {
-        for (List<Matching>[] storeArray : store) {
-            for (List<Matching> storeList : storeArray) {
-                storeList = new LinkedList<>();
+        for (int i = 0; i < store.length; i++) {
+            for (int j = 0; j < store[0].length; j++) {
+                store[i][j] = new LinkedList<>();
             }
         }
     }
@@ -52,12 +53,15 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         int latIndex = latitude - LATINIT;  // 위도를 배열의 인덱스로 변환
         int lngIndex = longitude - LNGINIT; // 경도를 배열의 인덱스로 변환
 
+        List<Matching> removed = new ArrayList<>();
+
         for (Matching matching : store[latIndex][lngIndex]) {
 
             // groupId가 동일하면 삭제
             if (matching.getGroupId() == groupId) {
-                store[latIndex][lngIndex].remove(matching);
+                removed.add(matching);
             }
         }
+        store[latIndex][lngIndex].removeAll(removed);
     }
 }
