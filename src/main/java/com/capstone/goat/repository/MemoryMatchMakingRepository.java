@@ -41,7 +41,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         for (Matching matching : store[latIndex][lngIndex]) {
 
             // 종목과 게임 시작 시간이 동일하면 리스트에 추가
-            if (matching.getSport().equals(newMatching.getSport()) && matching.getStartTime() == newMatching.getStartTime())
+            if (matching.getSport().equals(newMatching.getSport()) && matching.getStartTime().equals(newMatching.getStartTime()))
                 matchedList.add(matching);
         }
 
@@ -58,7 +58,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         for (Matching matching : store[latIndex][lngIndex]) {
 
             // groupId가 동일하면 삭제
-            if (matching.getGroupId() == groupId) {
+            if (matching.getGroupId().equals(groupId)) {
                 removed.add(matching);
             }
         }
