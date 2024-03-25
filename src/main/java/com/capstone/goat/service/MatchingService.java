@@ -71,12 +71,12 @@ public class MatchingService {
                 }
                 if (sum == player) {
                     if (team.isEmpty()) {
-                        for (int i = start; i <= end; i++)  team.add(matchingList.get(i).getGroupId());
+                        for (int i = start; i < end; i++)  team.add(matchingList.get(i).getGroupId());
                         start = end;
                         sum = 0;
                     }
                     else {
-                        for (int i = start; i <= end; i++) team.add(matchingList.get(i).getGroupId());
+                        for (int i = start; i < end; i++) team.add(matchingList.get(i).getGroupId());
                         break;
                     }
                 }
