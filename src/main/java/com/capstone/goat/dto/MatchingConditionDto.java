@@ -18,10 +18,14 @@ public class MatchingConditionDto {
 
     private LocalDateTime matchingStartTime;
 
-    private List<LocalDateTime> startTimeList;
+    private List<String> startTimeList;
 
     private String preferGender;
 
     private String preferCourt;
+
+    private Integer userCount;
+
+    private Integer groupId;
 
 }
