@@ -20,15 +20,8 @@ public class UserSecurityService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String login_id) throws UsernameNotFoundException {
-        com.capstone.goat.domain.User _user = userRepository.findByLoginId(login_id).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        if ("hen715".equals(login_id)) {
-            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getKey()));
-        } else {
-            authorities.add(new SimpleGrantedAuthority(Role.USER.getKey()));
-        }
-        return new User(_user.getLoginId(), _user.getPassword(), authorities);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findById(Long.valueOf(username)).orElseThrow(()-> new UsernameNotFoundException("존재하지 않는 유저입니다."));
 
     }
 }

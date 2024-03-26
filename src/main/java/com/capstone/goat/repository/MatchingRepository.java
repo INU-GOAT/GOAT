@@ -3,7 +3,6 @@ package com.capstone.goat.repository;
 
 import com.capstone.goat.domain.Matching;
 import com.capstone.goat.domain.Sport;
-import com.capstone.goat.dto.MatchingConditionDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

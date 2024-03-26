@@ -1,4 +1,4 @@
-package com.capstone.goat.dto;
+package com.capstone.goat.dto.response;
 
 import lombok.Getter;
 

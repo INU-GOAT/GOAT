@@ -1,13 +1,8 @@
-package com.capstone.goat.dto;
+package com.capstone.goat.dto.response;
 
 import com.capstone.goat.domain.User;
 import lombok.Builder;
 import lombok.Getter;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 @Getter
 public class UserResponseDto {

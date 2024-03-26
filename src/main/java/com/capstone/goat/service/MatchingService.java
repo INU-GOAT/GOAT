@@ -2,7 +2,7 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.Matching;
 import com.capstone.goat.domain.Sport;
-import com.capstone.goat.dto.MatchingConditionDto;
+import com.capstone.goat.dto.request.MatchingConditionDto;
 import com.capstone.goat.repository.MatchMakingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

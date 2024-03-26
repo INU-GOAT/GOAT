@@ -1,20 +1,7 @@
 package com.capstone.goat.repository;
 
-import com.capstone.goat.domain.Matching;
-import com.capstone.goat.domain.Sport;
-import com.capstone.goat.dto.MatchingConditionDto;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest

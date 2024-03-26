@@ -1,7 +1,7 @@
 package com.capstone.goat.controller;
 
-import com.capstone.goat.dto.MatchingConditionDto;
-import com.capstone.goat.dto.ResponseDto;
+import com.capstone.goat.dto.request.MatchingConditionDto;
+import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.repository.UserRepository;
 import com.capstone.goat.service.GameService;
 import com.capstone.goat.service.MatchingService;
