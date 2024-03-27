@@ -9,6 +9,7 @@ import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,7 +95,21 @@ public class TokenProvider {
         }catch (IllegalArgumentException ex){
             throw new CustomException(CustomErrorCode.UNKNOWN_TOKEN_ERROR);
         }
+    }
 
+    public String getUsernameByRefresh(String token){
+        log.info("토큰으로 회원 정보 추출");
+        try {
+            String info = Jwts.parserBuilder().setSigningKey(refreshKey).build().parseClaimsJws(token).getBody().getSubject();
+            log.info("토큰으로 회원 정보 추출 완료 info:{}",info);
+            return info;
+        } catch (MalformedJwtException ex){
+            throw new CustomException(CustomErrorCode.UNSUPPORTED_TOKEN);
+        }catch (ExpiredJwtException ex){
+            throw new CustomException(CustomErrorCode.EXPIRED_TOKEN);
+        }catch (IllegalArgumentException ex){
+            throw new CustomException(CustomErrorCode.UNKNOWN_TOKEN_ERROR);
+        }
     }
     public String resolveToken(HttpServletRequest request){
         log.info("헤더에서 토큰 값 추출");
@@ -105,6 +120,17 @@ public class TokenProvider {
         log.info("토큰 유효성 검증 시작");
         try{
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+            return !claims.getBody().getExpiration().before(new Date());
+        }catch (Exception e){
+            log.info("토큰 유효 체크 예외 발생");
+            return false;
+        }
+    }
+
+    public boolean validateRefreshToken(String token){
+        log.info("토큰 유효성 검증 시작");
+        try{
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(refreshKey).build().parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         }catch (Exception e){
             log.info("토큰 유효 체크 예외 발생");
