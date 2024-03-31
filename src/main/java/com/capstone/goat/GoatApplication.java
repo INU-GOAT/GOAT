@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(
 		servers = {
-				@Server(url = "http://15.165.113.9/", description = "Server URL"),
+				@Server(url = "http://15.165.113.9:8080/", description = "Server URL"),
 				@Server(url = "http://localhost:8080",description = "Local URL")
 		},
 		security = {
