@@ -37,7 +37,7 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("")
-    public ResponseEntity<ResponseDto<Long>> save(@Valid@RequestBody UserSaveDto userSaveDto,@AuthenticationPrincipal User user){
+    public ResponseEntity<ResponseDto<Long>> save(@Valid@RequestBody UserSaveDto userSaveDto,@Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("회원가입 호출 id={}",user.getId());
         return new ResponseEntity<>(new ResponseDto<>(userService.join(user.getId(), userSaveDto), "회원가입성공"), HttpStatus.OK);
     }
@@ -48,7 +48,7 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PutMapping("")
-    public ResponseEntity<ResponseDto<Long>> update(@Valid@RequestBody UserUpdateDto userUpdateDto, @AuthenticationPrincipal User user){
+    public ResponseEntity<ResponseDto<Long>> update(@Valid@RequestBody UserUpdateDto userUpdateDto, @Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("회원정보수정 호출 id={}",user.getId());
         return new ResponseEntity<>(new ResponseDto<>(userService.update(user.getId(),userUpdateDto), "회원정보수정성공"), HttpStatus.OK);
     }
@@ -58,7 +58,7 @@ public class UserController {
             @ApiResponse(responseCode = "200",description = "회원탈퇴성공",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @DeleteMapping("")
-    public ResponseEntity<ResponseDto<Long>> delete(@AuthenticationPrincipal User user){
+    public ResponseEntity<ResponseDto<Long>> delete(@Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("회원탈퇴 호출 id={}",user.getId());
         userService.delete(user);
         return new ResponseEntity<>(new ResponseDto<>(1L, "회원탈퇴성공"), HttpStatus.OK);
