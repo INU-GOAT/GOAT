@@ -3,11 +3,15 @@ package com.capstone.goat.config;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.KakaoTokenResponseDto;
 import com.capstone.goat.dto.response.KakaoUserResponseDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
@@ -59,6 +63,7 @@ public class ClientKakao {
                 .headers(httpHeaders -> httpHeaders.set("Content-Type","application/x-www-form-urlencoded;charset=utf-8"))
                 .bodyValue(sb.toString())
                 .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,clientResponse -> Mono.just(new CustomException(CustomErrorCode.CODE_ERROR)))
                 .bodyToMono(KakaoTokenResponseDto.class)
                 .block();
         log.info("발급된 카카오 토큰 :{}",kakaoTokenResponseDto.getAccess_token());
