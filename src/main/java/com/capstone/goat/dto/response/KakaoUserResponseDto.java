@@ -7,7 +7,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KakaoUserResponseDto {
-    private String nickname;
     private String id;
+    private String connected_at;
+    private KakaoAccount kakao_account;
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KakaoAccount {
+        private Profile profile;
+
+        @Getter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class Profile {
+            private String nickname;
+        }
+    }
 }

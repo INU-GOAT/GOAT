@@ -1,9 +1,7 @@
 package com.capstone.goat.dto.request;
 
-import com.capstone.goat.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +11,10 @@ import javax.validation.constraints.NotNull;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSaveDto {
-
+public class UserUpdateDto {
+    @NotNull
+    @Schema(description = "닉네임")
+    private String nickname;
     @NotNull
     @Schema(description = "나이")
     private Integer age;
@@ -35,5 +35,4 @@ public class UserSaveDto {
     private Integer badminton_tier;
     @Schema(description = "테니스 실력")
     private Integer tableTennis_tier;
-
 }

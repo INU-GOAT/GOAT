@@ -24,18 +24,18 @@ public class User implements UserDetails {
     @Column
     private String nickname;
 
-    @Column(nullable = false)
+    @Column
     private Integer age;
 
-    @Column(nullable = false)
-    private Boolean isMan;
-
+    @Column
+    private String gender;
 
     private String prefer_sport;
 
     private Integer soccer_tier;
     private Integer badminton_tier;
     private Integer basketball_tier;
+    private Integer tableTennis_tier;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,16 +43,38 @@ public class User implements UserDetails {
     private Group group;
 
     @Builder
-    public User(String nickname,Long id, int age,boolean isMan,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier, List<String> roles){
+    public User(String nickname,Long id, int age,String gender,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier, List<String> roles){
         this.nickname = nickname;
+        this.gender = gender;
         this.id = id;
         this.age = age;
-        this.isMan = isMan;
+        this.prefer_sport = prefer_sport;
+        this.soccer_tier = soccer_tier;
+        this.tableTennis_tier = tableTennis_tier;
+        this.badminton_tier = badminton_tier;
+        this.basketball_tier = basketball_tier;
+        this.roles = roles;
+    }
+
+    public void join(int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
+        this.age = age;
+        this.gender = gender;
         this.prefer_sport = prefer_sport;
         this.soccer_tier = soccer_tier;
         this.badminton_tier = badminton_tier;
         this.basketball_tier = basketball_tier;
-        this.roles = roles;
+        this.tableTennis_tier = tableTennis_tier;
+    }
+
+    public void update(String nickname, int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
+        this.age = age;
+        this.nickname = nickname;
+        this.gender = gender;
+        this.prefer_sport = prefer_sport;
+        this.soccer_tier = soccer_tier;
+        this.badminton_tier = badminton_tier;
+        this.basketball_tier = basketball_tier;
+        this.tableTennis_tier = tableTennis_tier;
     }
 
     @ElementCollection(fetch = FetchType.EAGER)

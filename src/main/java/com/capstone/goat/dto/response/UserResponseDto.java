@@ -8,16 +8,11 @@ import lombok.Getter;
 public class UserResponseDto {
     private Long id;
 
-    private String name;
-
-    private String phone;
+    private String nickname;
 
     private Integer age;
 
-    private Boolean isMan;
-
-    private Long manner_point;
-    private Integer manner_count;
+    private String gender;
 
     private String prefer_sport;
 
@@ -27,8 +22,9 @@ public class UserResponseDto {
     @Builder
     private UserResponseDto (User user){
         this.id = user.getId();
+        this.nickname = user.getNickname();
         this.age = user.getAge();
-        this.isMan = user.getIsMan();
+        this.gender = user.getGender();
         this.prefer_sport = user.getPrefer_sport();
         this.soccer_tier = user.getSoccer_tier();
         this.badminton_tier = user.getBadminton_tier();

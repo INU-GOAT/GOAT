@@ -4,12 +4,18 @@ import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.TokenDto;
+import com.capstone.goat.dto.request.UserSaveDto;
+import com.capstone.goat.dto.request.UserUpdateDto;
 import com.capstone.goat.dto.response.UserResponseDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -19,13 +25,15 @@ public class UserService {
     private final ClientKakao clientKakao;
 
 
+    @Transactional
     public TokenDto OAuthLogin(String userCode){
         User user = clientKakao.getUserData(clientKakao.getUserKakaoToken(userCode));
         if(!userRepository.existsById(user.getId())){
             userRepository.save(user);
         }
         User loginedUser= userRepository.findById(user.getId()).get();
-        return tokenProvider.createToken(String.valueOf(user.getId()),loginedUser.getRoles());
+        log.info("회원 :{}",loginedUser.getId());
+        return tokenProvider.createToken(String.valueOf(loginedUser.getId()),loginedUser.getRoles());
 
     }
 
@@ -40,28 +48,45 @@ public class UserService {
     }
 
     public UserResponseDto getUser(User user){
-        return UserResponseDto.of(user);
-    }
-
-    /*@Transactional
-    public Long save(UserSaveDto userSaveDto){
-        if(userRepository.existsByLoginId(userSaveDto.getLogin_id())){
-            throw new CustomException(CustomErrorCode.DUPLICATE_LOGIN_ID);
+        if(user.getGender()==null){
+            throw new CustomException(CustomErrorCode.NEED_JOIN);
         }
-        return userRepository.save(User.builder()
-                .isMan(userSaveDto.getIsMan())
-                .age(userSaveDto.getAge())
-                .prefer_sport(userSaveDto.getPrefer_sport())
-                .soccer_tier(userSaveDto.getSoccer_tier())
-                .basketball_tier(userSaveDto.getBasketball_tier())
-                .badminton_tier(userSaveDto.getBasketball_tier())
-                .roles(Collections.singletonList("ROLE_USER"))
-                .build()).getId();
+        return UserResponseDto.of(user);
     }
 
-    public UserResponseDto getUser(User user){
-        return UserResponseDto.of(user);
-    }*/
+    @Transactional
+    public Long join(Long id, UserSaveDto userSaveDto){
+        User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        user.join(userSaveDto.getAge()
+                ,userSaveDto.getGender()
+                ,userSaveDto.getPrefer_sport()
+                ,userSaveDto.getSoccer_tier()
+                ,userSaveDto.getBadminton_tier()
+                ,userSaveDto.getBasketball_tier()
+                ,userSaveDto.getTableTennis_tier());
+        return user.getId();
+    }
+
+    @Transactional
+    public Long update(Long id, UserUpdateDto userUpdateDto){
+        User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        user.update(userUpdateDto.getNickname()
+                ,userUpdateDto.getAge()
+                ,userUpdateDto.getGender()
+                ,userUpdateDto.getPrefer_sport()
+                ,userUpdateDto.getSoccer_tier()
+                ,userUpdateDto.getBadminton_tier()
+                ,userUpdateDto.getBasketball_tier()
+                ,userUpdateDto.getTableTennis_tier());
+        return user.getId();
+    }
+
+    @Transactional
+    public void delete(User user){
+        userRepository.delete(user);
+    }
+
+
 
 
 

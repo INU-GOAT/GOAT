@@ -3,6 +3,7 @@ package com.capstone.goat.controller;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.LoginDto;
 import com.capstone.goat.dto.request.TokenDto;
+import com.capstone.goat.dto.request.UserUpdateDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.dto.response.UserResponseDto;
 import com.capstone.goat.dto.request.UserSaveDto;
@@ -30,17 +31,38 @@ import java.io.UnsupportedEncodingException;
 @CrossOrigin(origins = "*")
 public class UserController {
         private final UserService userService;
-    /*@Operation(summary = "회원가입", description = "바디에 {name,phone,loing_id,password,age,soccer_career,basketball_career,badminton_career,soccer_position,basketball_position}을 json형식으로 보내주세요. 경력이나 포지션을 입력하지 않았을경우 값에 -1을 담아 보내주세요")
+    @Operation(summary = "회원가입", description = "url 헤더에 토큰을, 바디에 {age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "400",description = "잘못된 입력",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+            @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("")
-    public ResponseEntity<ResponseDto<Long>> save(@Valid@RequestBody UserSaveDto userSaveDto){
-        Long id = userService.save(userSaveDto);
-        log.info("유저 save 호출 id={}",id);
-        return new ResponseEntity<>(new ResponseDto<>(id,"회원가입성공"), HttpStatus.OK);
-    }*/
+    public ResponseEntity<ResponseDto<Long>> save(@Valid@RequestBody UserSaveDto userSaveDto,@AuthenticationPrincipal User user){
+        log.info("회원가입 호출 id={}",user.getId());
+        return new ResponseEntity<>(new ResponseDto<>(userService.join(user.getId(), userSaveDto), "회원가입성공"), HttpStatus.OK);
+    }
+
+    @Operation(summary = "회원정보수정", description = "url 헤더에 토큰을, 바디에 {nickname, age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "회원정보수정성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @PutMapping("")
+    public ResponseEntity<ResponseDto<Long>> update(@Valid@RequestBody UserUpdateDto userUpdateDto, @AuthenticationPrincipal User user){
+        log.info("회원정보수정 호출 id={}",user.getId());
+        return new ResponseEntity<>(new ResponseDto<>(userService.update(user.getId(),userUpdateDto), "회원정보수정성공"), HttpStatus.OK);
+    }
+
+    @Operation(summary = "회원탈퇴", description = "url 헤더에 토큰을 보내주세요")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "회원탈퇴성공",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @DeleteMapping("")
+    public ResponseEntity<ResponseDto<Long>> delete(@AuthenticationPrincipal User user){
+        log.info("회원탈퇴 호출 id={}",user.getId());
+        userService.delete(user);
+        return new ResponseEntity<>(new ResponseDto<>(1L, "회원탈퇴성공"), HttpStatus.OK);
+    }
 
     @Operation(summary = "카카오 로그인(코드방식)",description = "헤더에 카카오 인증으로 얻은 코드를 보내주세요")
     @PostMapping("/code")
@@ -65,9 +87,5 @@ public class UserController {
     public ResponseEntity<ResponseDto<UserResponseDto>> getUser(@Schema(hidden = true)@AuthenticationPrincipal User user){
         return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"회원가입성공"), HttpStatus.OK);
     }
-
-
-
-
 
 }

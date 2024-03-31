@@ -37,7 +37,7 @@ public class ClientKakao {
 
         return User.builder()
                 .id(Long.valueOf(kakaoUserResponseDto.getId()))
-                .nickname(kakaoUserResponseDto.getNickname())
+                .nickname(kakaoUserResponseDto.getKakao_account().getProfile().getNickname())
                 .roles(Collections.singletonList("ROLE_USER"))
                 .build();
     }

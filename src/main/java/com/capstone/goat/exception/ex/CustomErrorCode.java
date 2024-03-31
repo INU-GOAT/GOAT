@@ -14,7 +14,6 @@ public enum CustomErrorCode {
     UNKNOWN_TOKEN_ERROR(HttpStatus.BAD_REQUEST,"토큰의 값이 존재하지 않습니다."),
     ID_NOT_FOUND(HttpStatus.UNAUTHORIZED,"아이디가 존재하지 않습니다."),
     PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED,"비밀번호가 틀립니다."),
-    DUPLICATE_LOGIN_ID(HttpStatus.BAD_REQUEST,"동일한 로그인 아이디가 존재합니다."),
     NEED_JOIN(HttpStatus.OK,"회원가입이 필요합니다.");
 
 
