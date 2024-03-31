@@ -3,20 +3,12 @@ package com.capstone.goat.service;
 import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
 import com.capstone.goat.domain.User;
-import com.capstone.goat.dto.request.LoginDto;
 import com.capstone.goat.dto.request.TokenDto;
 import com.capstone.goat.dto.response.UserResponseDto;
-import com.capstone.goat.dto.request.UserSaveDto;
-import com.capstone.goat.exception.ex.CustomErrorCode;
-import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +19,18 @@ public class UserService {
     private final ClientKakao clientKakao;
 
 
-    @Transactional
     public TokenDto OAuthLogin(String userCode){
-        User user = clientKakao.getUserData(clientKakao.getUserKakaoToekn(userCode));
+        User user = clientKakao.getUserData(clientKakao.getUserKakaoToken(userCode));
+        if(!userRepository.existsById(user.getId())){
+            userRepository.save(user);
+        }
+        User loginedUser= userRepository.findById(user.getId()).get();
+        return tokenProvider.createToken(String.valueOf(user.getId()),loginedUser.getRoles());
+
+    }
+
+    public TokenDto LoginByToken(String token){
+        User user = clientKakao.getUserData(token);
         if(!userRepository.existsById(user.getId())){
             userRepository.save(user);
         }

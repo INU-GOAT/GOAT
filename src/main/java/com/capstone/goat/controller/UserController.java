@@ -42,11 +42,18 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto<>(id,"회원가입성공"), HttpStatus.OK);
     }*/
 
+    @Operation(summary = "카카오 로그인(코드방식)",description = "헤더에 카카오 인증으로 얻은 코드를 보내주세요")
+    @PostMapping("/code")
+    public ResponseEntity<ResponseDto<TokenDto>> getUserByCode(HttpServletRequest httpServletRequest) {
+        String userCode = httpServletRequest.getHeader("code");
+        return new ResponseEntity<>(new ResponseDto<>(userService.OAuthLogin(userCode),"회원가입성공"), HttpStatus.OK);
+    }
+
     @Operation(summary = "카카오 로그인",description = "헤더에 카카오 인증으로 얻은 토큰을 보내주세요")
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<TokenDto>> getUser(HttpServletRequest httpServletRequest) {
-        String userCode = httpServletRequest.getHeader("code");
-        return new ResponseEntity<>(new ResponseDto<>(userService.OAuthLogin(userCode),"회원가입성공"), HttpStatus.OK);
+        String token = httpServletRequest.getHeader("kakao");
+        return new ResponseEntity<>(new ResponseDto<>(userService.LoginByToken(token),"회원가입성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "유저 정보 가져오기", description = "url 파라미터에 유저의 데이터베이스 id 값을 보내주세요.")

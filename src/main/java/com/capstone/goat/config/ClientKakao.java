@@ -2,7 +2,7 @@ package com.capstone.goat.config;
 
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.KakaoTokenResponseDto;
-import com.capstone.goat.dto.request.KakaoUserResponseDto;
+import com.capstone.goat.dto.response.KakaoUserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +42,7 @@ public class ClientKakao {
                 .build();
     }
 
-    public String getUserKakaoToekn(String userCode) {
+    public String getUserKakaoToken(String userCode) {
         StringBuilder sb = new StringBuilder();
         sb.append("grant_type=authorization_code");
         sb.append("&client_id="+clientId);
