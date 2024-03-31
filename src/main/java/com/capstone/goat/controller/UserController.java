@@ -78,6 +78,18 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto<>(userService.LoginByToken(token),"회원가입성공"), HttpStatus.OK);
     }
 
+    @Operation(summary = "토큰 재발급",description = "헤더에 refresh 토큰을 보내주세요. 토큰 유효시간은 2시간, 리프레시 토큰의 유효시간은 1일입니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "토큰 재발급 성공",content = @Content(schema = @Schema(implementation = TokenDto.class)))
+            ,@ApiResponse(responseCode = "401",description = "만료된 토큰입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+            ,@ApiResponse(responseCode = "404",description = "존재하지 않는 회원입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseDto<TokenDto>> refresh(HttpServletRequest httpServletRequest){
+        log.info("토큰 재발급 호출");
+        return new ResponseEntity<>(new ResponseDto<>(userService.refreshToken(httpServletRequest.getHeader("refresh")),"토큰 재발급 성공"),HttpStatus.OK);
+    }
+
     @Operation(summary = "유저 정보 가져오기", description = "url 파라미터에 유저의 데이터베이스 id 값을 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),

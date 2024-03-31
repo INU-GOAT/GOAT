@@ -15,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,12 @@ public class UserService {
         }
         User loginedUser= userRepository.findById(user.getId()).get();
         log.info("회원 :{}",loginedUser.getId());
-        return tokenProvider.createToken(String.valueOf(loginedUser.getId()),loginedUser.getRoles());
+        LocalDateTime localDateTime = LocalDateTime.now();
+        long tokenValidMillisecond = 1000L * 60 * 60 * 2 ;//2시간
+        long refreshValidMillisecond = 1000L * 60 *60 *24;//24시간
+        String accessToken = tokenProvider.createToken(user.getId().toString(),user.getRoles(),localDateTime);
+        String refreshToken = tokenProvider.createRefreshToken(user.getId().toString(),localDateTime);
+        return TokenDto.of(accessToken,refreshToken,localDateTime.plus(Duration.ofMillis(tokenValidMillisecond)).toString(),localDateTime.plus(Duration.ofMillis(refreshValidMillisecond)).toString());
 
     }
 
@@ -43,8 +51,27 @@ public class UserService {
             userRepository.save(user);
         }
         User loginedUser= userRepository.findById(user.getId()).get();
-        return tokenProvider.createToken(String.valueOf(user.getId()),loginedUser.getRoles());
+        LocalDateTime localDateTime = LocalDateTime.now();
+        long tokenValidMillisecond = 1000L * 60 * 60 * 2 ;//2시간
+        long refreshValidMillisecond = 1000L * 60 *60 *24;//24시간
+        String accessToken = tokenProvider.createToken(loginedUser.getId().toString(),loginedUser.getRoles(),localDateTime);
+        String refreshToken = tokenProvider.createRefreshToken(loginedUser.getId().toString(),localDateTime);
+        return TokenDto.of(accessToken,refreshToken,localDateTime.plus(Duration.ofMillis(tokenValidMillisecond)).toString(),localDateTime.plus(Duration.ofMillis(refreshValidMillisecond)).toString());
 
+    }
+
+    public TokenDto refreshToken(String token){
+        Long id = Long.valueOf(tokenProvider.getUsernameByRefresh(token));
+        if(!tokenProvider.validateRefreshToken(token)){
+            throw new CustomException(CustomErrorCode.EXPIRED_TOKEN);
+        }
+        User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        long tokenValidMillisecond = 1000L * 60 * 60 * 2 ;//2시간
+        long refreshValidMillisecond = 1000L * 60 *60 *24;//24시간
+        String accessToken = tokenProvider.createToken(user.getId().toString(),user.getRoles(),localDateTime);
+        String refreshToken = tokenProvider.createRefreshToken(user.getId().toString(),localDateTime);
+        return TokenDto.of(accessToken,refreshToken,localDateTime.plus(Duration.ofMillis(tokenValidMillisecond)).toString(),localDateTime.plus(Duration.ofMillis(refreshValidMillisecond)).toString());
     }
 
     public UserResponseDto getUser(User user){
