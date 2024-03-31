@@ -29,11 +29,9 @@ public class UserService {
 
     @Transactional
     public TokenDto OAuthLogin(String userCode){
-        boolean isFirst = false;
         User user = clientKakao.getUserData(clientKakao.getUserKakaoToekn(userCode));
         if(!userRepository.existsById(user.getId())){
             userRepository.save(user);
-            isFirst = true;
         }
         User loginedUser= userRepository.findById(user.getId()).get();
         return tokenProvider.createToken(String.valueOf(user.getId()),loginedUser.getRoles());
