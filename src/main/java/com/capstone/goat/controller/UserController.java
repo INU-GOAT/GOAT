@@ -49,7 +49,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto<>(userService.OAuthLogin(userCode),"회원가입성공"), HttpStatus.OK);
     }
 
-    @Operation(summary = "카카오 로그인",description = "헤더에 카카오 인증으로 얻은 토큰을 보내주세요")
+    @Operation(summary = "카카오 로그인(토큰방식)",description = "헤더에 카카오 인증으로 얻은 토큰을 보내주세요")
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<TokenDto>> getUser(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader("kakao");

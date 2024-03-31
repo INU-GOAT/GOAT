@@ -19,7 +19,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		security = {
 				@SecurityRequirement(name = "Auth"),
 				@SecurityRequirement(name = "refresh"),
-				@SecurityRequirement(name = "code")
+				@SecurityRequirement(name = "code"),
+				@SecurityRequirement(name = "kakao")
+
 		}
 )
 @SecuritySchemes({
@@ -37,7 +39,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 				type = SecuritySchemeType.APIKEY,
 				description = "code",
 				in = SecuritySchemeIn.HEADER,
-				paramName = "code")
+				paramName = "code"),
+		@SecurityScheme(name = "kakao",
+				type = SecuritySchemeType.APIKEY,
+				description = "kakao",
+				in = SecuritySchemeIn.HEADER,
+				paramName = "kakao")
 })
 public class GoatApplication {
 
