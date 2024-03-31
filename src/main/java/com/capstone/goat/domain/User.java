@@ -19,20 +19,10 @@ import java.util.stream.Collectors;
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false,unique = true)
-    private String phone;
-
-    @Column(nullable = false)
-    private String loginId;
-
-    @Column(nullable = false)
-    private String password;
+    @Column
+    private String nickname;
 
     @Column(nullable = false)
     private Integer age;
@@ -40,8 +30,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isMan;
 
-    private Long manner_point;
-    private Integer manner_count;
 
     private String prefer_sport;
 
@@ -55,15 +43,11 @@ public class User implements UserDetails {
     private Group group;
 
     @Builder
-    public User(String name, String phone, String login_id, String password,int age,boolean isMan,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier, List<String> roles){
-        this.name = name;
-        this.phone = phone;
-        this.loginId = login_id;
-        this.password = password;
+    public User(String nickname,Long id, int age,boolean isMan,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier, List<String> roles){
+        this.nickname = nickname;
+        this.id = id;
         this.age = age;
         this.isMan = isMan;
-        this.manner_point = 0L;
-        this.manner_count = 0;
         this.prefer_sport = prefer_sport;
         this.soccer_tier = soccer_tier;
         this.badminton_tier = badminton_tier;
@@ -77,6 +61,11 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return null;
     }
 
     @Override

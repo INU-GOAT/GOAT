@@ -1,5 +1,6 @@
 package com.capstone.goat.service;
 
+import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.LoginDto;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 
 @Service
@@ -21,21 +23,35 @@ import java.util.Collections;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final ClientKakao clientKakao;
+
+
     @Transactional
+    public TokenDto OAuthLogin(String userCode){
+        boolean isFirst = false;
+        User user = clientKakao.getUserData(clientKakao.getUserKakaoToekn(userCode));
+        if(!userRepository.existsById(user.getId())){
+            userRepository.save(user);
+            isFirst = true;
+        }
+        User loginedUser= userRepository.findById(user.getId()).get();
+        return tokenProvider.createToken(String.valueOf(user.getId()),loginedUser.getRoles());
+
+    }
+
+    public UserResponseDto getUser(User user){
+        return UserResponseDto.of(user);
+    }
+
+    /*@Transactional
     public Long save(UserSaveDto userSaveDto){
         if(userRepository.existsByLoginId(userSaveDto.getLogin_id())){
             throw new CustomException(CustomErrorCode.DUPLICATE_LOGIN_ID);
         }
-        String encodedPassword = passwordEncoder.encode(userSaveDto.getPassword());
         return userRepository.save(User.builder()
-                .name(userSaveDto.getName())
-                .phone(userSaveDto.getPhone())
                 .isMan(userSaveDto.getIsMan())
                 .age(userSaveDto.getAge())
-                .login_id(userSaveDto.getLogin_id())
-                .password(encodedPassword)
                 .prefer_sport(userSaveDto.getPrefer_sport())
                 .soccer_tier(userSaveDto.getSoccer_tier())
                 .basketball_tier(userSaveDto.getBasketball_tier())
@@ -46,15 +62,8 @@ public class UserService {
 
     public UserResponseDto getUser(User user){
         return UserResponseDto.of(user);
-    }
+    }*/
 
-    public TokenDto login(LoginDto loginDto){
-        User user = userRepository.findByLoginId(loginDto.getLogin_id()).orElseThrow(()->new CustomException(CustomErrorCode.ID_NOT_FOUND));
-        if(!passwordEncoder.matches(loginDto.getPassword(),user.getPassword())){
-            throw new CustomException(CustomErrorCode.PASSWORD_NOT_MATCHED);
-        }
-        return tokenProvider.createToken(String.valueOf(user.getId()),user.getRoles());
-    }
 
 
 }

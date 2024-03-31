@@ -18,7 +18,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		},
 		security = {
 				@SecurityRequirement(name = "Auth"),
-				@SecurityRequirement(name = "refresh")
+				@SecurityRequirement(name = "refresh"),
+				@SecurityRequirement(name = "code")
 		}
 )
 @SecuritySchemes({
@@ -31,7 +32,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 				type = SecuritySchemeType.APIKEY,
 				description = "JWT refresh token",
 				in = SecuritySchemeIn.HEADER,
-				paramName = "refresh")
+				paramName = "refresh"),
+		@SecurityScheme(name = "code",
+				type = SecuritySchemeType.APIKEY,
+				description = "code",
+				in = SecuritySchemeIn.HEADER,
+				paramName = "code")
 })
 public class GoatApplication {
 

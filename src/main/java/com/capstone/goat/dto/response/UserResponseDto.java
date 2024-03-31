@@ -27,12 +27,8 @@ public class UserResponseDto {
     @Builder
     private UserResponseDto (User user){
         this.id = user.getId();
-        this.name = user.getName();
-        this.phone = user.getPhone();
         this.age = user.getAge();
         this.isMan = user.getIsMan();
-        this.manner_point = user.getManner_point();
-        this.manner_count = user.getManner_count();
         this.prefer_sport = user.getPrefer_sport();
         this.soccer_tier = user.getSoccer_tier();
         this.badminton_tier = user.getBadminton_tier();

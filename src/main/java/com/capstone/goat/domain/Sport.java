@@ -10,11 +10,9 @@ import java.util.Arrays;
 public enum Sport {
 
     SOCCER("축구",11),
-    FUTSAL_5("풋살-5인",5),
-    FUTSAL_6("풋살-6인",6),
     BASKETBALL("농구",5),
-    BADMINTON_1("배드민턴-단식",1),
-    BADMINTON_2("배드민턴-복식",2);
+    BADMINTON("배드민턴",2),
+    TABLE_TENNIS("탁구",2);
 
     private final String name;
     private final int player;
