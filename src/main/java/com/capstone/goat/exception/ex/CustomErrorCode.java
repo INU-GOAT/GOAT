@@ -15,7 +15,8 @@ public enum CustomErrorCode {
     ID_NOT_FOUND(HttpStatus.UNAUTHORIZED,"아이디가 존재하지 않습니다."),
     PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED,"비밀번호가 틀립니다."),
     NEED_JOIN(HttpStatus.OK,"회원가입이 필요합니다."),
-    CODE_ERROR(HttpStatus.UNAUTHORIZED,"이미 한번 사용된 코드이거나, 코드 형식에 문제가 있습니다.");
+    CODE_ERROR(HttpStatus.UNAUTHORIZED,"이미 한번 사용된 코드이거나, 코드 형식에 문제가 있습니다."),
+    HAS_CLUB(HttpStatus.BAD_REQUEST,"이미 가입된 클럽이 있습니다.");
 
 
     private final HttpStatus status;
