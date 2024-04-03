@@ -89,6 +89,10 @@ public class User implements UserDetails {
         this.club = club;
     }
 
+    public void joinGroup(Group group){
+        this.group = group;
+    }
+
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;

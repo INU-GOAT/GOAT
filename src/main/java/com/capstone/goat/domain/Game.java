@@ -1,16 +1,15 @@
 package com.capstone.goat.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Game {
@@ -28,13 +27,23 @@ public class Game {
     @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Team> team2;
 
-    private LocalDateTime startTime;
+    private String startTime;
 
-    private String location;
+    private Integer latitude;
+
+    private Integer longitude;
 
     private String court;
 
     private String winTeam;
 
-
+    @Builder
+    public Game(Sport sport, String startTime, Integer latitude, Integer longitude, String court, String winTeam) {
+        this.sport = sport;
+        this.startTime = startTime;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.court = court;
+        this.winTeam = winTeam;
+    }
 }

@@ -1,9 +1,13 @@
 package com.capstone.goat.domain;
 
+import lombok.Getter;
+
 import javax.persistence.*;
 import java.util.List;
 
+@Getter
 @Entity
+@Table(name = "group_table")
 public class Group {
 
     @Id
