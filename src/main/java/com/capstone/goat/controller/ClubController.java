@@ -89,7 +89,7 @@ public class ClubController {
         return new ResponseEntity<>(new ResponseDto<>(clubService.getClub(clubId),"클럽 정보 가져오기 성공"), HttpStatus.OK);
     }
 
-    @Operation(summary = "클럽 가입 신청", description = "파라미터에 클럽 id를 보내주세요.")
+    @Operation(summary = "클럽 가입 신청", description = "url 헤더에 토큰을, 파라미터에 클럽 id를 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "클럽 가입 신청 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404",description = "존재하지 않는 클럽입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -102,7 +102,7 @@ public class ClubController {
         return new ResponseEntity<>(new ResponseDto<>(clubService.applyClub(user.getId(),clubId),"클럽 가입 신청 성공"), HttpStatus.OK);
     }
 
-    @Operation(summary = "클럽 가입 신청 수락/거절", description = "파라미터변수에 클럽 id를 , 파라미터로 applicantId, accept 를 boolean 형태로 보내주세요.")
+    @Operation(summary = "클럽 가입 신청 수락/거절", description = "url 헤더에 토큰을, 파라미터변수에 클럽 id를 , 파라미터로 applicantId, accept 를 boolean 형태로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "클럽 가입 신청 신청 수락/거절 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "클럽에 가입 신청을 하지 않은 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
