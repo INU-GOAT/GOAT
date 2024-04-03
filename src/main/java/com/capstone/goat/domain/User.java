@@ -46,8 +46,9 @@ public class User implements UserDetails {
     @JoinColumn(name =  "club_id")
     private Club club;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<ClubApplicant> clubApplicant;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="applying_club_id")
+    private Club applyingClub;
 
     @Builder
     public User(String nickname,Long id, int age,String gender,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier, List<String> roles){

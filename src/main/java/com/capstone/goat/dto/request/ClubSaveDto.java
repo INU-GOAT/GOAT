@@ -12,4 +12,7 @@ public class ClubSaveDto {
 
     @Schema(description = "클럽명",example = "인천의태양")
     private String name;
+
+    @Schema(description = "스포츠",example = "축구")
+    private String sport;
 }
