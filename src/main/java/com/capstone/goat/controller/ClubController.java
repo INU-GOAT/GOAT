@@ -123,7 +123,7 @@ public class ClubController {
     @GetMapping("/applicant/{clubId}")
     public ResponseEntity<ResponseDto<List<ApplicantListResponseDto>>> getApplicant(@PathVariable Long clubId, @Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("클럽 가입 신청신청자 목록 가져오기 id = {}",clubId);
-        return new ResponseEntity<>(new ResponseDto<>(clubService.getApplicantList(clubId),"클럽 가입 신청 성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(clubService.getApplicantList(clubId),"클럽 가입 신청자 목록 가져오기 성공"), HttpStatus.OK);
     }
 
 
