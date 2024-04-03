@@ -27,7 +27,12 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         int latIndex = matching.getLatitude() - LATINIT;  // 위도를 배열의 인덱스로 변환
         int lngIndex = matching.getLongitude() - LNGINIT; // 경도를 배열의 인덱스로 변환
 
-        store[latIndex][lngIndex].add(matching);
+        try {
+            store[latIndex][lngIndex].add(matching);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("위도와 경도 값이 대한민국 내의 값이 아닙니다.");
+        }
+
     }
 
     @Override
