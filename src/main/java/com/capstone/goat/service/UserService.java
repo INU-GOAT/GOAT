@@ -97,6 +97,9 @@ public class UserService {
         int badminton = 1;
         int basketball = 1;
         int tableTennis = 1;
+        if(userRepository.existsByNickname(userSaveDto.getNickname())){
+            throw new CustomException(CustomErrorCode.EXIST_NICKNAME);
+        }
         if(userSaveDto.getPrefer_sport().equals("축구")){
             soccer = userSaveDto.getSoccer_tier();
         }
@@ -109,7 +112,8 @@ public class UserService {
         else{
             tableTennis = user.getTableTennis_tier();
         }
-        user.join(userSaveDto.getAge()
+        user.join(userSaveDto.getNickname()
+                ,userSaveDto.getAge()
                 ,userSaveDto.getGender()
                 ,userSaveDto.getPrefer_sport()
                 ,soccer
@@ -122,6 +126,9 @@ public class UserService {
     @Transactional
     public Long update(Long id, UserUpdateDto userUpdateDto){
         User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        if(userRepository.existsByNickname(userUpdateDto.getNickname())){
+            throw new CustomException(CustomErrorCode.EXIST_NICKNAME);
+        }
         user.update(userUpdateDto.getNickname()
                 ,userUpdateDto.getAge()
                 ,userUpdateDto.getGender()

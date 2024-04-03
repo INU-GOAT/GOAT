@@ -32,6 +32,7 @@ public class UserController {
     @Operation(summary = "회원가입", description = "url 헤더에 토큰을, 바디에 {age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400",description = "이미 존재하는 닉네임입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("")
@@ -43,6 +44,7 @@ public class UserController {
     @Operation(summary = "회원정보수정", description = "url 헤더에 토큰을, 바디에 {nickname, age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "회원정보수정성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400",description = "이미 존재하는 닉네임입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PutMapping("")

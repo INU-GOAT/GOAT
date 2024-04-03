@@ -23,6 +23,10 @@ public class UserSaveDto {
     @Schema(description = "성별")
     private String gender;
 
+    @NotNull
+    @Schema(description = "닉네임")
+    private String nickname;
+
     @NotBlank
     @Schema(description = "선호 스포츠", example = "soccer")
     private String prefer_sport;

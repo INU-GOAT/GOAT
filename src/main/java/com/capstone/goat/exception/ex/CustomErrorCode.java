@@ -23,7 +23,8 @@ public enum CustomErrorCode {
     DUPLICATE_CLUB_NAME(HttpStatus.BAD_REQUEST,"이미 존재하는 클럽이름입니다."),
     HAS_NOT_CLUB(HttpStatus.BAD_REQUEST,"가입된 클럽이 없습니다."),
     MASTER_NOT_OUT(HttpStatus.BAD_REQUEST,"클럽장은 탈퇴가 불가능합니다."),
-    NOT_APPLY_USER(HttpStatus.BAD_REQUEST,"클럽에 가입 신청을 하지 않은 유저입니다.");
+    NOT_APPLY_USER(HttpStatus.BAD_REQUEST,"클럽에 가입 신청을 하지 않은 유저입니다."),
+    EXIST_NICKNAME(HttpStatus.BAD_REQUEST,"이미 존재하는 닉네임입니다.");
 
 
     private final HttpStatus status;

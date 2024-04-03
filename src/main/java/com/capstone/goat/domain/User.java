@@ -64,7 +64,8 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public void join(int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
+    public void join(String nickname, int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
+        this.nickname = nickname;
         this.age = age;
         this.gender = gender;
         this.prefer_sport = prefer_sport;
