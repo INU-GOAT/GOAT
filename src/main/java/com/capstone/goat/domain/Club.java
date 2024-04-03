@@ -49,4 +49,10 @@ public class Club {
         this.win = 0L;
         this.lose = 0L;
     }
+
+    public void update(String name, String sport){
+        this.name = name;
+        this.sport = sport;
+    }
+
 }

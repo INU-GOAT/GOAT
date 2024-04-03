@@ -1,8 +1,7 @@
 package com.capstone.goat.controller;
 
 import com.capstone.goat.domain.User;
-import com.capstone.goat.dto.request.LoginDto;
-import com.capstone.goat.dto.request.TokenDto;
+import com.capstone.goat.dto.response.TokenDto;
 import com.capstone.goat.dto.request.UserUpdateDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.dto.response.UserResponseDto;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.UnsupportedEncodingException;
 
 @Slf4j
 @RestController
@@ -99,5 +97,18 @@ public class UserController {
     public ResponseEntity<ResponseDto<UserResponseDto>> getUser(@Schema(hidden = true)@AuthenticationPrincipal User user){
         return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"회원가입성공"), HttpStatus.OK);
     }
+
+    @Operation(summary = "클럽 탈퇴")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "클럽 탈퇴 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400",description = "가입된 클럽이 없습니다. / 클럽장은 탈퇴가 불가능합니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @PutMapping("/club")
+    public ResponseEntity<ResponseDto<Long>> outClub(@Schema(hidden = true)@AuthenticationPrincipal User user){
+        userService.outClub(user.getId());
+        return new ResponseEntity<>(new ResponseDto<>(1L,"클럽 탈퇴 성공"), HttpStatus.OK);
+    }
+
+
 
 }

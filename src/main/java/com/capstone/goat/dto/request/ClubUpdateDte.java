@@ -5,18 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClubSaveDto {
-
-    @Schema(description = "클럽명",example = "인천의태양")
-    @NotBlank
+public class ClubUpdateDte {
+    @Schema(description = "클럽이름")
     private String name;
 
-    @Schema(description = "스포츠",example = "축구")
-    @NotBlank
+    @Schema(description = "클럽 스포츠 종목")
     private String sport;
 }

@@ -1,4 +1,4 @@
-package com.capstone.goat.dto.request;
+package com.capstone.goat.dto.response;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

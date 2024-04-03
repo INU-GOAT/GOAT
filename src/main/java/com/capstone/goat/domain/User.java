@@ -88,6 +88,13 @@ public class User implements UserDetails {
     public void joinClub(Club club){
         this.club = club;
     }
+    public void applyClub(Club club){this.applyingClub = club;}
+    public void fineApply(){
+        this.applyingClub=null;
+    }
+    public void kickClub(){
+        this.club = null;
+    }
 
 
     @ElementCollection(fetch = FetchType.EAGER)

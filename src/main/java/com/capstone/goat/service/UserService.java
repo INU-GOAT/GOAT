@@ -2,13 +2,16 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
+import com.capstone.goat.domain.Club;
 import com.capstone.goat.domain.User;
-import com.capstone.goat.dto.request.TokenDto;
+import com.capstone.goat.dto.response.ClubResponseDto;
+import com.capstone.goat.dto.response.TokenDto;
 import com.capstone.goat.dto.request.UserSaveDto;
 import com.capstone.goat.dto.request.UserUpdateDto;
 import com.capstone.goat.dto.response.UserResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
+import com.capstone.goat.repository.ClubRepository;
 import com.capstone.goat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final ClientKakao clientKakao;
+    private final ClubRepository clubRepository;
 
 
     @Transactional
@@ -78,19 +82,40 @@ public class UserService {
         if(user.getGender()==null){
             throw new CustomException(CustomErrorCode.NEED_JOIN);
         }
-        return UserResponseDto.of(user);
+        User user1 = userRepository.findById(user.getId()).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        String club  ="없음";
+        if(user.getClub()!=null){
+            club = user1.getClub().getName();
+        }
+        return UserResponseDto.of(user1,club);
     }
 
     @Transactional
     public Long join(Long id, UserSaveDto userSaveDto){
         User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        int soccer=1;
+        int badminton = 1;
+        int basketball = 1;
+        int tableTennis = 1;
+        if(userSaveDto.getPrefer_sport().equals("축구")){
+            soccer = userSaveDto.getSoccer_tier();
+        }
+        else if(userSaveDto.getPrefer_sport().equals("배드민턴")){
+            badminton = userSaveDto.getBadminton_tier();
+        }
+        else if(userSaveDto.getPrefer_sport().equals("농구")){
+            basketball = user.getBasketball_tier();
+        }
+        else{
+            tableTennis = user.getTableTennis_tier();
+        }
         user.join(userSaveDto.getAge()
                 ,userSaveDto.getGender()
                 ,userSaveDto.getPrefer_sport()
-                ,userSaveDto.getSoccer_tier()
-                ,userSaveDto.getBadminton_tier()
-                ,userSaveDto.getBasketball_tier()
-                ,userSaveDto.getTableTennis_tier());
+                ,soccer
+                ,badminton
+                ,basketball
+                ,tableTennis);
         return user.getId();
     }
 
@@ -111,6 +136,17 @@ public class UserService {
     @Transactional
     public void delete(User user){
         userRepository.delete(user);
+    }
+    @Transactional
+    public void outClub(Long id){
+        User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        if(user.getClub()==null){
+            throw new CustomException(CustomErrorCode.HAS_NOT_CLUB);
+        }
+        if(user.getClub().getMaster_id().equals(user.getId())){
+            throw new CustomException(CustomErrorCode.MASTER_NOT_OUT);
+        }
+        user.kickClub();
     }
 
 
