@@ -86,6 +86,10 @@ public class ClubService {
         if(!club.getMaster_id().equals(userId)){
             throw new CustomException(CustomErrorCode.ONLY_MASTER_AUTH);
         }
+        List<Long> applicant = club.getApplicants().stream().map(User::getId).toList();
+        if(!applicant.contains(applicantId)){
+            throw new CustomException(CustomErrorCode.NOT_APPLY_USER);
+        }
         User user = userRepository.findById(applicantId).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.fineApply();
         if(accept) {

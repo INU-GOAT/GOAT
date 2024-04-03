@@ -36,7 +36,7 @@ public class Club {
     @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<User> member;
 
-    @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "applyingClub",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<User> applicants;
 
 
