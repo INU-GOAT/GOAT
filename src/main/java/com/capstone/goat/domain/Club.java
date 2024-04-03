@@ -28,7 +28,7 @@ public class Club {
     private List<User> member;
 
     @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<JoinClub> joinClubs;
+    private List<ClubApply> clubApplies;
 
     @Builder
     public Club(String name, Long master_id){

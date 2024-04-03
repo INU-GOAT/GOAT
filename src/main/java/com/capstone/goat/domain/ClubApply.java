@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class JoinClub {
+public class ClubApply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,7 @@ public class JoinClub {
     private Club club;
 
     @Builder
-    public JoinClub(User user,Club club){
+    public ClubApply(User user, Club club){
         this.user = user;
         this.club = club;
     }
