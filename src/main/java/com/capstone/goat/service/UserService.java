@@ -2,6 +2,7 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
+import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.TokenDto;
 import com.capstone.goat.dto.request.UserSaveDto;
@@ -113,7 +114,12 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    @Transactional
+    public void joinGroup(Long userId, Group group){
 
+        User user = userRepository.findById(userId).orElseThrow();
+        user.joinGroup(group);
+    }
 
 
 

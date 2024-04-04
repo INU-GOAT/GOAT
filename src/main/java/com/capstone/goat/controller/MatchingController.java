@@ -1,10 +1,12 @@
 package com.capstone.goat.controller;
 
+import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.MatchingConditionDto;
 import com.capstone.goat.dto.response.ResponseDto;
-import com.capstone.goat.service.GameService;
+import com.capstone.goat.service.GroupService;
 import com.capstone.goat.service.MatchingService;
+import com.capstone.goat.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,8 +27,8 @@ import javax.validation.Valid;
 public class MatchingController {
 
     private final MatchingService matchingService;
-
-    private final GameService gameService;
+    private final GroupService groupService;
+    private final UserService userService;
 
     @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchingStartTime,startTimeList,startTimeList,preferGender,preferCourt,userCount,groupId}을 json형식으로 보내주세요.")
     @ApiResponses({
@@ -35,6 +37,13 @@ public class MatchingController {
     })
     @PostMapping
     public ResponseEntity<?> matchingStart(@AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto){
+
+        // 사용자가 그룹이 없으면 생성
+        if (matchingConditionDto.getGroupId() == null) {
+            Group group = groupService.addGroup(user);
+            userService.joinGroup(user.getId(), group);
+            matchingConditionDto.insertGroupId(group.getId());
+        }
 
         matchingService.addMatching(matchingConditionDto);
 

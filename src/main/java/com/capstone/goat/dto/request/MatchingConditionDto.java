@@ -1,7 +1,6 @@
 package com.capstone.goat.dto.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,5 +29,9 @@ public class MatchingConditionDto {
     private Integer userCount;
 
     private Integer groupId;
+
+    public void insertGroupId(int groupId) {
+        this.groupId = groupId;
+    }
 
 }
