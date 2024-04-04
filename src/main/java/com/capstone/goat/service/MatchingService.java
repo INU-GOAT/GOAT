@@ -221,7 +221,7 @@ public class MatchingService {
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
                             teamRepository.save(
-                                    Team.builder().game(game).user(user).build()
+                                    Team.builder().teamNumber(1).game(game).user(user).build()
                             )
                     );
         }
@@ -232,7 +232,7 @@ public class MatchingService {
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
                             teamRepository.save(
-                                    Team.builder().game(game).user(user).build()
+                                    Team.builder().teamNumber(2).game(game).user(user).build()
                             )
                     );
         }
