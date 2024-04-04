@@ -111,6 +111,28 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto<>(1L,"클럽 탈퇴 성공"), HttpStatus.OK);
     }
 
+    @Operation(summary = "더미데이터 유저 생성")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "클럽 탈퇴 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400",description = "이미 존재하는 id 값 입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @PostMapping("/dummy/{id}")
+    public ResponseEntity<ResponseDto<Long>> createDummy (@PathVariable Long id){
+        return new ResponseEntity<>(new ResponseDto<>(userService.createDummyUser(id),"더미데이터 생성 완료"),HttpStatus.OK);
+
+    }
+
+    @Operation(summary = "더미데이터 유저 로그인")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "클럽 탈퇴 성공",content = @Content(schema = @Schema(implementation = TokenDto.class))),
+            @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    @PostMapping("/dummy/{id}/login")
+    public ResponseEntity<ResponseDto<TokenDto>> loginDummy (@PathVariable Long id){
+        return new ResponseEntity<>(new ResponseDto<>(userService.loginDummy(id),"더미유저 로그인 완료"),HttpStatus.OK);
+
+    }
+
 
 
 }

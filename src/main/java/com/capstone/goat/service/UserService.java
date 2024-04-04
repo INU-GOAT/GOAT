@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -29,7 +30,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final ClientKakao clientKakao;
-    private final ClubRepository clubRepository;
 
 
     @Transactional
@@ -154,6 +154,37 @@ public class UserService {
             throw new CustomException(CustomErrorCode.MASTER_NOT_OUT);
         }
         user.kickClub();
+    }
+
+    @Transactional
+    public Long createDummyUser(Long id){
+        if(userRepository.existsById(id)){
+            throw new CustomException(CustomErrorCode.EXIST_ID);
+        }
+       User user = User.builder()
+               .id(id)
+               .age(20)
+               .roles(Collections.singletonList("ROLE_USER"))
+               .basketball_tier(3)
+               .badminton_tier(3)
+               .soccer_tier(3)
+               .tableTennis_tier(3)
+               .prefer_sport("축구")
+               .nickname("더미#"+id)
+               .gender("남자")
+               .build();
+       return userRepository.save(user).getId();
+    }
+
+    public TokenDto loginDummy(Long id){
+        User loginedUser = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        long tokenValidMillisecond = 1000L * 60 * 60 * 2 ;//2시간
+        long refreshValidMillisecond = 1000L * 60 *60 *24;//24시간
+        String accessToken = tokenProvider.createToken(loginedUser.getId().toString(),loginedUser.getRoles(),localDateTime);
+        String refreshToken = tokenProvider.createRefreshToken(loginedUser.getId().toString(),localDateTime);
+        return TokenDto.of(accessToken,refreshToken,localDateTime.plus(Duration.ofMillis(tokenValidMillisecond)).toString(),localDateTime.plus(Duration.ofMillis(refreshValidMillisecond)).toString());
+
     }
 
 
