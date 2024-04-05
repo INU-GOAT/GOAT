@@ -16,14 +16,17 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "master_id")
-    User master;
+    private User master;
 
     @OneToMany(mappedBy = "group",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    List<User> users;
+    private List<User> members;
+
+    @OneToMany(mappedBy = "invitedGroup",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<User> invitees;
 
     @Builder
     public Group(User master) {

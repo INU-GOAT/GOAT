@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Entity
@@ -32,15 +33,23 @@ public class User implements UserDetails {
 
     private String prefer_sport;
 
+    // TODO 제거하고 ratings로 변경
     private Integer soccer_tier;
     private Integer badminton_tier;
     private Integer basketball_tier;
     private Integer tableTennis_tier;
 
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @MapKey(name = "sport")
+    private Map<Sport,Rating> ratings;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invited_group_id")
+    private Group invitedGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name =  "club_id")
@@ -49,6 +58,9 @@ public class User implements UserDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="applying_club_id")
     private Club applyingClub;
+
+    @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<Notification> receivedNotification;
 
     @Builder
     public User(String nickname,Long id, int age,String gender,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier, List<String> roles){

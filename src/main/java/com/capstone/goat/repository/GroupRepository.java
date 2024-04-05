@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface GroupRepository extends JpaRepository<Group,Integer> {
+public interface GroupRepository extends JpaRepository<Group,Long> {
 
     // TODO N+1 문제 해결해야 할 듯
-    @Query("select g.users from Group g where g.id = :groupId")
-    List<User> findUsersById(Integer groupId);
+    @Query("select g.members from Group g where g.id = :groupId")
+    List<User> findUsersById(long groupId);
 }

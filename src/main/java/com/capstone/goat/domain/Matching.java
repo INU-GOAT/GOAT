@@ -1,54 +1,56 @@
 package com.capstone.goat.domain;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity // TODO 매칭을 배열로 하니까 Entity로 DB에 저장할 필요 없을 듯 @Component로 변경
+@Entity
 public class Matching {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+
+    private int userCount;  // 유저 수
+
+    private int rating; // MatchMaking Rating
 
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private Integer latitude;
+    private float latitude;
 
-    private Integer longitude;
+    private float longitude;
+
+    private String preferCourt;
 
     @CreationTimestamp
     private LocalDateTime matchingStartTime;
 
-    private String startTime;    // 당일 매칭만 잡는 거면 0시부터 24시를 30분 단위로 쪼개어서 표시 ex)0430 1500 등
+    @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    private List<MatchStartTime> matchStartTimes;
 
-    private String preferGender;
-
-    private String preferCourt;
-
-    private Integer userCount;  // 유저 수
-
-    /*@OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;*/
-    private Integer groupId;
+    private Group group;
 
     @Builder
-    public Matching(Sport sport, Integer latitude, Integer longitude, LocalDateTime matchingStartTime, String startTime, String preferGender, String preferCourt, Integer userCount, Integer groupId) {
+    public Matching(int userCount, int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
+        this.userCount = userCount;
+        this.rating = rating;
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.matchingStartTime = matchingStartTime;
-        this.startTime = startTime;
-        this.preferGender = preferGender;
         this.preferCourt = preferCourt;
-        this.userCount = userCount;
-        this.groupId = groupId;
+        this.matchingStartTime = matchingStartTime;
+        this.group = group;
     }
 }

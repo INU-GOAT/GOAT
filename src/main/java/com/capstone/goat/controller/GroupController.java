@@ -1,13 +1,9 @@
 package com.capstone.goat.controller;
 
-import com.capstone.goat.domain.User;
-import com.capstone.goat.dto.response.ResponseDto;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/group/")
@@ -15,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class GroupController {
 
-    @Operation(summary = "새로운 그룹 생성", description = "새로운 그룹을 생성합니다.")
+    /*@Operation(summary = "새로운 그룹 생성", description = "새로운 그룹을 생성합니다.")
     @PostMapping()
     public ResponseEntity<?> groupAdd(){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
@@ -24,7 +20,7 @@ public class GroupController {
     @Operation(summary = "그룹원 조회", description = "사용자의 그룹원을 조회합니다.")
     @GetMapping()
     public ResponseEntity<?> groupList(@AuthenticationPrincipal User user){
-        user.getGroup().getUsers();
+        user.getGroup().getMembers();
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
     }
 
@@ -50,6 +46,6 @@ public class GroupController {
     @DeleteMapping("{groupId}")
     public ResponseEntity<?> groupRemove(){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
-    }
+    }*/
 
 }

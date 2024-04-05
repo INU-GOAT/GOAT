@@ -1,6 +1,6 @@
 package com.capstone.goat.service;
 
-import com.capstone.goat.domain.Team;
+import com.capstone.goat.domain.Teammate;
 import com.capstone.goat.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class GameService {
 
     @Transactional
     public int addGame(List<Integer> team) {
-        Team team1 = Team.builder().build();
+        Teammate teammate1 = Teammate.builder().build();
 
         return 0;
     }

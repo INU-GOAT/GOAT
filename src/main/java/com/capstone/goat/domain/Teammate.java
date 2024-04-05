@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Team {
+public class Teammate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class Team {
     private Game game;
 
     @Builder
-    public Team(int teamNumber, User user, Game game) {
+    public Teammate(int teamNumber, User user, Game game) {
         this.teamNumber = teamNumber;
         this.user = user;
         this.game = game;

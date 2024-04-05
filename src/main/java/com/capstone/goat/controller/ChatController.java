@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ChatController {
-    @Operation(summary = "메시지 전송", description = "사용자가 작성한 메시지를 전송합니다. url 바디에 {comment,time,gameId}를 담아 json 형태로 보내주세요.")
+    /*@Operation(summary = "메시지 전송", description = "사용자가 작성한 메시지를 전송합니다. url 바디에 {comment,time,gameId}를 담아 json 형태로 보내주세요.")
     @PostMapping()
     public ResponseEntity<?> chatAdd(){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
@@ -22,5 +22,5 @@ public class ChatController {
     @GetMapping()
     public ResponseEntity<?> chatList(Integer gameId){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
-    }
+    }*/
 }

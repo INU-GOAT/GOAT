@@ -34,9 +34,9 @@ public class Club {
     private Long lose;
 
     @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<User> member;
+    private List<User> members;
 
-    @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "applyingClub",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<User> applicants;
 
 

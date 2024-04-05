@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class GameController {
 
-    @Operation(summary = "진행 중인 게임 조회", description = "사용자가 현재 진행하고 있는 게임을 조회합니다.")
+    /*@Operation(summary = "진행 중인 게임 조회", description = "사용자가 현재 진행하고 있는 게임을 조회합니다.")
     @GetMapping("playing")
     public ResponseEntity<?> gamePlayingDetails(@AuthenticationPrincipal User user){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
@@ -37,7 +37,7 @@ public class GameController {
     @GetMapping("{gameId}")
     public ResponseEntity<?> gameFinishedDetails(@PathVariable Integer gameId, @AuthenticationPrincipal User user){
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
-    }
+    }*/
 
 
 }

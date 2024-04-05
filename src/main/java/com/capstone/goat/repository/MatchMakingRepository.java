@@ -1,14 +1,14 @@
 package com.capstone.goat.repository;
 
-import com.capstone.goat.domain.Matching;
+import com.capstone.goat.domain.MatchMaking;
 
 import java.util.List;
 
 public interface MatchMakingRepository {
 
-    void save(Matching matching);
+    void save(MatchMaking matchMaking);
 
-    List<Matching> findByMatching(Matching matching);
+    List<MatchMaking> findByMatching(MatchMaking matchMaking);
 
-    void deleteByGroupIdAndLatitudeAndLongitude(Integer groupId, Integer latitude, Integer longitude);
+    void deleteByGroupIdAndLatitudeAndLongitude(long groupId, float latitude, float longitude);
 }
