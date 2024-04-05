@@ -1,25 +1,15 @@
 package com.capstone.goat.service;
 
-import com.capstone.goat.domain.Game;
-import com.capstone.goat.domain.MatchMaking;
-import com.capstone.goat.domain.Sport;
-import com.capstone.goat.domain.Teammate;
+import com.capstone.goat.domain.*;
 import com.capstone.goat.dto.request.MatchingConditionDto;
-import com.capstone.goat.repository.GameRepository;
-import com.capstone.goat.repository.GroupRepository;
-import com.capstone.goat.repository.MatchMakingRepository;
-import com.capstone.goat.repository.TeamRepository;
+import com.capstone.goat.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -27,6 +17,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class MatchMakingService {
 
+    private final MatchingRepository matchingRepository;
     private final MatchMakingRepository matchMakingRepository;
     private final GroupRepository groupRepository;
     private final GameRepository gameRepository;
@@ -35,59 +26,23 @@ public class MatchMakingService {
     @Transactional
     public void addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, int rating) {
 
-        Sport sport = Sport.getSport(matchingConditionDto.getSport());
-        float latitude = matchingConditionDto.getLatitude();
-        float longitude = matchingConditionDto.getLongitude();
-        LocalDateTime matchingStartTime = matchingConditionDto.getMatchingStartTime();
-        List<String> matchStartTimeList = matchingConditionDto.getMatchStartTimes();
-        String preferCourt = matchingConditionDto.getPreferCourt();
-        int userCount = matchingConditionDto.getUserCount();
-        long groupId = matchingConditionDto.getGroupId();
+        Group group = groupRepository.findById(matchingConditionDto.getGroupId())
+                .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
 
-        for (String matchStartTime : matchStartTimeList) {
+        // Matching Repository에 저장
+        Matching matching = matchingConditionDto.toEntity(rating, group);
+        matchingRepository.save(matching);
 
-            MatchMaking matchMaking = com.capstone.goat.domain.MatchMaking.builder()
-                    .sport(sport)
-                    .latitude(latitude)
-                    .longitude(longitude)
-                    .matchingStartTime(matchingStartTime)
-                    .matchStartTime(matchStartTime)
-                    .preferCourt(preferCourt)
-                    .userCount(userCount)
-                    .groupId(groupId).build();
-
-            // 매칭 대기열에 추가
-            matchMakingRepository.save(matchMaking);
-        }
-
+        // MatchMaking Repository에 저장
+        matchingConditionDto.toMatchMakingList(rating)  // List<MatchMaking>
+                .forEach(matchMakingRepository::save);
     }
 
     @Async
     @Transactional
     public void findMatching(MatchingConditionDto matchingConditionDto, int rating) {
 
-        Sport sport = Sport.getSport(matchingConditionDto.getSport());
-        float latitude = matchingConditionDto.getLatitude();
-        float longitude = matchingConditionDto.getLongitude();
-        LocalDateTime matchingStartTime = matchingConditionDto.getMatchingStartTime();
-        List<String> matchStartTimeList = matchingConditionDto.getMatchStartTimes();
-        String preferCourt = matchingConditionDto.getPreferCourt();
-        int userCount = matchingConditionDto.getUserCount();
-        long groupId = matchingConditionDto.getGroupId();
-
-        for (String matchStartTime : matchStartTimeList) {
-
-            log.info("[로그] : groupId: " + groupId);
-
-            MatchMaking matchMaking = com.capstone.goat.domain.MatchMaking.builder()
-                    .sport(sport)
-                    .latitude(latitude)
-                    .longitude(longitude)
-                    .matchingStartTime(matchingStartTime)
-                    .matchStartTime(matchStartTime)
-                    .preferCourt(preferCourt)
-                    .userCount(userCount)
-                    .groupId(groupId).build();
+        for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(rating)) {
 
             // 조건에 맞는 매칭 중인 유저 검색
             List<MatchMaking> matchMakingList = matchMakingRepository.findByMatching(matchMaking);
@@ -95,8 +50,11 @@ public class MatchMakingService {
             // 검색한 리스트가 비어있으면 다음으로
             if (matchMakingList.size() <= 1) continue;
 
-            int player = sport.getPlayer();
+            float latitude = matchingConditionDto.getLatitude();
+            float longitude = matchingConditionDto.getLongitude();
+            int player = Sport.getSport(matchingConditionDto.getSport()).getPlayer();
 
+            // 스포츠 인원에 맞는 팀 구성이 되는지 확인
             List<Long> team1 = findSumSubset(matchMakingList, player);
             if (team1.isEmpty()) continue;
             List<Long> team2 = findSumSubset(matchMakingList, player);
@@ -113,6 +71,7 @@ public class MatchMakingService {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
                 }
 
+                // Game에 추가
                 addGame(team1, team2, matchMaking);
 
                 return;
@@ -120,6 +79,7 @@ public class MatchMakingService {
         }
     }
 
+    // 그룹 인원 수의 합이 스포츠 한 팀의 수와 같은 집합 검색
     private List<Long> findSumSubset(List<MatchMaking> matchMakingList, int target) {
         int n = matchMakingList.size();
         boolean[][] dp = new boolean[n + 1][target + 1];
@@ -159,6 +119,7 @@ public class MatchMakingService {
         return subset;
     }
 
+    // 게임 생성
     private void addGame(List<Long> team1GroupId, List<Long> team2GroupId, MatchMaking matchMaking) {
 
         Game newGame = Game.builder()
