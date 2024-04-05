@@ -47,7 +47,7 @@ public class ClubResponseDto {
                 .name(club.getName())
                 .clubMaster(clubMaster)
                 .sport(club.getSport())
-                .memberNumber((long) club.getMember().size())
+                .memberNumber((long) club.getMembers().size())
                 .win(club.getWin())
                 .lose(club.getLose())
                 .members(members)

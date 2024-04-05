@@ -2,6 +2,7 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
+import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.Club;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.response.ClubResponseDto;
@@ -187,7 +188,12 @@ public class UserService {
 
     }
 
+    @Transactional
+    public void joinGroup(Long userId, Group group){
 
+        User user = userRepository.findById(userId).orElseThrow();
+        user.joinGroup(group);
+    }
 
 
 
