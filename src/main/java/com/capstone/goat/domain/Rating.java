@@ -18,13 +18,13 @@ public class Rating {
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private int rating; // MMR
+    private Integer rating; // MMR
 
-    private int win;    // 승 수
+    private Integer win;    // 승 수
 
-    private int lose;   // 패 수
+    private Integer lose;   // 패 수
 
-    private int winStreak;  // 연승
+    private Integer winStreak;  // 연승
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

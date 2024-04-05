@@ -19,16 +19,16 @@ public class Matching {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int userCount;  // 유저 수
+    private Integer userCount;  // 유저 수
 
-    private int rating; // MatchMaking Rating
+    private Integer rating; // MatchMaking Rating
 
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private float latitude;
+    private Float latitude;
 
-    private float longitude;
+    private Float longitude;
 
     private String preferCourt;
 

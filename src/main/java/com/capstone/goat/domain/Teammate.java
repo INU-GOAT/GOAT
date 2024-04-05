@@ -15,7 +15,7 @@ public class Teammate {
     private Integer id;
 
     @Column
-    private int teamNumber;
+    private Integer teamNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

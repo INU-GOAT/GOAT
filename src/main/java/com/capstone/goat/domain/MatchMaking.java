@@ -13,13 +13,13 @@ public class MatchMaking {
 
     private Sport sport;
 
-    private int userCount;  // 유저 수
+    private Integer userCount;  // 유저 수
 
-    private int rating;  // MatchMaking Rating
+    private Integer rating;  // MatchMaking Rating
 
-    private float latitude;
+    private Float latitude;
 
-    private float longitude;
+    private Float longitude;
 
     private String preferCourt;
 
@@ -27,10 +27,9 @@ public class MatchMaking {
 
     private String matchStartTime;    // 당일 매칭만 잡는 거면 0시부터 24시를 30분 단위로 쪼개어서 표시 ex)0430 1500 등
 
-    private long groupId;
+    private Long groupId;
 
     @Builder
-
     public MatchMaking(Sport sport, int userCount, int rating, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, String matchStartTime, long groupId) {
         this.sport = sport;
         this.userCount = userCount;

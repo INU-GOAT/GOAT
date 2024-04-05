@@ -23,13 +23,13 @@ public class Game {
 
     private String startTime;
 
-    private float latitude;
+    private Float latitude;
 
-    private float longitude;
+    private Float longitude;
 
     private String court;
 
-    private int winTeam;    // 0이면 게임 중 / 1이면 1팀 / 2면 2팀
+    private Integer winTeam;    // 0이면 게임 중 / 1이면 1팀 / 2면 2팀
 
     @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Teammate> team1;
