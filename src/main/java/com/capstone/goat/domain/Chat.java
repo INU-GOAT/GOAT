@@ -23,9 +23,16 @@ public class Chat {
     @CreationTimestamp
     private LocalDateTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
-    private Game game;
+    public enum messageType{
+        ENTER,
+        TALK,
+        QUIT
+    }
+
+    @Enumerated(EnumType.STRING)
+    private messageType messageType;
+
+    private Long gameId;
 
     private String userNickname;
 
@@ -35,10 +42,14 @@ public class Chat {
     private User userNickname;*/
 
     @Builder
-    public Chat(String comment, LocalDateTime time, Game game, String userNickname) {
+    public Chat(String comment, LocalDateTime time, Long gameId, String userNickname) {
         this.comment = comment;
         this.time = time;
-        this.game = game;
+        this.gameId = gameId;
         this.userNickname = userNickname;
+    }
+
+    public void changeMessage(String comment){
+        this.comment = comment;
     }
 }
