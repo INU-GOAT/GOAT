@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,7 +37,7 @@ public class Matching {
     private LocalDateTime matchingStartTime;
 
     @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<MatchStartTime> matchStartTimes;
+    private List<MatchStartTime> matchStartTimes = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
@@ -52,5 +53,9 @@ public class Matching {
         this.preferCourt = preferCourt;
         this.matchingStartTime = matchingStartTime;
         this.group = group;
+    }
+
+    public void addMatchStartTimes(List<MatchStartTime> matchStartTimeList) {
+        this.matchStartTimes.addAll(matchStartTimeList);
     }
 }

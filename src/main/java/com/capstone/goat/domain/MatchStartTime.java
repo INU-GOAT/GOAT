@@ -1,6 +1,7 @@
 package com.capstone.goat.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,4 +21,10 @@ public class MatchStartTime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "matching_id")
     private Matching matching;
+
+    @Builder
+    public MatchStartTime(String startTime, Matching matching) {
+        this.startTime = startTime;
+        this.matching = matching;
+    }
 }

@@ -31,6 +31,11 @@ public class MatchMakingService {
 
         // Matching Repository에 저장
         Matching matching = matchingConditionDto.toEntity(rating, group);
+        // Dto의 List<String> matchStartTimes를 List<MatchStartTime>으로 변환
+        List<MatchStartTime> matchStartTimeList = matchingConditionDto.getMatchStartTimes().stream().map(stringStartTime ->
+            MatchStartTime.builder().startTime(stringStartTime).matching(matching).build()
+        ).toList();
+        matching.addMatchStartTimes(matchStartTimeList);
         matchingRepository.save(matching);
 
         // MatchMaking Repository에 저장
@@ -63,12 +68,14 @@ public class MatchMakingService {
             log.info("[로그] : team2: " + team2);
 
             if (!team2.isEmpty()) {
-                // MatchingRepository에서 제거
+                // matchMakingRepository 및 matchingRepository에서 제거
                 for (long matchedGroupId : team1) {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
+                    matchingRepository.deleteAllByGroupId(matchedGroupId);
                 }
                 for (long matchedGroupId : team2) {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
+                    matchingRepository.deleteAllByGroupId(matchedGroupId);
                 }
 
                 // Game에 추가
