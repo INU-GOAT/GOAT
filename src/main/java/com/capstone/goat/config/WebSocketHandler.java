@@ -38,7 +38,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("payload {}",payload);
 
-        Chat chat = mapper.readValue(payload, Chat.class);
+        Chat chatDto = mapper.readValue(payload, Chat.class);
+        Chat chat = chatRepository.save(chatDto);
 
         Long chatRoomId = chat.getGameId();
         if(!chatRoomSessionMap.containsKey(chatRoomId)){
@@ -54,7 +55,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             chat.changeMessage(chat.getUserNickname()+"님이 퇴장하셨습니다.");
         }
         chatRoomSession.parallelStream().forEach(ses->sendMessage(ses,chat));
-        chatRepository.save(chat);
+
     }
 
 
