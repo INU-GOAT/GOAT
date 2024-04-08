@@ -1,12 +1,16 @@
 package com.capstone.goat.dto.request;
 
+import com.capstone.goat.domain.Group;
+import com.capstone.goat.domain.MatchMaking;
+import com.capstone.goat.domain.Matching;
+import com.capstone.goat.domain.Sport;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -15,20 +19,50 @@ public class MatchingConditionDto {
 
     private String sport;
 
-    private Integer latitude;
+    private float latitude;
 
-    private Integer longitude;
+    private float longitude;
 
     private LocalDateTime matchingStartTime;
 
-    private List<String> startTimeList;
-
-    private String preferGender;
+    private List<String> matchStartTimes;
 
     private String preferCourt;
 
-    private Integer userCount;
+    private int userCount;
 
-    private Integer groupId;
+    private Long groupId;
+
+    public void insertGroupId(long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Matching toEntity(int rating, Group group) {
+        return Matching.builder()
+                .userCount(userCount)
+                .rating(rating)
+                .sport(Sport.getSport(sport))
+                .latitude(latitude)
+                .longitude(longitude)
+                .preferCourt(preferCourt)
+                .matchingStartTime(matchingStartTime)
+                .group(group)
+                .build();
+    }
+
+    public List<MatchMaking> toMatchMakingList(int rating){
+        return matchStartTimes.stream().map(matchStartTime ->
+                MatchMaking.builder()
+                        .sport(Sport.getSport(sport))
+                        .userCount(userCount)
+                        .rating(rating)
+                        .latitude(latitude)
+                        .longitude(longitude)
+                        .preferCourt(preferCourt)
+                        .matchingStartTime(matchingStartTime)
+                        .matchStartTime(matchStartTime)
+                        .groupId(groupId)
+                        .build()).collect(Collectors.toList());
+    }
 
 }

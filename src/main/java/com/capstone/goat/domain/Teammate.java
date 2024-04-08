@@ -8,11 +8,14 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Team {
+public class Teammate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column
+    private Integer teamNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -23,7 +26,8 @@ public class Team {
     private Game game;
 
     @Builder
-    public Team(User user, Game game) {
+    public Teammate(int teamNumber, User user, Game game) {
+        this.teamNumber = teamNumber;
         this.user = user;
         this.game = game;
     }

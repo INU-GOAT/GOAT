@@ -62,7 +62,7 @@ public class ClubService {
 
     public ClubResponseDto getClub (Long id){
         Club club = clubRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.CLUB_NOT_FOUND));
-        List<String> members = club.getMember().stream().map(User::getNickname).toList();
+        List<String> members = club.getMembers().stream().map(User::getNickname).toList();
         User master = userRepository.findById(club.getMaster_id()).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         return ClubResponseDto.of(club,master.getNickname(),members);
     }
@@ -73,7 +73,7 @@ public class ClubService {
             throw new CustomException(CustomErrorCode.APPLYING_CLUB_EXIST);
         }
         Club club = clubRepository.findById(clubId).orElseThrow(()->new CustomException(CustomErrorCode.CLUB_NOT_FOUND));
-        if(club.getMember().size()==20){
+        if(club.getMembers().size()==20){
             throw new CustomException(CustomErrorCode.FULL_MEMBER);
         }
         user.applyClub(club);
@@ -98,7 +98,7 @@ public class ClubService {
         if(accept) {
             user.applyClub(club);
         }
-        if(club.getMember().size()==20){
+        if(club.getMembers().size()==20){
             for(int i = 0 ; i < club.getApplicants().size();i++){
                 deleteApplicant(club.getApplicants().get(i).getId());
             }
