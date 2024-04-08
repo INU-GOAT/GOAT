@@ -18,6 +18,7 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
+    @Column(columnDefinition = "text")
     private String comment;
 
     @CreationTimestamp
