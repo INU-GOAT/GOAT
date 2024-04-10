@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,7 +30,14 @@ public class SecurityConfig  {
                 .headers().frameOptions().disable();
         http
                 .authorizeRequests()
-                .antMatchers("/","/login","/mainLogin","/join","/api/**","/index.js","/js/**","/css/**","/image/**","/h2-console/**").permitAll()
+                .antMatchers("/","/index.js","/js/**","/css/**","/image/**","/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.PUT,"/api/users").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE,"/api/users").hasRole("USER")
+                .antMatchers(HttpMethod.GET,"/api/users").hasRole("USER")
+                .antMatchers("/api/users/club").hasRole("USER")
+                .antMatchers("/api/users","/api/users/*").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/clubs/*").permitAll()
+                .antMatchers("/api/clubs","/api/clubs/*").hasRole("USER")
                 .anyRequest().permitAll();
         http
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
