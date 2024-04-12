@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,11 +32,11 @@ public class Game {
 
     private Integer winTeam;    // 0이면 게임 중 / 1이면 1팀 / 2면 2팀
 
-    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<Teammate> team1;
+    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Teammate> team1 = new ArrayList<>();
 
-    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<Teammate> team2;
+    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Teammate> team2 = new ArrayList<>();
 
     @Builder
     public Game(Sport sport, String startTime, float latitude, float longitude, String court, int winTeam) {
@@ -45,5 +46,14 @@ public class Game {
         this.longitude = longitude;
         this.court = court;
         this.winTeam = winTeam;
+    }
+
+    public void addTeammateToTeam(Teammate teammate) {
+        if (teammate.getTeamNumber().equals(1))
+            team1.add(teammate);
+        else if (teammate.getTeamNumber().equals(2))
+            team2.add(teammate);
+        else
+            throw new IllegalArgumentException("teammate 객체 값이 잘못되어있습니다.");
     }
 }

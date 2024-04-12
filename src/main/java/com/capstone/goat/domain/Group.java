@@ -22,10 +22,10 @@ public class Group {
     @JoinColumn(name = "master_id")
     private User master;
 
-    @OneToMany(mappedBy = "group",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group",fetch = FetchType.LAZY)
     private List<User> members;
 
-    @OneToMany(mappedBy = "invitedGroup",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "invitedGroup",fetch = FetchType.LAZY)
     private List<User> invitees;
 
     @Builder

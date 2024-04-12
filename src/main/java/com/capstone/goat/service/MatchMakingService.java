@@ -144,7 +144,7 @@ public class MatchMakingService {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
-                            teamRepository.save(
+                            game.addTeammateToTeam(
                                     Teammate.builder().teamNumber(1).game(game).user(user).build()
                             )
                     );
@@ -155,7 +155,7 @@ public class MatchMakingService {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
-                            teamRepository.save(
+                            game.addTeammateToTeam(
                                     Teammate.builder().teamNumber(2).game(game).user(user).build()
                             )
                     );

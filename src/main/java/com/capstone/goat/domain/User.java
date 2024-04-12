@@ -59,7 +59,7 @@ public class User implements UserDetails {
     @JoinColumn(name="applying_club_id")
     private Club applyingClub;
 
-    @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY)
     private List<Notification> receivedNotification;
 
     @Builder

@@ -36,12 +36,12 @@ public class Matching {
     @CreationTimestamp
     private LocalDateTime matchingStartTime;
 
-    @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<MatchStartTime> matchStartTimes = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;
+    private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해도 될 듯
 
     @Builder
     public Matching(int userCount, int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
