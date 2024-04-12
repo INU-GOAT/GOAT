@@ -71,11 +71,11 @@ public class MatchMakingService {
                 // matchMakingRepository 및 matchingRepository에서 제거
                 for (long matchedGroupId : team1) {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
-                    matchingRepository.deleteAllByGroupId(matchedGroupId);
+                    matchingRepository.deleteByGroupId(matchedGroupId);
                 }
                 for (long matchedGroupId : team2) {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
-                    matchingRepository.deleteAllByGroupId(matchedGroupId);
+                    matchingRepository.deleteByGroupId(matchedGroupId);
                 }
 
                 // Game에 추가
@@ -164,8 +164,12 @@ public class MatchMakingService {
     }
 
     @Transactional
-    public void deleteMatching(Integer groupId) {
+    public void deleteMatching(long groupId) {
+        Matching foundMatching = matchingRepository.findByGroupId(groupId).orElseThrow(() -> new NoSuchElementException("해당 그룹 id에 해당하는 매칭이 없습니다. 매칭 중이 아닙니다"));
 
+        matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, foundMatching.getLatitude(), foundMatching.getLongitude());
+
+        matchingRepository.deleteByGroupId(groupId);
     }
 
 }
