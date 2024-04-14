@@ -31,14 +31,14 @@ public class UserController {
         private final UserService userService;
     @Operation(summary = "회원가입", description = "url 헤더에 토큰을, 바디에 {age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "201",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "이미 존재하는 닉네임입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("")
     public ResponseEntity<ResponseDto<Long>> save(@Valid@RequestBody UserSaveDto userSaveDto,@Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("회원가입 호출 id={}",user.getId());
-        return new ResponseEntity<>(new ResponseDto<>(userService.join(user.getId(), userSaveDto), "회원가입성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(userService.join(user.getId(), userSaveDto), "회원가입성공"), HttpStatus.CREATED);
     }
 
     @Operation(summary = "회원정보수정", description = "url 헤더에 토큰을, 바디에 {nickname, age,gender,prefer_sport, soccer_tier,basketball_tier,badminton_tier}을 json형식으로 보내주세요.")

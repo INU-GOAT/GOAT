@@ -32,13 +32,13 @@ public class ClubController {
 
     @Operation(summary = "클럽 생성", description = "url 헤더에 토큰을, 바디에 {name, sport}을 json형식으로 보내주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "클럽 생성성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "201",description = "클럽 생성성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "이미 가입된 클럽이 있습니다. / 이미 존재하는 클럽이름입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("")
     public ResponseEntity<ResponseDto<Long>> createClub(@Valid @RequestBody ClubSaveDto clubSaveDto, @Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("클럽 생성 호출 id={}",user.getId());
-        return new ResponseEntity<>(new ResponseDto<>(clubService.createClub(user,clubSaveDto),"클럽 생성 성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(clubService.createClub(user,clubSaveDto),"클럽 생성 성공"), HttpStatus.CREATED);
     }
 
     @Operation(summary = "클럽 정보 변경", description = "url 헤더에 토큰을,파라미터에 클럽 id를,  바디에 {name, sport}을 json형식으로 보내주세요.")
