@@ -68,14 +68,14 @@ public class UserController {
     @PostMapping("/code")
     public ResponseEntity<ResponseDto<TokenDto>> getUserByCode(HttpServletRequest httpServletRequest) {
         String userCode = httpServletRequest.getHeader("code");
-        return new ResponseEntity<>(new ResponseDto<>(userService.OAuthLogin(userCode),"회원가입성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(userService.OAuthLogin(userCode),"로그인 성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "카카오 로그인(토큰방식)",description = "헤더에 카카오 인증으로 얻은 토큰을 보내주세요")
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<TokenDto>> getUser(HttpServletRequest httpServletRequest) {
         String token = httpServletRequest.getHeader("kakao");
-        return new ResponseEntity<>(new ResponseDto<>(userService.LoginByToken(token),"회원가입성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(userService.LoginByToken(token),"로그인 성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "토큰 재발급",description = "헤더에 refresh 토큰을 보내주세요. 토큰 유효시간은 2시간, 리프레시 토큰의 유효시간은 1일입니다.")
@@ -92,12 +92,12 @@ public class UserController {
 
     @Operation(summary = "유저 정보 가져오기", description = "url 파라미터에 유저의 데이터베이스 id 값을 보내주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "회원가입성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200",description = "유저 정보 가져오기성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "잘못된 입력",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @GetMapping("")
     public ResponseEntity<ResponseDto<UserResponseDto>> getUser(@Schema(hidden = true)@AuthenticationPrincipal User user){
-        return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"유저정보가져오기성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"유저 정보 가져오기성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "클럽 탈퇴")
@@ -113,7 +113,7 @@ public class UserController {
 
     @Operation(summary = "더미데이터 유저 생성")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "클럽 탈퇴 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200",description = "더미데이터 생성 완료",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "이미 존재하는 id 값 입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("/dummy/{id}")
@@ -124,7 +124,7 @@ public class UserController {
 
     @Operation(summary = "더미데이터 유저 로그인")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "클럽 탈퇴 성공",content = @Content(schema = @Schema(implementation = TokenDto.class))),
+            @ApiResponse(responseCode = "200",description = "더미유저 로그인 완료",content = @Content(schema = @Schema(implementation = TokenDto.class))),
             @ApiResponse(responseCode = "404",description = "존재하지 않는 유저입니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @PostMapping("/dummy/{id}/login")
