@@ -16,6 +16,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
         Gson gson = new Gson();
         String result = gson.toJson((new ResponseDto<>(403,"접근 권한이 없는 사용자입니다.")));
         response.setStatus(401);

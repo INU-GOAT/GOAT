@@ -97,7 +97,7 @@ public class UserController {
     })
     @GetMapping("")
     public ResponseEntity<ResponseDto<UserResponseDto>> getUser(@Schema(hidden = true)@AuthenticationPrincipal User user){
-        return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"회원가입성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(userService.getUser(user),"유저정보가져오기성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "클럽 탈퇴")
