@@ -127,7 +127,7 @@ public class UserService {
     @Transactional
     public Long update(Long id, UserUpdateDto userUpdateDto){
         User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
-        if(userRepository.existsByNickname(userUpdateDto.getNickname())){
+        if(!user.getNickname().equals(userUpdateDto.getNickname())&&userRepository.existsByNickname(userUpdateDto.getNickname())){
             throw new CustomException(CustomErrorCode.EXIST_NICKNAME);
         }
         user.update(userUpdateDto.getNickname()
