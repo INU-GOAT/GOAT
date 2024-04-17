@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -131,6 +132,16 @@ public class UserController {
     public ResponseEntity<ResponseDto<TokenDto>> loginDummy (@PathVariable Long id){
         return new ResponseEntity<>(new ResponseDto<>(userService.loginDummy(id),"더미유저 로그인 완료"),HttpStatus.OK);
 
+    }
+
+    @Operation(summary = "닉네임 중복 체크",description = "중복된 아이디 일 경우 True, 중복이 아닌 아이디 일 경우 False로 응답합니다")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "닉네임 중복 체크 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
+    @PostMapping("/nickname")
+    public ResponseEntity<ResponseDto<Boolean>> checkNickname(@RequestBody Map<String,String> dto){
+        log.info("닉네임 중복 호출 id={}",dto.get("nickname"));
+        return new ResponseEntity<>(new ResponseDto<>(userService.checkNickname(dto.get("nickname")), "닉네임 중복여부 체크 성공"), HttpStatus.OK);
     }
 
 
