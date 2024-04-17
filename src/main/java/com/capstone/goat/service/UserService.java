@@ -195,6 +195,10 @@ public class UserService {
         user.joinGroup(group);
     }
 
+    public boolean checkNickname(String nickname){
+        return userRepository.existsByNickname(nickname);
+    }
+
 
 
 }
