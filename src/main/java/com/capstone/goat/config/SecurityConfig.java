@@ -31,6 +31,7 @@ public class SecurityConfig  {
         http
                 .authorizeRequests()
                 .antMatchers("/","/index.js","/js/**","/css/**","/image/**","/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/users").permitAll()
                 .antMatchers("/api/users","/api/users/refresh").hasRole("USER")
                 .antMatchers("/api/users/club").hasRole("USER")
                 .antMatchers("/api/users/*").permitAll()
