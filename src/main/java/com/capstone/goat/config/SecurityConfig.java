@@ -31,11 +31,12 @@ public class SecurityConfig  {
         http
                 .authorizeRequests()
                 .antMatchers("/","/index.js","/js/**","/css/**","/image/**","/h2-console/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/users").permitAll()
-                .antMatchers("/api/users","/api/users/refresh").hasRole("USER")
+                .antMatchers(HttpMethod.PUT,"/api/users").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE,"/api/users").hasRole("USER")
+                .antMatchers(HttpMethod.GET,"/api/users").hasRole("USER")
+                .antMatchers(HttpMethod.POST,"/api/users").hasRole("USER")
                 .antMatchers("/api/users/club").hasRole("USER")
-                .antMatchers("/api/users/*").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/clubs/applicant/*").hasRole("USER")
+                .antMatchers("/api/users","/api/users/*").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/clubs/*").permitAll()
                 .antMatchers("/api/clubs","/api/clubs/*").hasRole("USER")
                 .anyRequest().permitAll();
