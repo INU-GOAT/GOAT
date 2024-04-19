@@ -17,6 +17,10 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+
         Gson gson = new Gson();
         String result = gson.toJson((new ResponseDto<>(403,"접근 권한이 없는 사용자입니다.")));
         response.setStatus(401);
