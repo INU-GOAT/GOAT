@@ -2,13 +2,20 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.*;
 import com.capstone.goat.dto.request.MatchingConditionDto;
-import com.capstone.goat.repository.*;
+import com.capstone.goat.repository.GameRepository;
+import com.capstone.goat.repository.GroupRepository;
+import com.capstone.goat.repository.MatchMakingRepository;
+import com.capstone.goat.repository.MatchingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -21,12 +28,11 @@ public class MatchMakingService {
     private final MatchMakingRepository matchMakingRepository;
     private final GroupRepository groupRepository;
     private final GameRepository gameRepository;
-    private final TeamRepository teamRepository;
 
     @Transactional
-    public void addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, int rating) {
+    public void addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
 
-        Group group = groupRepository.findById(matchingConditionDto.getGroupId())
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
 
         // Matching Repository에 저장
@@ -39,15 +45,15 @@ public class MatchMakingService {
         matchingRepository.save(matching);
 
         // MatchMaking Repository에 저장
-        matchingConditionDto.toMatchMakingList(rating)  // List<MatchMaking>
+        matchingConditionDto.toMatchMakingList(rating, groupId)  // List<MatchMaking>
                 .forEach(matchMakingRepository::save);
     }
 
     @Async
     @Transactional
-    public void findMatching(MatchingConditionDto matchingConditionDto, int rating) {
+    public void findMatching(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
 
-        for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(rating)) {
+        for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(rating, groupId)) {
 
             // 조건에 맞는 매칭 중인 유저 검색
             List<MatchMaking> matchMakingList = matchMakingRepository.findByMatching(matchMaking);
@@ -129,13 +135,19 @@ public class MatchMakingService {
     // 게임 생성
     private void addGame(List<Long> team1GroupId, List<Long> team2GroupId, MatchMaking matchMaking) {
 
+        // 시작 시간 파싱
+        LocalTime matchStartTimeParsed = LocalTime.parse(matchMaking.getMatchStartTime(), DateTimeFormatter.ofPattern("HHmm"));
+
+        // 현재 날짜와 시작 시간을 합쳐서 LocalDateTime 객체 생성
+        LocalDateTime matchStartDateTime = LocalDate.now().atTime(matchStartTimeParsed);
+
         Game newGame = Game.builder()
                 .sport(matchMaking.getSport())
-                .startTime(matchMaking.getMatchStartTime())
+                .startTime(matchStartDateTime)
                 .latitude(matchMaking.getLatitude())
                 .longitude(matchMaking.getLongitude())
                 .court(null)
-                .winTeam(0)
+                .winTeam(null)
                 .build();
         Game game = gameRepository.save(newGame);
 

@@ -1,8 +1,6 @@
 package com.capstone.goat.exception;
 
 
-import javax.validation.ConstraintViolationException;
-
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.exception.ex.CustomException;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +12,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice

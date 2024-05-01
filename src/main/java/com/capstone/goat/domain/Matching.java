@@ -41,7 +41,7 @@ public class Matching {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해도 될 듯
+    private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해야 함
 
     @Builder
     public Matching(int userCount, int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {

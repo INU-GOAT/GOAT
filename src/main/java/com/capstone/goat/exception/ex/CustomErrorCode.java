@@ -26,7 +26,11 @@ public enum CustomErrorCode {
     NOT_APPLY_USER(HttpStatus.BAD_REQUEST,"클럽에 가입 신청을 하지 않은 유저입니다."),
     EXIST_NICKNAME(HttpStatus.BAD_REQUEST,"이미 존재하는 닉네임입니다."),
     FULL_MEMBER(HttpStatus.BAD_REQUEST,"클럽의 인원이 최대입니다."),
-    EXIST_ID(HttpStatus.BAD_REQUEST,"이미 존재하는 id값 입니다.");
+    EXIST_ID(HttpStatus.BAD_REQUEST,"이미 존재하는 id값 입니다."),
+    GROUP_INVITING_ON_GOING(HttpStatus.CONFLICT, "그룹원을 초대 중이므로 매칭 시작이 불가능합니다."),
+    MATCHING_ACCESS_DENIED(HttpStatus.BAD_REQUEST, "그룹장이 아닙니다. 그룹장만 매칭 조작을 할 수 있습니다."),
+    NO_JOINING_GROUP(HttpStatus.NOT_FOUND, "가입된 그룹을 찾을 수 없습니다."),
+    INVALIED_TEAM_NUMBER(HttpStatus.BAD_REQUEST, "잘못된 winTeam 값입니다.");
 
 
     private final HttpStatus status;

@@ -17,9 +17,9 @@ public enum Sport {
     private final String name;
     private final int player;
 
-    public static Sport getSport(String inputName) {
+    public static Sport getSport(String sportName) {
         return Arrays.stream(Sport.values())
-                .filter(sport -> sport.getName().equals(inputName))
+                .filter(sport -> sport.getName().equals(sportName))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 이름의 스포츠를 찾을 수 없습니다"));
     }

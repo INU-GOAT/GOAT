@@ -18,7 +18,7 @@ public class Rating {
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private Integer rating; // MMR
+    private Integer ratingScore; // MMR 기본값
 
     private Integer win;    // 승 수
 
@@ -30,13 +30,51 @@ public class Rating {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Builder
-    public Rating(Sport sport, int rating, int win, int lose, int winStreak, User user) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Rating(Sport sport, int ratingScore, int win, int lose, int winStreak, User user) {
         this.sport = sport;
-        this.rating = rating;
+        this.ratingScore = ratingScore;
         this.win = win;
         this.lose = lose;
         this.winStreak = winStreak;
         this.user = user;
+    }
+
+    // ratingScore 말고 유저 생성 시 등록한 본인의 실력을 받으면 그에 따른 점수를 넣어도 될 듯
+    public static Rating initRating(Sport sport, int ratingScore, User user) {
+        return Rating.builder()
+                .sport(sport)
+                .ratingScore(ratingScore)
+                .win(0)
+                .lose(0)
+                .winStreak(0)
+                .user(user)
+                .build();
+    }
+
+    public void updateRatingByWin() {
+
+        win++;
+
+        if (winStreak < 0) {
+            winStreak = 1;
+        } else {
+            winStreak++;
+        }
+
+        ratingScore = ratingScore + 15 + winStreak * 5;
+    }
+
+    public void updateRatingByLose() {
+
+        lose++;
+
+        if (winStreak > 0) {
+            winStreak = -1;
+        } else {
+            winStreak--;
+        }
+
+        ratingScore = ratingScore - 15 + winStreak * 5;
     }
 }

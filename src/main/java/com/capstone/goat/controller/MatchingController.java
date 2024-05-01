@@ -4,69 +4,91 @@ import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.MatchingConditionDto;
 import com.capstone.goat.dto.response.ResponseDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
+import com.capstone.goat.repository.NotificationRepository;
 import com.capstone.goat.service.GroupService;
 import com.capstone.goat.service.MatchMakingService;
 import com.capstone.goat.service.RatingService;
-import com.capstone.goat.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import static java.util.Optional.ofNullable;
 
 @RestController
 @RequestMapping("/api/matching/")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class MatchingController {
 
     private final MatchMakingService matchMakingService;
     private final GroupService groupService;
-    private final UserService userService;
     private final RatingService ratingService;
+    private final NotificationRepository notificationRepository;
 
     @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchingStartTime,matchStartTimes,preferCourt,userCount,groupId}을 json형식으로 보내주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "매칭 시작 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "404",description = "매칭 등록 실패",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+            @ApiResponse(responseCode = "200", description = "매칭 시작 성공", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "그룹장이 아닙니다. 그룹장만 매칭 조작을 할 수 있습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "409", description = "그룹원을 초대 중이므로 매칭 시작이 불가능합니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping
-    public ResponseEntity<?> matchingStart(@AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto){
+    public ResponseEntity<?> matchingStart(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
 
-        // 사용자가 그룹이 없으면 생성
-        if (matchingConditionDto.getGroupId() == null) {
-            Group group = groupService.addGroup(user.getId());  // (long userId)
-            matchingConditionDto.insertGroupId(group.getId());  // (long groupId)
+        // 그룹원을 초대 중일 때에는 매칭 시작 불가능
+        notificationRepository.findSendTimeBySenderIdAndType(user.getId(), 2).forEach(sendTime -> {
+            if (Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)
+                throw new CustomException(CustomErrorCode.GROUP_INVITING_ON_GOING);
+        });
+
+        Group group = ofNullable(user.getGroup())
+                .orElseGet(() -> groupService.addGroup(user.getId()));  // 사용자에게 그룹이 없으면 그룹 생성
+
+        // TODO 도메인 내부로 이동
+        // 그룹장이 아닌 경우 매칭 시작 불가능
+        if (!Objects.equals(group.getMaster().getId(), user.getId())) {
+            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
         }
 
         // 그룹원의 평균 rating을 계산
-        int rating = ratingService.getRatingMean(matchingConditionDto.getGroupId(), matchingConditionDto.getSport());  // (long groupId,String sport)
+        int rating = ratingService.getRatingMean(group.getId(), matchingConditionDto.getSport());  // (long groupId, String sport)
+        matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, group.getId(), rating);  // Controller to Service 용 dto 만드는 것도 좋음
+        matchMakingService.findMatching(matchingConditionDto, group.getId(), rating);
 
-        matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, rating);  // Controller to Service 용 dto 만드는 것도 좋음
-
-        matchMakingService.findMatching(matchingConditionDto, rating);
-
-        return new ResponseEntity<>(new ResponseDto(user.getNickname(),"매칭 시작 성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(user.getNickname(), "매칭 시작 성공"), HttpStatus.CREATED);
     }
 
     @Operation(summary = "매칭 중단", description = "매칭 목록에서 사용자를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "매칭 중단 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
-            @ApiResponse(responseCode = "400",description = "그룹장이 아닙니다. 그룹장만 매칭 중단을 할 수 있습니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+            @ApiResponse(responseCode = "400",description = "그룹장이 아닙니다. 그룹장만 매칭 조작을 할 수 있습니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404",description = "가입된 그룹을 찾을 수 없습니다.",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @DeleteMapping
-    public ResponseEntity<?> matchingRemove(@AuthenticationPrincipal User user){
+    public ResponseEntity<?> matchingRemove(@Schema(hidden = true) @AuthenticationPrincipal User user){
 
-        Group group = user.getGroup();
-        if (!user.getId().equals(group.getId()))
-            return new ResponseEntity<>(new ResponseDto(group.getMaster().getNickname(), "그룹장이 아닙니다. 그룹장만 매칭 중단을 할 수 있습니다."), HttpStatus.BAD_REQUEST);
+        // 그룹이 존재하지 않을 경우 예외
+        Group group = ofNullable(user.getGroup())
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
+
+        // 그룹장이 아닌 경우 매칭 종료 불가능
+        if (!Objects.equals(group.getMaster().getId(), user.getId()))
+            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
 
         matchMakingService.deleteMatching(group.getId());
 
