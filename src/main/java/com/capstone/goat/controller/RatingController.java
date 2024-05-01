@@ -1,5 +1,6 @@
 package com.capstone.goat.controller;
 
+import com.capstone.goat.domain.Sport;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.response.RatingResponseDto;
 import com.capstone.goat.dto.response.ResponseDto;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/rating/")
@@ -38,6 +40,21 @@ public class RatingController {
         RatingResponseDto ratingResponseDto = ratingService.getRatingBySport(user.getId(), sportName);
 
         return new ResponseEntity<>(new ResponseDto<>(ratingResponseDto,"성공"), HttpStatus.OK);
+    }
+
+    @Operation(summary = "레이팅 랜덤 생성", description = "사용자에 레이팅을 랜덤한 점수로 추가합니다.")
+    @PostMapping
+    public ResponseEntity<?> ratingAdd(@Schema(hidden = true) @AuthenticationPrincipal User user) {
+
+        Random random = new Random(); //랜덤 객체 생성(디폴트 시드값 : 현재시간)
+        random.setSeed(System.currentTimeMillis()); //시드값 설정을 따로 할수도 있음
+
+        ratingService.initRating(user.getId(), Sport.BASKETBALL, random.nextInt(60));
+        ratingService.initRating(user.getId(), Sport.SOCCER, random.nextInt(60));
+        ratingService.initRating(user.getId(), Sport.BADMINTON, random.nextInt(60));
+        ratingService.initRating(user.getId(), Sport.TABLE_TENNIS, random.nextInt(60));
+
+        return new ResponseEntity<>(new ResponseDto<>(null,"성공"), HttpStatus.OK);
     }
 
 }
