@@ -58,16 +58,20 @@ public class MatchingController {
                 throw new CustomException(CustomErrorCode.GROUP_INVITING_ON_GOING);
         });
 
+        // TODO user 에서 groupId 가져오지 말고 groupId를 받아오는 방식으로 변경해야 함
+        long userId = user.getId();
+        user = userRepository.findById(userId).orElseThrow();
+
         Group group = ofNullable(user.getGroup())
-                .orElseGet(() -> groupService.addGroup(user.getId()));  // 사용자에게 그룹이 없으면 그룹 생성
+                .orElseGet(() -> groupService.addGroup(userId));  // 사용자에게 그룹이 없으면 그룹 생성
 
         // TODO 도메인 내부로 이동
         // 그룹장이 아닌 경우 매칭 시작 불가능
-        if (!Objects.equals(group.getMaster().getId(), user.getId())) {
+        if (!Objects.equals(group.getMaster().getId(), userId)) {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
         }
 
-        log.info("[로그] userId = " + user.getId() + " groupId = " + group.getId() + " 매칭 시작");
+        log.info("[로그] userId = " + userId + " groupId = " + group.getId() + " 매칭 시작");
         // 그룹원의 평균 rating을 계산
         int rating = ratingService.getRatingMean(group.getId(), matchingConditionDto.getSport());  // (long groupId, String sport)
         matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, group.getId(), rating);  // Controller to Service 용 dto 만드는 것도 좋음
@@ -84,6 +88,8 @@ public class MatchingController {
     })
     @DeleteMapping
     public ResponseEntity<?> matchingRemove(@Schema(hidden = true) @AuthenticationPrincipal User user){
+
+        user = userRepository.findById(user.getId()).orElseThrow();
 
         // 그룹이 존재하지 않을 경우 예외
         Group group = ofNullable(user.getGroup())

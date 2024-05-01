@@ -6,6 +6,7 @@ import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.dto.response.UserResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
+import com.capstone.goat.repository.UserRepository;
 import com.capstone.goat.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,6 +31,7 @@ import static java.util.Optional.ofNullable;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserRepository userRepository;
 
     // TODO 만약 그룹원 초대 시 자동 생성이라면 필요 없음
     /*@Operation(summary = "새로운 그룹 생성", description = "새로운 그룹을 생성합니다.")
@@ -46,6 +48,8 @@ public class GroupController {
     @Operation(summary = "그룹원 조회", description = "그룹원을 조회합니다. 그룹장이 리스트 맨 앞에 위치합니다. 그룹에 속해있지 않을 경우 null이 반환됩니다.")
     @GetMapping
     public ResponseEntity<?> groupList(@Schema(hidden = true) @AuthenticationPrincipal User user){
+
+        user = userRepository.findById(user.getId()).orElseThrow();
 
         Group group = user.getGroup();
         List<UserResponseDto> memberDtoList = null;
@@ -67,8 +71,11 @@ public class GroupController {
         String inviteeNickname = param.get("inviteeNickname");
         if (inviteeNickname == null) throw new IllegalArgumentException("inviteeNickname의 형식이 잘못되었습니다.");
 
+        long userId = user.getId();
+        user = userRepository.findById(userId).orElseThrow();
+
         Group group = ofNullable(user.getGroup())
-                .orElseGet(() -> groupService.addGroup(user.getId()));  // 사용자에게 그룹이 없으면 그룹 생성
+                .orElseGet(() -> groupService.addGroup(userId));  // 사용자에게 그룹이 없으면 그룹 생성
 
         groupService.addInviteeToGroup(group.getId(), inviteeNickname);
 
@@ -124,6 +131,8 @@ public class GroupController {
     @Operation(summary = "그룹 추방", description = "그룹에서 그룹원을 추방시킵니다.")
     @PatchMapping("members/{memberId}")
     public ResponseEntity<?> groupMembersRemove(@Schema(hidden = true) @AuthenticationPrincipal User user, @PathVariable Long memberId) {
+
+        user = userRepository.findById(user.getId()).orElseThrow();
 
         // 그룹이 존재하지 않을 경우 예외
         Group group = ofNullable(user.getGroup())
