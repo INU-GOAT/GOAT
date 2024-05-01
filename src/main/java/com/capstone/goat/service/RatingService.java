@@ -25,6 +25,7 @@ public class RatingService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
 
+    @Transactional
     public Rating initRating(long userId, Sport sport, int ratingNumber) {
 
         User user = userRepository.getReferenceById(userId);
