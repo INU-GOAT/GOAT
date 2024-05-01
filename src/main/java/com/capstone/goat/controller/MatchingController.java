@@ -50,9 +50,7 @@ public class MatchingController {
             @ApiResponse(responseCode = "409", description = "그룹원을 초대 중이므로 매칭 시작이 불가능합니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping
-    public ResponseEntity<?> matchingStart(/*@Schema(hidden = true) @AuthenticationPrincipal User user*/ Long userId, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
-
-        User user = userRepository.findById(userId).orElseThrow();
+    public ResponseEntity<?> matchingStart(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
 
         // 그룹원을 초대 중일 때에는 매칭 시작 불가능
         notificationRepository.findSendTimeBySenderIdAndType(user.getId(), 2).forEach(sendTime -> {
