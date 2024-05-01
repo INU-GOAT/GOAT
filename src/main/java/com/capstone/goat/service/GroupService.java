@@ -3,6 +3,8 @@ package com.capstone.goat.service;
 import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.response.UserResponseDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GroupRepository;
 import com.capstone.goat.repository.NotificationRepository;
 import com.capstone.goat.repository.UserRepository;
@@ -76,12 +78,12 @@ public class GroupService {
         User user = userRepository.findByNickname(inviteeNickname).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
 
         if (user.getGroup() != null)
-            throw new IllegalStateException("그룹에 초대할 수 없습니다. 해당 유저가 이미 그룹에 속해있습니다.");
+            throw new CustomException(CustomErrorCode.USER_BELONG_GROUP);
 
         // 유저가 그룹 초대를 받는 중이면 예외
         for (LocalDateTime sendTime : notificationRepository.findSendTimeByReceiverIdAndType(user.getId(), 2)) {
             if (Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)
-                throw new IllegalStateException("그룹에 초대할 수 없습니다. 해당 유저가 그룹 초대를 받는 중입니다.");
+                throw new CustomException(CustomErrorCode.USER_INVITED_GROUP);
         }
 
         // 초대 중인 인원에 추가
