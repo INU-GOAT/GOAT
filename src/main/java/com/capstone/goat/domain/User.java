@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private Integer basketball_tier;
     private Integer tableTennis_tier;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "sport")
     private Map<Sport,Rating> ratings;
 
@@ -59,7 +59,7 @@ public class User implements UserDetails {
     @JoinColumn(name="applying_club_id")
     private Club applyingClub;
 
-    @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY)
     private List<Notification> receivedNotification;
 
     @Builder
@@ -113,6 +113,15 @@ public class User implements UserDetails {
         this.group = group;
     }
 
+    public void leaveGroup() { this.group = null; }
+
+    public void changeInvitedGroup(Group group) {
+        this.invitedGroup = group;
+    }
+
+    public void denyInvitedGroup() {
+        this.invitedGroup = null;
+    }
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;

@@ -31,12 +31,6 @@ public class MatchingConditionDto {
 
     private int userCount;
 
-    private Long groupId;
-
-    public void insertGroupId(long groupId) {
-        this.groupId = groupId;
-    }
-
     public Matching toEntity(int rating, Group group) {
         return Matching.builder()
                 .userCount(userCount)
@@ -50,7 +44,7 @@ public class MatchingConditionDto {
                 .build();
     }
 
-    public List<MatchMaking> toMatchMakingList(int rating){
+    public List<MatchMaking> toMatchMakingList(int rating, long groupId){
         return matchStartTimes.stream().map(matchStartTime ->
                 MatchMaking.builder()
                         .sport(Sport.getSport(sport))
