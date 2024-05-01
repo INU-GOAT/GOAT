@@ -20,8 +20,6 @@ public class Matching {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer userCount;  // 유저 수
-
     private Integer rating; // MatchMaking Rating
 
     @Enumerated(EnumType.STRING)
@@ -44,8 +42,7 @@ public class Matching {
     private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해야 함
 
     @Builder
-    public Matching(int userCount, int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
-        this.userCount = userCount;
+    public Matching(int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
         this.rating = rating;
         this.sport = sport;
         this.latitude = latitude;

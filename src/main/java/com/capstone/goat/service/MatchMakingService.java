@@ -34,6 +34,7 @@ public class MatchMakingService {
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
+        int userCount = group.getMembers().size();
 
         // Matching Repository에 저장
         Matching matching = matchingConditionDto.toEntity(rating, group);
@@ -45,7 +46,7 @@ public class MatchMakingService {
         matchingRepository.save(matching);
 
         // MatchMaking Repository에 저장
-        matchingConditionDto.toMatchMakingList(rating, groupId)  // List<MatchMaking>
+        matchingConditionDto.toMatchMakingList(userCount, rating, groupId)  // List<MatchMaking>
                 .forEach(matchMakingRepository::save);
     }
 
@@ -53,7 +54,7 @@ public class MatchMakingService {
     @Transactional
     public void findMatching(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
 
-        for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(rating, groupId)) {
+        for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(0, rating, groupId)) {
 
             // 조건에 맞는 매칭 중인 유저 검색
             List<MatchMaking> matchMakingList = matchMakingRepository.findByMatching(matchMaking);

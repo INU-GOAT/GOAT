@@ -23,17 +23,14 @@ public class MatchingResponseDto {
 
     private final String preferCourt;
 
-    private final int userCount;
-
     @Builder(access = AccessLevel.PRIVATE)
-    private MatchingResponseDto(String sport, float latitude, float longitude, LocalDateTime matchingStartTime, List<String> matchStartTimes, String preferCourt, int userCount) {
+    private MatchingResponseDto(String sport, float latitude, float longitude, LocalDateTime matchingStartTime, List<String> matchStartTimes, String preferCourt) {
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;
         this.matchingStartTime = matchingStartTime;
         this.matchStartTimes = matchStartTimes;
         this.preferCourt = preferCourt;
-        this.userCount = userCount;
     }
 
     public static MatchingResponseDto of(Matching matching, List<String> matchStartTimes) {
@@ -45,7 +42,6 @@ public class MatchingResponseDto {
                 .matchingStartTime(matching.getMatchingStartTime())
                 .matchStartTimes(matchStartTimes)
                 .preferCourt(matching.getPreferCourt())
-                .userCount(matching.getUserCount())
                 .build();
     }
 
