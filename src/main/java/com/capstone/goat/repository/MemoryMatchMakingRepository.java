@@ -35,8 +35,6 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         // 위도, 경도 인덱스 범위 검사
         checkArrayIndexOutOfBoundsException(latIndex, lngIndex);
 
-        System.out.println("[로그] latIndex/lngIndex : " + latIndex + " " + lngIndex);
-
         store[latIndex][lngIndex].add(matchMaking);
 
     }

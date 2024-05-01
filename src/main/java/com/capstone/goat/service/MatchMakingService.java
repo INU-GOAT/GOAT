@@ -70,10 +70,10 @@ public class MatchMakingService {
             if (team1.isEmpty()) continue;
             List<Long> team2 = findSumSubset(matchMakingList, player);
 
-            log.info("[로그] : team1: " + team1);
-            log.info("[로그] : team2: " + team2);
+            log.info("[로그] : team1: " + team1 + " team2: " + team2);
 
             if (!team2.isEmpty()) {
+                log.info("[로그] deleteByGroupId 시작");
                 // matchMakingRepository 및 matchingRepository에서 제거
                 for (long matchedGroupId : team1) {
                     matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
@@ -134,6 +134,7 @@ public class MatchMakingService {
 
     // 게임 생성
     private void addGame(List<Long> team1GroupId, List<Long> team2GroupId, MatchMaking matchMaking) {
+        log.info("[로그] addGame() 시작");
 
         // 시작 시간 파싱
         LocalTime matchStartTimeParsed = LocalTime.parse(matchMaking.getMatchStartTime(), DateTimeFormatter.ofPattern("HHmm"));
@@ -152,7 +153,6 @@ public class MatchMakingService {
         Game game = gameRepository.save(newGame);
 
         for (long groupId: team1GroupId) {
-            log.info("[로그] team1 groupId : " + groupId);
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
@@ -163,7 +163,6 @@ public class MatchMakingService {
         }
 
         for (long groupId: team2GroupId) {
-            log.info("[로그] team2 groupId : " + groupId);
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->

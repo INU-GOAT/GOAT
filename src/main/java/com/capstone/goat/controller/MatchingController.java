@@ -7,6 +7,7 @@ import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.NotificationRepository;
+import com.capstone.goat.repository.UserRepository;
 import com.capstone.goat.service.GroupService;
 import com.capstone.goat.service.MatchMakingService;
 import com.capstone.goat.service.RatingService;
@@ -40,6 +41,7 @@ public class MatchingController {
     private final GroupService groupService;
     private final RatingService ratingService;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchingStartTime,matchStartTimes,preferCourt,userCount,groupId}을 json형식으로 보내주세요.")
     @ApiResponses({
@@ -48,7 +50,9 @@ public class MatchingController {
             @ApiResponse(responseCode = "409", description = "그룹원을 초대 중이므로 매칭 시작이 불가능합니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PostMapping
-    public ResponseEntity<?> matchingStart(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
+    public ResponseEntity<?> matchingStart(/*@Schema(hidden = true) @AuthenticationPrincipal User user*/ Long userId, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
+
+        User user = userRepository.findById(userId).orElseThrow();
 
         // 그룹원을 초대 중일 때에는 매칭 시작 불가능
         notificationRepository.findSendTimeBySenderIdAndType(user.getId(), 2).forEach(sendTime -> {
@@ -65,6 +69,7 @@ public class MatchingController {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
         }
 
+        log.info("[로그] userId = " + user.getId() + " groupId = " + group.getId() + " 매칭 시작");
         // 그룹원의 평균 rating을 계산
         int rating = ratingService.getRatingMean(group.getId(), matchingConditionDto.getSport());  // (long groupId, String sport)
         matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, group.getId(), rating);  // Controller to Service 용 dto 만드는 것도 좋음
