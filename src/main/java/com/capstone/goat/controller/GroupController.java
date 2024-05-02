@@ -11,13 +11,13 @@ import com.capstone.goat.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DateTimeException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import static java.util.Optional.ofNullable;
 @RequestMapping("/api/group/")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class GroupController {
 
     private final GroupService groupService;
@@ -67,15 +68,21 @@ public class GroupController {
     @PatchMapping
     public ResponseEntity<?> userInvitedModify(@Schema(hidden = true) @AuthenticationPrincipal User user, @RequestBody Map<String, String> param){  // inviteeNickname 하나만 받음
 
+        log.info("[로그] 그룹 초대 메서드 시작");
+
         // 파라미터 검증
         String inviteeNickname = param.get("inviteeNickname");
         if (inviteeNickname == null) throw new IllegalArgumentException("inviteeNickname의 형식이 잘못되었습니다.");
+
+        log.info("[로그] inviteeNickname = " + inviteeNickname);
 
         long userId = user.getId();
         user = userRepository.findById(userId).orElseThrow();
 
         Group group = ofNullable(user.getGroup())
                 .orElseGet(() -> groupService.addGroup(userId));  // 사용자에게 그룹이 없으면 그룹 생성
+
+        log.info("[로그] group : " + group);
 
         groupService.addInviteeToGroup(group.getId(), inviteeNickname);
 
@@ -115,11 +122,11 @@ public class GroupController {
         String msg = "성공";
         HttpStatus httpStatus = HttpStatus.OK;
         // 만약 초대를 수락했는데 초대 메시지를 받은 지 30초가 지난 상태라면 초대 거절
-        if (isAccepted && Duration.between(sendTime, LocalDateTime.now()).getSeconds() > 30) {
+        /*if (isAccepted && Duration.between(sendTime, LocalDateTime.now()).getSeconds() > 30) {
             isAccepted = false;
             msg = "초대 유효 시간이 지났습니다.";
             httpStatus = HttpStatus.BAD_REQUEST;
-        }
+        }*/
 
         long groupId = user.getInvitedGroup().getId();  // TODO 초대 받은 group이 null인 경우도 예외 처리 해야하나
 

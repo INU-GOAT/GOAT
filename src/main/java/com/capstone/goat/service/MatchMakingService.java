@@ -36,6 +36,8 @@ public class MatchMakingService {
                 .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
         int userCount = group.getMembers().size();
 
+        log.info("[로그] 매칭 DB 추가, userCount = " + userCount);
+
         // Matching Repository에 저장
         Matching matching = matchingConditionDto.toEntity(rating, group);
         // Dto의 List<String> matchStartTimes를 List<MatchStartTime>으로 변환
@@ -56,8 +58,12 @@ public class MatchMakingService {
 
         for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(0, rating, groupId)) {
 
+            log.info("[로그] 매치메이킹 시작, groupId = " + groupId);
+
             // 조건에 맞는 매칭 중인 유저 검색
             List<MatchMaking> matchMakingList = matchMakingRepository.findByMatching(matchMaking);
+
+            log.info("[로그] 조건에 맞는 매칭 중인 유저, matchMakingList = " + matchMakingList);
 
             // 검색한 리스트가 비어있으면 다음으로
             if (matchMakingList.size() <= 1) continue;
