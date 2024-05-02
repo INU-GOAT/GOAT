@@ -4,6 +4,7 @@ import com.capstone.goat.domain.MatchMaking;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     private static final int LATINIT = 3861;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
     private static final int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
 
-    private static final int RATINGVALUE = 20;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
+    private static final int RATINGVALUE = 15;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
 
     public MemoryMatchMakingRepository() {
         for (int i = 0; i < store.length; i++) {
@@ -90,9 +91,14 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     }
 
     private int calculateRatingWeight(LocalDateTime matchingStartTime) {
+
         Duration diff = Duration.between(matchingStartTime.toLocalTime(), LocalTime.now());
+
         int ratingWeight = (int) diff.toMinutes() / 20 + 1; // 20분당 1의 가중치
         if (ratingWeight > 10) ratingWeight = 10; // 최대 가중치
+        // TODO 자정이 지나면 매칭 취소 시켜야 함
+        if (matchingStartTime.getDayOfMonth() != LocalDate.now().getDayOfMonth())  ratingWeight = 10;   // 매칭 후 하루가 지났으면 최대 가중치
+
         return ratingWeight;
     }
 }
