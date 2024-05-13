@@ -24,15 +24,6 @@ public class Chat {
     @CreationTimestamp
     private LocalDateTime time;
 
-    public enum messageType{
-        ENTER,
-        TALK,
-        QUIT
-    }
-
-    @Enumerated(EnumType.STRING)
-    private messageType messageType;
-
     private Long gameId;
 
     private String userNickname;

@@ -1,44 +1,35 @@
 package com.capstone.goat.controller;
 
-import com.capstone.goat.domain.User;
+import com.capstone.goat.domain.Chat;
 import com.capstone.goat.dto.request.ChatDto;
-import com.capstone.goat.dto.response.ResponseDto;
-import io.swagger.v3.oas.annotations.Operation;
+import com.capstone.goat.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/chat")
+@Controller
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class ChatController {
     private final SimpMessagingTemplate template;
-    /*@Operation(summary = "메시지 전송", description = "사용자가 작성한 메시지를 전송합니다. url 바디에 {comment,time,gameId}를 담아 json 형태로 보내주세요.")
-    @PostMapping()
-    public ResponseEntity<?> chatAdd(){
-        return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
+    private final ChatRepository chatRepository;
+
+    @MessageMapping("/enter/{gameId}")
+    public void enter(@DestinationVariable Long gameId, ChatDto chatDto){
+        log.info("입장 : {}",chatDto.getUserNickname());
+        template.convertAndSend("/room/"+gameId,chatDto.getUserNickname()+"님이 입장하셨습니다.");
     }
 
-    @Operation(summary = "대화 목록 조회", description = "해당 채팅방의 대화 목록을 조회합니다. url 바디에 {gameId}를 담아 json 형태로 보내주세요.")
-    @GetMapping()
-    public ResponseEntity<?> chatList(Integer gameId){
-        return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
-    }*/
-
-    @MessageMapping("/enter/{roomId}")
-    public void enter(@DestinationVariable Long roomId, ChatDto chatDto, @AuthenticationPrincipal User user){
-        template.convertAndSend("/room/chat/"+roomId,user.getNickname()+"님이 입장하셨습니다.");
-    }
-
-    @MessageMapping("/message/{roomId}")
-    public void message(@DestinationVariable Long roomId, ChatDto chatDto, @AuthenticationPrincipal User user){
-        template.convertAndSend("/room/chat/"+roomId,"메세지 테스트");
+    @MessageMapping("/message/{gameId}")
+    public void message(@DestinationVariable Long gameId, ChatDto chatDto){
+        log.info("메시지 보냄");
+        chatRepository.save(Chat.builder().gameId(gameId).comment(chatDto.getComment()).userNickname(chatDto.getUserNickname()).build());
+        template.convertAndSend("/room/"+gameId,chatDto.getComment());
     }
 
 }
