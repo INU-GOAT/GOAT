@@ -23,7 +23,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         Gson gson = new Gson();
         String result = gson.toJson((new ResponseDto<>(403,"접근 권한이 없는 사용자입니다.")));
-        response.setStatus(401);
+        response.setStatus(403);
         response.getWriter().write(result);
     }
 }
