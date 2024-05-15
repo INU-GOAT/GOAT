@@ -50,7 +50,7 @@ public class ChatController {
     @GetMapping("/api/chats/{gameId}")
     @Operation(summary = "채팅 기록 가져오기", description = "url 변수에 gameId를 보내주세요")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "채팅 기록 가져오기 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200",description = "채팅 기록 가져오기 성공",content = @Content(schema = @Schema(implementation = ChatResponseDto.class))),
     })
     public ResponseEntity<ResponseDto<List<ChatResponseDto>>> getChatList(@PathVariable Long gameId){
         return new ResponseEntity<>(new ResponseDto<>(chatService.getChatList(gameId),"채팅 기록 가져오기 성공"), HttpStatus.OK);
