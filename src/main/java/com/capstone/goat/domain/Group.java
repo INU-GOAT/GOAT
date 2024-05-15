@@ -20,9 +20,7 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "master_id")
-    private User master;
+    private Long masterId;
 
     @OneToMany(mappedBy = "group",fetch = FetchType.LAZY)
     private List<User> members = new ArrayList<>();
@@ -31,8 +29,8 @@ public class Group {
     private List<User> invitees = new ArrayList<>();
 
     @Builder
-    public Group(User master) {
-        this.master = master;
+    public Group(Long masterId) {
+        this.masterId = masterId;
     }
 
     public void addMember(User member) {

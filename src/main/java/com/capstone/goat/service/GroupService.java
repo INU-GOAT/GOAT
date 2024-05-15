@@ -37,7 +37,7 @@ public class GroupService {
 
         // 그룹장이 user인 그룹 생성
         Group group = Group.builder()
-                .master(user)
+                .masterId(user.getId())
                 .build();
 
         // group에 member로 추가
@@ -50,7 +50,7 @@ public class GroupService {
 
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
 
-        long masterId = group.getMaster().getId();
+        long masterId = group.getMasterId();
         List<UserResponseDto> memberList = new ArrayList<>();
 
         group.getMembers().forEach(member -> {
@@ -118,7 +118,7 @@ public class GroupService {
         User member = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
         Group group = ofNullable(member.getGroup()).orElseThrow(() -> new NoSuchElementException("가입된 그룹을 찾을 수 없습니다"));
 
-        if (Objects.equals(group.getMaster().getId(), userId)) {    // 그룹장이 탈퇴하는 경우
+        if (Objects.equals(group.getMasterId(), userId)) {    // 그룹장이 탈퇴하는 경우
             group.kickAllMembers(); // 그룹원 모두 추방
             group.excludeAllInvitees(); // 초대 중인 유저 목록 제거
             // TODO 알림 구현 시 알림 삭제도 추가

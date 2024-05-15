@@ -70,7 +70,7 @@ public class MatchingController {
 
         // TODO 도메인 내부로 이동
         // 그룹장이 아닌 경우 매칭 시작 불가능
-        if (!Objects.equals(group.getMaster().getId(), userId)) {
+        if (!Objects.equals(group.getMasterId(), userId)) {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
         }
 
@@ -114,7 +114,7 @@ public class MatchingController {
                 .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
 
         // 그룹장이 아닌 경우 매칭 종료 불가능
-        if (!Objects.equals(group.getMaster().getId(), user.getId()))
+        if (!Objects.equals(group.getMasterId(), user.getId()))
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
 
         matchMakingService.deleteMatching(group.getId());
