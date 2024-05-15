@@ -26,13 +26,4 @@ public class UserUpdateDto {
     @NotBlank
     @Schema(description = "선호 스포츠", example = "soccer")
     private String prefer_sport;
-
-    @Schema(description = "축구 실력")
-    private Integer soccer_tier;
-    @Schema(description = "농구 실력")
-    private Integer basketball_tier;
-    @Schema(description = "배드민턴 실력")
-    private Integer badminton_tier;
-    @Schema(description = "테니스 실력")
-    private Integer tableTennis_tier;
 }

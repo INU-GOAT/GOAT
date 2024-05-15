@@ -87,15 +87,11 @@ public class User implements UserDetails {
         this.tableTennis_tier = tableTennis_tier;
     }
 
-    public void update(String nickname, int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
+    public void update(String nickname, int age, String gender, String prefer_sport){
         this.age = age;
         this.nickname = nickname;
         this.gender = gender;
         this.prefer_sport = prefer_sport;
-        this.soccer_tier = soccer_tier;
-        this.badminton_tier = badminton_tier;
-        this.basketball_tier = basketball_tier;
-        this.tableTennis_tier = tableTennis_tier;
     }
 
     public void joinClub(Club club){
