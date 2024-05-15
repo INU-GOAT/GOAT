@@ -25,7 +25,7 @@ import java.util.Map;
 import static java.util.Optional.ofNullable;
 
 @RestController
-@RequestMapping("/api/group/")
+@RequestMapping("/api/group")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Slf4j
@@ -99,7 +99,7 @@ public class GroupController {
     }*/
 
     @Operation(summary = "초대 수락에 따른 그룹원 추가", description = "그룹장의 초대를 수락하면 그룹에 추가합니다. url 바디에 {sendTime, isAccepted}를 json 형태로 넣어주세요.")
-    @PatchMapping("{groupId}")
+    @PatchMapping("/{groupId}")
     public ResponseEntity<?> groupSave(@Schema(hidden = true) @AuthenticationPrincipal User user, @RequestBody Map<String, String> param){ // isAccepted와 sendTime 받음
         log.info("초대 수락에 따른 그룹원 추가 id : {}",user.getId());
         // 파라미터 검증
@@ -137,7 +137,7 @@ public class GroupController {
     }
 
     @Operation(summary = "그룹 추방", description = "그룹에서 그룹원을 추방시킵니다.")
-    @PatchMapping("members/{memberId}")
+    @PatchMapping("/members/{memberId}")
     public ResponseEntity<?> groupMembersRemove(@Schema(hidden = true) @AuthenticationPrincipal User user, @PathVariable Long memberId) {
         log.info("그룹 추방 id : {}",memberId);
         user = userRepository.findById(user.getId()).orElseThrow();

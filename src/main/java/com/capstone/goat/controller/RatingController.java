@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 @RestController
-@RequestMapping("/api/rating/")
+@RequestMapping("/api/rating")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Slf4j
@@ -36,7 +36,7 @@ public class RatingController {
     }
 
     @Operation(summary = "레이팅 상세 조회", description = "사용자 레이팅 중 하나를 상세 조회합니다.")
-    @GetMapping("{sportName}")  // sportName으로 받는 상황이 나올 지 ratingId로 받는 상황이 나올지 아직 모르겠음
+    @GetMapping("/{sportName}")  // sportName으로 받는 상황이 나올 지 ratingId로 받는 상황이 나올지 아직 모르겠음
     public ResponseEntity<?> ratingBySport(@Schema(hidden = true) @AuthenticationPrincipal User user, @PathVariable String sportName) {
         log.info("레이팅 상세 조회 id : {}",user.getId());
         RatingResponseDto ratingResponseDto = ratingService.getRatingBySport(user.getId(), sportName);
