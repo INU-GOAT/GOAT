@@ -33,7 +33,7 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 
 @RestController
-@RequestMapping("/api/matching/")
+@RequestMapping("/api/matching")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 @Slf4j
