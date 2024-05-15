@@ -120,11 +120,7 @@ public class UserService {
         user.update(userUpdateDto.getNickname()
                 ,userUpdateDto.getAge()
                 ,userUpdateDto.getGender()
-                ,userUpdateDto.getPrefer_sport()
-                ,userUpdateDto.getSoccer_tier()
-                ,userUpdateDto.getBadminton_tier()
-                ,userUpdateDto.getBasketball_tier()
-                ,userUpdateDto.getTableTennis_tier());
+                ,userUpdateDto.getPrefer_sport());
         return user.getId();
     }
 
