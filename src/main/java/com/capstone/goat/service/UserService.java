@@ -3,6 +3,7 @@ package com.capstone.goat.service;
 import com.capstone.goat.config.ClientKakao;
 import com.capstone.goat.config.TokenProvider;
 import com.capstone.goat.domain.Group;
+import com.capstone.goat.domain.Sport;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.response.TokenDto;
 import com.capstone.goat.dto.request.UserSaveDto;
@@ -28,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final ClientKakao clientKakao;
+    private final RatingService ratingService;
 
 
     @Transactional
@@ -102,6 +104,10 @@ public class UserService {
                 ,userSaveDto.getBadminton_tier()
                 ,userSaveDto.getBasketball_tier()
                 ,userSaveDto.getTableTennis_tier());
+        ratingService.initRating(id, Sport.BADMINTON,userSaveDto.getBadminton_tier()*200);
+        ratingService.initRating(id, Sport.SOCCER,userSaveDto.getSoccer_tier()*200);
+        ratingService.initRating(id, Sport.BASKETBALL,userSaveDto.getBasketball_tier()*200);
+        ratingService.initRating(id, Sport.TABLE_TENNIS,userSaveDto.getTableTennis_tier()*200);
         return user.getId();
     }
 
