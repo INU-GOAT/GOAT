@@ -15,10 +15,10 @@ import java.util.List;
 public class MemoryMatchMakingRepository implements MatchMakingRepository {
     private static final List<MatchMaking>[][] store = new List[550][725];
     //Map<Integer, List<Matching>> store1; //1550725
-    private static final int LATINIT = 3861;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
+    private static final int LATINIT = 3311;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
     private static final int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
 
-    private static final int RATINGVALUE = 15;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
+    private static final int RATINGVALUE = 25;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
 
     public MemoryMatchMakingRepository() {
         for (int i = 0; i < store.length; i++) {
@@ -94,8 +94,8 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
 
         Duration diff = Duration.between(matchingStartTime.toLocalTime(), LocalTime.now());
 
-        int ratingWeight = (int) diff.toMinutes() / 20 + 1; // 20분당 1의 가중치
-        if (ratingWeight > 10) ratingWeight = 10; // 최대 가중치
+        int ratingWeight = (int) diff.toMinutes() / 10 + 1; // 10분당 1의 가중치
+        if (ratingWeight > 15) ratingWeight = 5; // 최대 가중치
         // TODO 자정이 지나면 매칭 취소 시켜야 함
         if (matchingStartTime.getDayOfMonth() != LocalDate.now().getDayOfMonth())  ratingWeight = 10;   // 매칭 후 하루가 지났으면 최대 가중치
 
