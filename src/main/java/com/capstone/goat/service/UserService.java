@@ -91,33 +91,17 @@ public class UserService {
     @Transactional
     public Long join(Long id, UserSaveDto userSaveDto){
         User user = userRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
-        int soccer=1;
-        int badminton = 1;
-        int basketball = 1;
-        int tableTennis = 1;
         if(userRepository.existsByNickname(userSaveDto.getNickname())){
             throw new CustomException(CustomErrorCode.EXIST_NICKNAME);
-        }
-        if(userSaveDto.getPrefer_sport().equals("축구")){
-            soccer = userSaveDto.getSoccer_tier();
-        }
-        else if(userSaveDto.getPrefer_sport().equals("배드민턴")){
-            badminton = userSaveDto.getBadminton_tier();
-        }
-        else if(userSaveDto.getPrefer_sport().equals("농구")){
-            basketball = user.getBasketball_tier();
-        }
-        else{
-            tableTennis = user.getTableTennis_tier();
         }
         user.join(userSaveDto.getNickname()
                 ,userSaveDto.getAge()
                 ,userSaveDto.getGender()
                 ,userSaveDto.getPrefer_sport()
-                ,soccer
-                ,badminton
-                ,basketball
-                ,tableTennis);
+                ,userSaveDto.getSoccer_tier()
+                ,userSaveDto.getBadminton_tier()
+                ,userSaveDto.getBasketball_tier()
+                ,userSaveDto.getTableTennis_tier());
         return user.getId();
     }
 
