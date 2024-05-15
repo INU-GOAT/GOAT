@@ -54,7 +54,7 @@ public class MatchingController {
     })
     @PostMapping
     public ResponseEntity<?> matchingStart(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
-
+        log.info("매칭 시작 id : {}",user.getId());
         // 그룹원을 초대 중일 때에는 매칭 시작 불가능
         notificationRepository.findSendTimeBySenderIdAndType(user.getId(), 2).forEach(sendTime -> {
             if (Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)
@@ -86,7 +86,7 @@ public class MatchingController {
     @Operation(summary = "매칭 중인 조건 조회", description = "사용자가 현재 매칭 중인 조건을 조회합니다. 매칭 중이 아닐 경우 null을 반환합니다.")
     @GetMapping
     public ResponseEntity<?> matchingCondition(@Schema(hidden = true) @AuthenticationPrincipal User user){
-
+        log.info("매칭 중인 조건 조회 id : {}",user.getId());
         user = userRepository.findById(user.getId()).orElseThrow();
 
         Group group = user.getGroup();
@@ -106,7 +106,7 @@ public class MatchingController {
     })
     @DeleteMapping
     public ResponseEntity<?> matchingRemove(@Schema(hidden = true) @AuthenticationPrincipal User user){
-
+        log.info("매칭 중단 id : {}",user.getId());
         user = userRepository.findById(user.getId()).orElseThrow();
 
         // 그룹이 존재하지 않을 경우 예외
