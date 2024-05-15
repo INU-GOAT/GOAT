@@ -109,7 +109,7 @@ public class GameService {
                 rating.updateRatingByWin();
             });
         } else {
-            throw new CustomException(CustomErrorCode.INVALIED_TEAM_NUMBER);
+            throw new CustomException(CustomErrorCode.INVALID_TEAM_NUMBER);
         }
     }
 
