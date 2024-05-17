@@ -48,6 +48,9 @@ public class MatchMakingService {
         // MatchMaking Repository에 저장
         matchingConditionDto.toMatchMakingList(userCount, rating, groupId)  // List<MatchMaking>
                 .forEach(matchMakingRepository::save);
+
+        // 그룹원 모두 매칭 중으로 상태 변경
+        group.getMembers().forEach(user -> user.changeStatus(Status.MATCHING));
     }
 
     @Async
@@ -88,7 +91,10 @@ public class MatchMakingService {
                 deleteMatchedGroup(team1GroupId, team2GroupId, latitude, longitude);
 
                 // Game에 추가
-                addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
+                Long gameId = addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
+
+                // 매칭된 모든 유저를 게임 중으로 상태 변경
+                changeUserStateToGaming(gameId);
 
                 // 매칭된 그룹 모두 해체
                 disbandGroup(team1GroupId, team2GroupId);
@@ -155,7 +161,7 @@ public class MatchMakingService {
     }
 
     // 게임 생성
-    private void addGame(List<Long> team1, List<Long> team2, MatchMaking matchMaking, List<String> preferCourtList) {
+    private Long addGame(List<Long> team1, List<Long> team2, MatchMaking matchMaking, List<String> preferCourtList) {
 
         log.info("[로그] addGame() 시작");
 
@@ -203,6 +209,15 @@ public class MatchMakingService {
             game.addPreferCourts(preferCourt);
         }
 
+        return game.getId();
+    }
+
+    private void changeUserStateToGaming(Long gameId) {
+
+        // 매칭된 모든 유저를 게임 중으로 상태 변경
+        teammateRepository.findUsersByGameId(gameId).forEach(user -> {
+            user.changeStatus(Status.GAMING);
+        });
     }
 
     // 매칭된 그룹 모두 삭제
@@ -227,6 +242,12 @@ public class MatchMakingService {
         matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, foundMatching.getLatitude(), foundMatching.getLongitude());
 
         matchingRepository.deleteByGroupId(groupId);
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
+
+        // 그룹원 모두 대기 중으로 상태 변경
+        group.getMembers().forEach(user -> user.changeStatus(Status.WAITING));
     }
 
 }

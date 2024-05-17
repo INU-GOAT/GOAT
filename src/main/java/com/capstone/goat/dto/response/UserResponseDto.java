@@ -1,5 +1,6 @@
 package com.capstone.goat.dto.response;
 
+import com.capstone.goat.domain.Status;
 import com.capstone.goat.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -30,6 +31,8 @@ public class UserResponseDto {
     private Integer basketball_tier;
     @Schema(description = "탁구실력")
     private Integer tableTennis_tier;
+    @Schema(description = "유저상태")
+    private Status status;
     @Builder
     private UserResponseDto (User user, String club){
         this.id = user.getId();
@@ -42,6 +45,7 @@ public class UserResponseDto {
         this.badminton_tier = user.getBadminton_tier();
         this.basketball_tier = user.getBasketball_tier();
         this.tableTennis_tier = user.getTableTennis_tier();
+        this.status = user.getStatus();
     }
 
     public static UserResponseDto of(User user,String club){

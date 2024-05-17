@@ -33,11 +33,12 @@ public class User implements UserDetails {
 
     private String prefer_sport;
 
-    // TODO 제거하고 ratings로 변경
     private Integer soccer_tier;
     private Integer badminton_tier;
     private Integer basketball_tier;
     private Integer tableTennis_tier;
+
+    private Status status;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "sport")
@@ -73,6 +74,7 @@ public class User implements UserDetails {
         this.tableTennis_tier = tableTennis_tier;
         this.badminton_tier = badminton_tier;
         this.basketball_tier = basketball_tier;
+        this.status = Status.WAITING;
         this.roles = roles;
     }
 
@@ -85,6 +87,7 @@ public class User implements UserDetails {
         this.badminton_tier = badminton_tier;
         this.basketball_tier = basketball_tier;
         this.tableTennis_tier = tableTennis_tier;
+        this.status = Status.WAITING;
     }
 
     public void update(String nickname, int age, String gender, String prefer_sport){
@@ -92,6 +95,10 @@ public class User implements UserDetails {
         this.nickname = nickname;
         this.gender = gender;
         this.prefer_sport = prefer_sport;
+    }
+
+    public void changeStatus(Status status) {
+        this.status = status;
     }
 
     public void joinClub(Club club){

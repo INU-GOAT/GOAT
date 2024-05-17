@@ -88,6 +88,10 @@ public class GameService {
                 .build();
 
         game.voteWinTeam(votedWinTeam);
+        
+        // 대기 중으로 유저 상태 변경
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다"));
+        user.changeStatus(Status.WAITING);
 
         int player = game.getSport().getPlayer();
         if (game.getVotedWinTeams().size() == player * 2) {
