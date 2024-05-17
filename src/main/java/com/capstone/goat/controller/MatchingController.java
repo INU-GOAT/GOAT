@@ -118,6 +118,11 @@ public class MatchingController {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
 
         matchMakingService.deleteMatching(group.getId());
+        
+        // 그룹 인원이 1명인 경우 그룹 삭제
+        if(user.getGroup().getMembers().size() == 1){
+            groupService.removeMemberFromGroup(user.getId());
+        }
 
         return new ResponseEntity<>(new ResponseDto(user.getNickname(),"매칭 중단 성공"), HttpStatus.OK);
     }

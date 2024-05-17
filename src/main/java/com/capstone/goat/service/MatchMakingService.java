@@ -92,6 +92,9 @@ public class MatchMakingService {
                 // Game에 추가
                 addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
 
+                // 매칭된 그룹 모두 해체
+                disbandGroup(team1GroupId, team2GroupId);
+
                 return;
             }
         }
@@ -136,6 +139,21 @@ public class MatchMakingService {
         }
 
         return subset;
+    }
+
+    // Matching과 MatchMaking에서 매칭된 그룹 제거
+    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, float latitude, float longitude) {
+
+        log.info("[로그] deleteByGroupId 시작");
+
+        for (long groupId : team1) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
+            matchingRepository.deleteByGroupId(groupId);
+        }
+        for (long groupId : team2) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
+            matchingRepository.deleteByGroupId(groupId);
+        }
     }
 
     // 게임 생성
@@ -189,17 +207,17 @@ public class MatchMakingService {
 
     }
 
-    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, float latitude, float longitude) {
+    // 매칭된 그룹 모두 삭제
+    private void disbandGroup(List<Long> team1, List<Long> team2) {
 
-        log.info("[로그] deleteByGroupId 시작");
-
-        for (long groupId : team1) {
-            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
-            matchingRepository.deleteByGroupId(groupId);
+        for (long groupId: team1) {
+            groupRepository.findById(groupId)
+                    .ifPresent(Group::kickAllMembers);
         }
-        for (long groupId : team2) {
-            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
-            matchingRepository.deleteByGroupId(groupId);
+
+        for (Long groupId : team2) {
+            groupRepository.findById(groupId)
+                    .ifPresent(Group::kickAllMembers);
         }
     }
 
