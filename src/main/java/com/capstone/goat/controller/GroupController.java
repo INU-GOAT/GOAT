@@ -151,7 +151,7 @@ public class GroupController {
         return new ResponseEntity<>(new ResponseDto<>(null, "성공"), HttpStatus.OK);
     }
 
-    @Operation(summary = "그룹 탈퇴", description = "그룹을 탈퇴합니다. 그룹장이 탈퇴 시 그룹을 삭제합니다.")
+    @Operation(summary = "그룹 탈퇴", description = "그룹을 탈퇴합니다. 그룹장이 탈퇴 시 그룹장을 양도 후 탈퇴합니다.")
     @DeleteMapping
     public ResponseEntity<?> groupRemove(@Schema(hidden = true) @AuthenticationPrincipal User user){
         log.info("그룹 탈퇴 id : {}",user.getId());

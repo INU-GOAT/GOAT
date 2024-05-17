@@ -118,14 +118,19 @@ public class GroupService {
         User member = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
         Group group = ofNullable(member.getGroup()).orElseThrow(() -> new NoSuchElementException("가입된 그룹을 찾을 수 없습니다"));
 
+        member.leaveGroup();    // 그룹 탈퇴
+
         if (Objects.equals(group.getMasterId(), userId)) {    // 그룹장이 탈퇴하는 경우
-            group.kickAllMembers(); // 그룹원 모두 추방
-            group.excludeAllInvitees(); // 초대 중인 유저 목록 제거
-            // TODO 알림 구현 시 알림 삭제도 추가
-            groupRepository.deleteById(group.getId());  // 그룹 삭제
+
+            if (group.getMembers().size() == 1) {
+                group.excludeAllInvitees(); // 초대 중인 유저 목록 제거
+                // TODO 알림 구현 시 알림 삭제도 추가
+                groupRepository.deleteById(group.getId());  // 그룹 삭제
+            } else {
+                group.handOverMaster(group.getMembers().get(0).getId());    // 다른 그룹원에게 그룹장 양도
+            }
         }
-        else    // 그룹원이 탈퇴하는 경우
-            member.leaveGroup();    // 그룹 탈퇴
+
     }
 
 

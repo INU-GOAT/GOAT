@@ -33,6 +33,10 @@ public class Group {
         this.masterId = masterId;
     }
 
+    public void handOverMaster(Long newMasterId) {
+        this.masterId = newMasterId;
+    }
+
     public void addMember(User member) {
         this.members.add(member);
         member.joinGroup(this);
