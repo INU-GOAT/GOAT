@@ -28,8 +28,9 @@ public class GameService {
 
         List<User> team1UserList = game.getTeam1().stream().map(Teammate::getUser).toList();
         List<User> team2UserList = game.getTeam2().stream().map(Teammate::getUser).toList();
+        team1UserList.forEach(user -> System.out.print(user.getId() + ", "));
 
-        return GameResponseDto.of(game, team1UserList, team2UserList);
+        return GameResponseDto.of(game, game.getPreferCourts(), team1UserList, team2UserList);
     }
 
     public GameResponseDto getPlayingGame(long userId) {
@@ -75,14 +76,39 @@ public class GameService {
     }
 
     @Transactional
-    public void determineWinTeam(long gameId, int winTeam) {
+    public void determineWinTeam(long gameId, long userId, int winTeam) {
 
         Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
 
-        game.determineWinTeam(winTeam); // game에 승리 팀 저장
+        VotedWinTeam votedWinTeam = VotedWinTeam.builder()
+                .userId(userId)
+                .winTeam(winTeam)
+                .game(game)
+                .build();
 
-        // 각 팀의 승리/패배에 따른 점수 조정
-        updateRating(game);
+        game.voteWinTeam(votedWinTeam);
+
+        int player = game.getSport().getPlayer();
+        if (game.getVotedWinTeams().size() == player * 2) {
+            int winTeam1Count = 0;
+
+            for (VotedWinTeam userWinTeam : game.getVotedWinTeams()) {
+                if (userWinTeam.getWinTeam() == 1) {
+                    winTeam1Count++;
+                }
+            }
+
+            if (winTeam1Count < player) {
+                game.determineWinTeam(2);
+            } else if (winTeam1Count > player) {
+                game.determineWinTeam(1);
+            } else {
+                game.determineWinTeam(0);
+            }
+
+            // 각 팀의 승리/패배에 따른 점수 조정
+            updateRating(game);
+        }
     }
 
     private void updateRating(Game game) {

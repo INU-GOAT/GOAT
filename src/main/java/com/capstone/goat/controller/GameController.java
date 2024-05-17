@@ -67,8 +67,11 @@ public class GameController {
 
     @Operation(summary = "진행 중인 게임 종료", description = "사용자가 현재 진행하던 게임을 종료합니다. url 바디에 {winTeam}을 json 형식으로 보내주세요. winTeam은 team1이면 1, team2면 2를 int 형으로 적어주세요.")
     @PatchMapping("/{gameId}/win-team")
-    public ResponseEntity<?> gameWinTeamPatch(@PathVariable Long gameId, @RequestBody Map<String, String> param){  // winTeam
+    public ResponseEntity<?> gameWinTeamPatch(@Schema(hidden = true) @AuthenticationPrincipal User user,
+                                              @PathVariable Long gameId, @RequestBody Map<String, String> param){  // winTeam
+
         log.info("진행 중인 게임 종료 gameId : {}",gameId);
+
         // 파라미터 검증
         int winTeam;
         String winTeamString = param.get("winTeam");
@@ -78,7 +81,7 @@ public class GameController {
             throw new IllegalArgumentException("winTeam 형식이 잘못되었습니다. int 형식이어야 합니다.");
         }
 
-        gameService.determineWinTeam(gameId, winTeam);
+        gameService.determineWinTeam(gameId, user.getId(), winTeam);
 
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
     }

@@ -33,6 +33,12 @@ public class Game {
 
     private Integer winTeam;    // null이면 게임 중 / 1이면 1팀 / 2면 2팀
 
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PreferCourt> preferCourts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VotedWinTeam> votedWinTeams = new ArrayList<>();
+
     @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Teammate> team1 = new ArrayList<>();
 
@@ -47,6 +53,14 @@ public class Game {
         this.longitude = longitude;
         this.court = court;
         this.winTeam = winTeam;
+    }
+
+    public void voteWinTeam(VotedWinTeam votedWinTeam) {
+        this.votedWinTeams.add(votedWinTeam);
+    }
+
+    public void addPreferCourts(PreferCourt preferCourt) {
+        this.preferCourts.add(preferCourt);
     }
 
     public void addTeammateToTeam(Teammate teammate) {

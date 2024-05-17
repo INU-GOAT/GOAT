@@ -73,26 +73,24 @@ public class MatchMakingService {
             int player = Sport.getSport(matchingConditionDto.getSport()).getPlayer();
 
             // 스포츠 인원에 맞는 팀 구성이 되는지 확인
-            List<Long> team1 = findSumSubset(matchMakingList, player);
+            List<MatchMaking> team1 = findSumSubset(matchMakingList, player);
             if (team1.isEmpty()) continue;
-            List<Long> team2 = findSumSubset(matchMakingList, player);
-
-            log.info("[로그] : team1: " + team1 + " team2: " + team2);
+            List<MatchMaking> team2 = findSumSubset(matchMakingList, player);
 
             if (!team2.isEmpty()) {
-                log.info("[로그] deleteByGroupId 시작");
-                // matchMakingRepository 및 matchingRepository에서 제거
-                for (long matchedGroupId : team1) {
-                    matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
-                    matchingRepository.deleteByGroupId(matchedGroupId);
-                }
-                for (long matchedGroupId : team2) {
-                    matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchedGroupId, latitude, longitude);
-                    matchingRepository.deleteByGroupId(matchedGroupId);
-                }
+                List<Long> team1GroupId = team1.stream().map(MatchMaking::getGroupId).toList();
+                List<Long> team2GroupId = team2.stream().map(MatchMaking::getGroupId).toList();
+                List<String> preferCourtList = new ArrayList<>();
+                preferCourtList.addAll(team1.stream().map(MatchMaking::getPreferCourt).toList());
+                preferCourtList.addAll(team2.stream().map(MatchMaking::getPreferCourt).toList());
+
+                log.info("[로그] : team1GroupId: " + team1GroupId + " team2GroupId: " + team2GroupId);
+
+                // Matching과 MatchMaking에서 매칭된 그룹 제거
+                deleteMatchedGroup(team1GroupId, team2GroupId, latitude, longitude);
 
                 // Game에 추가
-                addGame(team1, team2, matchMaking);
+                addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
 
                 return;
             }
@@ -100,7 +98,8 @@ public class MatchMakingService {
     }
 
     // 그룹 인원 수의 합이 스포츠 한 팀의 수와 같은 집합 검색
-    private List<Long> findSumSubset(List<MatchMaking> matchMakingList, int target) {
+    private List<MatchMaking> findSumSubset(List<MatchMaking> matchMakingList, int target) {
+
         int n = matchMakingList.size();
         boolean[][] dp = new boolean[n + 1][target + 1];
 
@@ -121,14 +120,14 @@ public class MatchMakingService {
         }
 
         // 부분집합을 구성하는 요소를 찾아내기
-        List<Long> subset = new ArrayList<>();
+        List<MatchMaking> subset = new ArrayList<>();
         if (dp[n][target]) {
             int i = n, j = target;
             while (i > 0 && j > 0) {
                 if (dp[i - 1][j]) {
                     i--;
                 } else {
-                    subset.add(matchMakingList.get(i - 1).getGroupId());
+                    subset.add(matchMakingList.get(i - 1));
                     j -= matchMakingList.get(i - 1).getUserCount();
                     matchMakingList.remove(i - 1);
                     i--;
@@ -140,7 +139,8 @@ public class MatchMakingService {
     }
 
     // 게임 생성
-    private void addGame(List<Long> team1GroupId, List<Long> team2GroupId, MatchMaking matchMaking) {
+    private void addGame(List<Long> team1, List<Long> team2, MatchMaking matchMaking, List<String> preferCourtList) {
+
         log.info("[로그] addGame() 시작");
 
         // 시작 시간 파싱
@@ -159,7 +159,7 @@ public class MatchMakingService {
                 .build();
         Game game = gameRepository.save(newGame);
 
-        for (long groupId: team1GroupId) {
+        for (long groupId: team1) {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
@@ -169,7 +169,7 @@ public class MatchMakingService {
                     );
         }
 
-        for (long groupId: team2GroupId) {
+        for (long groupId: team2) {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
@@ -179,10 +179,33 @@ public class MatchMakingService {
                     );
         }
 
+        for (String preferCourtString : preferCourtList) {
+            PreferCourt preferCourt = PreferCourt.builder()
+                    .court(preferCourtString)
+                    .game(game)
+                    .build();
+            game.addPreferCourts(preferCourt);
+        }
+
+    }
+
+    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, float latitude, float longitude) {
+
+        log.info("[로그] deleteByGroupId 시작");
+
+        for (long groupId : team1) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
+            matchingRepository.deleteByGroupId(groupId);
+        }
+        for (long groupId : team2) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
+            matchingRepository.deleteByGroupId(groupId);
+        }
     }
 
     @Transactional
     public void deleteMatching(long groupId) {
+
         Matching foundMatching = matchingRepository.findByGroupId(groupId).orElseThrow(() -> new NoSuchElementException("해당 그룹 id에 해당하는 매칭이 없습니다. 매칭 중이 아닙니다"));
 
         matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, foundMatching.getLatitude(), foundMatching.getLongitude());

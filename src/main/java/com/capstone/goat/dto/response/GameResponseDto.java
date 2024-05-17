@@ -1,6 +1,7 @@
 package com.capstone.goat.dto.response;
 
 import com.capstone.goat.domain.Game;
+import com.capstone.goat.domain.PreferCourt;
 import com.capstone.goat.domain.Sport;
 import com.capstone.goat.domain.User;
 import lombok.AccessLevel;
@@ -27,13 +28,15 @@ public class GameResponseDto {
 
     private final Integer winTeam;    // null이면 게임 중 / 1이면 1팀 / 2면 2팀
 
+    private final List<String> preferCourts;
+
     private final List<UserInfo> team1;
 
     private final List<UserInfo> team2;
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GameResponseDto(long id, String sportName, LocalDateTime startTime, float latitude, float longitude, String court, Integer winTeam, List<UserInfo> team1, List<UserInfo> team2) {
+    private GameResponseDto(long id, String sportName, LocalDateTime startTime, float latitude, float longitude, String court, Integer winTeam, List<String> preferCourts, List<UserInfo> team1, List<UserInfo> team2) {
         this.id = id;
         this.sportName = sportName;
         this.startTime = startTime;
@@ -41,11 +44,13 @@ public class GameResponseDto {
         this.longitude = longitude;
         this.court = court;
         this.winTeam = winTeam;
+        this.preferCourts = preferCourts;
         this.team1 = team1;
         this.team2 = team2;
     }
 
-    public static GameResponseDto of(Game game, List<User> team1UserList, List<User> team2UserList) {
+    public static GameResponseDto of(Game game, List<PreferCourt> preferCourtList, List<User> team1UserList, List<User> team2UserList) {
+        List<String> preferCourts = preferCourtList.stream().map(PreferCourt::getCourt).toList();
         List<UserInfo> team1 = team1UserList.stream().map(user -> UserInfo.of(user, game.getSport())).toList();
         List<UserInfo> team2 = team2UserList.stream().map(user -> UserInfo.of(user, game.getSport())).toList();
 
@@ -57,6 +62,7 @@ public class GameResponseDto {
                 .longitude(game.getLongitude())
                 .court(game.getCourt())
                 .winTeam(game.getWinTeam())
+                .preferCourts(preferCourts)
                 .team1(team1)
                 .team2(team2)
                 .build();
