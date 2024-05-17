@@ -2,10 +2,7 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.*;
 import com.capstone.goat.dto.request.MatchingConditionDto;
-import com.capstone.goat.repository.GameRepository;
-import com.capstone.goat.repository.GroupRepository;
-import com.capstone.goat.repository.MatchMakingRepository;
-import com.capstone.goat.repository.MatchingRepository;
+import com.capstone.goat.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -28,6 +25,7 @@ public class MatchMakingService {
     private final MatchMakingRepository matchMakingRepository;
     private final GroupRepository groupRepository;
     private final GameRepository gameRepository;
+    private final TeammateRepository teammateRepository;
 
     @Transactional
     public void addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
@@ -181,7 +179,7 @@ public class MatchMakingService {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
-                            game.addTeammateToTeam(
+                            teammateRepository.save(
                                     Teammate.builder().teamNumber(1).game(game).user(user).build()
                             )
                     );
@@ -191,7 +189,7 @@ public class MatchMakingService {
             Optional.ofNullable(groupRepository.findUsersById(groupId))
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
-                            game.addTeammateToTeam(
+                            teammateRepository.save(
                                     Teammate.builder().teamNumber(2).game(game).user(user).build()
                             )
                     );

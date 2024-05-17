@@ -39,12 +39,6 @@ public class Game {
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VotedWinTeam> votedWinTeams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Teammate> team1 = new ArrayList<>();
-
-    @OneToMany(mappedBy = "game",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Teammate> team2 = new ArrayList<>();
-
     @Builder
     public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court, Integer winTeam) {
         this.sport = sport;
@@ -61,15 +55,6 @@ public class Game {
 
     public void addPreferCourts(PreferCourt preferCourt) {
         this.preferCourts.add(preferCourt);
-    }
-
-    public void addTeammateToTeam(Teammate teammate) {
-        if (teammate.getTeamNumber().equals(1))
-            team1.add(teammate);
-        else if (teammate.getTeamNumber().equals(2))
-            team2.add(teammate);
-        else
-            throw new IllegalArgumentException("teammate 객체 값이 잘못되어있습니다.");
     }
 
     public void determineCourt(String court) {

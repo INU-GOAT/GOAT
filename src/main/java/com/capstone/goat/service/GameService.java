@@ -5,7 +5,7 @@ import com.capstone.goat.dto.response.GameResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GameRepository;
-import com.capstone.goat.repository.TeamRepository;
+import com.capstone.goat.repository.TeammateRepository;
 import com.capstone.goat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,15 @@ public class GameService {
 
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
-    private final TeamRepository teamRepository;
+    private final TeammateRepository teammateRepository;
 
-    // TODO 도메인 서비스로 이동할 수 있을까?
-    private static GameResponseDto toDto (Game game) {
+    private GameResponseDto toDto (Game game) {
 
-        List<User> team1UserList = game.getTeam1().stream().map(Teammate::getUser).toList();
-        List<User> team2UserList = game.getTeam2().stream().map(Teammate::getUser).toList();
-        team1UserList.forEach(user -> System.out.print(user.getId() + ", "));
+        List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
+        List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
+
+        List<User> team1UserList = team1.stream().map(Teammate::getUser).toList();
+        List<User> team2UserList = team2.stream().map(Teammate::getUser).toList();
 
         return GameResponseDto.of(game, game.getPreferCourts(), team1UserList, team2UserList);
     }
@@ -36,7 +37,7 @@ public class GameService {
     public GameResponseDto getPlayingGame(long userId) {
 
         User user = userRepository.getReferenceById(userId);
-        Teammate userTeammate = teamRepository.findFirstByUserOrderByIdDesc(user).orElseThrow(() -> new NoSuchElementException("해당하는 유저의 teammate가 존재하지 않습니다."));
+        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user).orElseThrow(() -> new NoSuchElementException("해당하는 유저의 teammate가 존재하지 않습니다."));
         Game game = userTeammate.getGame();
 
         GameResponseDto gameResponseDto = null; // 이미 종료된 게임이면 null 객체 반환
@@ -52,7 +53,7 @@ public class GameService {
     public List<GameResponseDto> getFinishedGame(long userId) {
 
         User user = userRepository.getReferenceById(userId);
-        List<Teammate> teammateList = teamRepository.findAllByUserOrderByIdDesc(user);
+        List<Teammate> teammateList = teammateRepository.findAllByUserOrderByIdDesc(user);
 
         return teammateList.stream()
                 .filter(teammate -> teammate.getGame().getWinTeam() != null)    // 종료된 Game 만
@@ -116,25 +117,28 @@ public class GameService {
         Sport sport = game.getSport();
         int winTeam = game.getWinTeam();
 
+        List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
+        List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
+
         if (winTeam == 1) {
-            game.getTeam1().forEach(teammate -> {
+            team1.forEach(teammate -> {
                 Rating rating = teammate.getUser().getRatings().get(sport);
                 rating.updateRatingByWin();
             });
-            game.getTeam2().forEach(teammate -> {
+            team2.forEach(teammate -> {
                 Rating rating = teammate.getUser().getRatings().get(sport);
                 rating.updateRatingByLose();
             });
         } else if (winTeam == 2) {
-            game.getTeam1().forEach(teammate -> {
+            team1.forEach(teammate -> {
                 Rating rating = teammate.getUser().getRatings().get(sport);
                 rating.updateRatingByLose();
             });
-            game.getTeam2().forEach(teammate -> {
+            team2.forEach(teammate -> {
                 Rating rating = teammate.getUser().getRatings().get(sport);
                 rating.updateRatingByWin();
             });
-        } else {
+        } else if (winTeam != 0){
             throw new CustomException(CustomErrorCode.INVALID_TEAM_NUMBER);
         }
     }

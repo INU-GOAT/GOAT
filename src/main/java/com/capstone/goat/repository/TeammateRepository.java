@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface TeamRepository extends JpaRepository<Teammate,Long> {
+public interface TeammateRepository extends JpaRepository<Teammate,Long> {
     Optional<Teammate> findFirstByUserOrderByIdDesc(User user);
     List<Teammate> findAllByUserOrderByIdDesc(User user);
+    List<Teammate> findAllByGameIdAndTeamNumber(Long gameId, Integer teamNumber);
 }
