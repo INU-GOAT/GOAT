@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public class GamePlayingResponseDto {
@@ -45,7 +46,10 @@ public class GamePlayingResponseDto {
     }
 
     public static GamePlayingResponseDto of(Game game, List<PreferCourt> preferCourtList, List<UserInfoDto> team1, List<UserInfoDto> team2) {
-        List<String> preferCourts = preferCourtList.stream().map(PreferCourt::getCourt).toList();
+        List<String> preferCourts = preferCourtList.stream()
+                .map(PreferCourt::getCourt)
+                .filter(Objects::nonNull)
+                .toList();
 
         return GamePlayingResponseDto.builder()
                 .gameId(game.getId())
