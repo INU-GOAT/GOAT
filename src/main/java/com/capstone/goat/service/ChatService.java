@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 public class ChatService {
     private final ChatRepository chatRepository;
     @Transactional
-    public void saveChat(Long gameId, ChatDto chatDto){
-        chatRepository.save(Chat.builder().gameId(gameId).comment(chatDto.getComment()).userNickname(chatDto.getUserNickname()).build());
+    public ChatResponseDto saveChat(Long gameId, ChatDto chatDto){
+        Chat chat = chatRepository.save(Chat.builder().gameId(gameId).comment(chatDto.getComment()).userNickname(chatDto.getUserNickname()).build());
+        return ChatResponseDto.of(chat);
     }
 
     @Transactional(readOnly = true)
