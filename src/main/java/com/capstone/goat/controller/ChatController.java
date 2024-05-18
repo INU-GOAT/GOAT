@@ -42,8 +42,8 @@ public class ChatController {
     @MessageMapping("/message/{gameId}")
     public void message(@DestinationVariable Long gameId, ChatDto chatDto){
         log.info("메시지 보냄");
-        Chat chat = chatService.saveChat(gameId,chatDto);
-        template.convertAndSend("/room/"+gameId,chat);
+        ChatResponseDto chatResponseDto = chatService.saveChat(gameId,chatDto);
+        template.convertAndSend("/room/"+gameId,chatResponseDto);
     }
 
     @ResponseBody
