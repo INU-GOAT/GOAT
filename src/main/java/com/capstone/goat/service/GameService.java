@@ -6,8 +6,6 @@ import com.capstone.goat.dto.response.GameFinishedResponseDto;
 import com.capstone.goat.dto.response.GamePlayingResponseDto;
 import com.capstone.goat.dto.response.TeammateResponseDto;
 import com.capstone.goat.dto.response.UserInfoDto;
-import com.capstone.goat.exception.ex.CustomErrorCode;
-import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GameRepository;
 import com.capstone.goat.repository.TeammateRepository;
 import com.capstone.goat.repository.UserRepository;
@@ -121,8 +119,6 @@ public class GameService {
             rating.updateRatingByLose();
         } else if (result == 0) {
             rating.updateRatingByDraw();
-        } else {
-            throw new CustomException(CustomErrorCode.INVALID_GAME_RESULT);
         }
     }
 

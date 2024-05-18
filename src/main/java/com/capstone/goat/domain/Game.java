@@ -32,10 +32,10 @@ public class Game {
     private String court;
 
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PreferCourt> preferCourts = new ArrayList<>();
+    private final List<PreferCourt> preferCourts = new ArrayList<>();
 
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VotedWinTeam> votedWinTeams = new ArrayList<>();   // Court 투표로 변경
+    private final List<VotedWinTeam> votedWinTeams = new ArrayList<>();   // Court 투표로 변경
 
     @Builder
     public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court) {

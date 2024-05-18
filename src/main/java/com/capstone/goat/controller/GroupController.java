@@ -2,6 +2,8 @@ package com.capstone.goat.controller;
 
 import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
+import com.capstone.goat.dto.request.GroupAcceptDto;
+import com.capstone.goat.dto.request.GroupInviteDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.dto.response.UserResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
@@ -17,10 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 
@@ -55,7 +55,6 @@ public class GroupController {
         Group group = user.getGroup();
         List<UserResponseDto> memberDtoList = null;
 
-        // TODO 반환 형태 적합한 지 -> 아마 rating 도 포함해서 반환하려면 새로 dto를 만드는게 좋을 듯
         if (group != null) {
              memberDtoList = groupService.getMembersFromGroup(group.getId());
         }
@@ -64,18 +63,12 @@ public class GroupController {
     }
 
     // TODO 알림 추가 하면 완성됨
-    @Operation(summary = "그룹에 초대", description = "사용자의 그룹에 새로운 유저를 초대합니다. url 바디에 {inviteeNickname}를 json 형태로 넣어주세요.")
+    @Operation(summary = "그룹에 초대", description = "사용자의 그룹에 새로운 유저를 초대합니다. url 바디에 {inviteeUserId}를 json 형태로 넣어주세요.")
     @PatchMapping
-    public ResponseEntity<?> userInvitedModify(@Schema(hidden = true) @AuthenticationPrincipal User user, @RequestBody Map<String, String> param){  // inviteeNickname 하나만 받음
+    public ResponseEntity<?> userInvitedModify(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody GroupInviteDto groupInviteDto){  // inviteeUserId 하나만 받음
 
         log.info("[로그] 그룹 초대 메서드 시작");
-
-        // 파라미터 검증
-        String inviteeNickname = param.get("inviteeNickname");
-        log.info("그룹에 초대 조회 초대된 사람: {}",inviteeNickname);
-        if (inviteeNickname == null) throw new IllegalArgumentException("inviteeNickname의 형식이 잘못되었습니다.");
-
-        log.info("[로그] inviteeNickname = " + inviteeNickname);
+        log.info("[로그] inviteeUserId : {} ", groupInviteDto.getInviteeUserId());
 
         long userId = user.getId();
         user = userRepository.findById(userId).orElseThrow();
@@ -85,7 +78,7 @@ public class GroupController {
 
         log.info("[로그] group : " + group);
 
-        groupService.addInviteeToGroup(group.getId(), inviteeNickname);
+        groupService.addInviteeToGroup(group.getId(), groupInviteDto.getInviteeUserId());
 
         return new ResponseEntity<>(new ResponseDto(group.getId(),"성공"), HttpStatus.OK);
     }
@@ -99,41 +92,13 @@ public class GroupController {
     }*/
 
     @Operation(summary = "초대 수락에 따른 그룹원 추가", description = "그룹장의 초대를 수락하면 그룹에 추가합니다. url 바디에 {sendTime, isAccepted}를 json 형태로 넣어주세요.")
-    @PatchMapping("/{groupId}")
-    public ResponseEntity<?> groupSave(@Schema(hidden = true) @AuthenticationPrincipal User user, @RequestBody Map<String, String> param){ // isAccepted와 sendTime 받음
-        log.info("초대 수락에 따른 그룹원 추가 id : {}",user.getId());
-        // 파라미터 검증
-        LocalDateTime sendTime;
-        try {
-            sendTime = LocalDateTime.parse(param.get("sendTime"));
-        } catch (DateTimeException e) {
-            throw new IllegalArgumentException("sendTime 형식이 잘못되었습니다. LocalDateTime 형식이어야 합니다.");
-        }
+    @PatchMapping("/members")
+    public ResponseEntity<?> groupUpdate(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody GroupAcceptDto groupAcceptDto){ // isAccepted와 sendTime 받음
+        log.info("초대 수락에 따른 그룹원 추가 id : {}, sendTime : {}, isAccepted : {}", user.getId(), groupAcceptDto.getSendTime(), groupAcceptDto.getIsAccepted());
 
-        boolean isAccepted;
-        String isAcceptedString = param.get("isAccepted");
-        if ("true".equalsIgnoreCase(isAcceptedString)) {
-            isAccepted = true;
-        } else if ("false".equalsIgnoreCase(isAcceptedString)) {
-            isAccepted = false;
-        } else {
-            throw new IllegalArgumentException("isAccepted 형식이 잘못되었습니다. 'true' 또는 'false' 문자열이 와야 합니다.");
-        }
+        long groupId = groupService.updateInvitee(user.getId(), groupAcceptDto);
 
-        String msg = "성공";
-        HttpStatus httpStatus = HttpStatus.OK;
-        // 만약 초대를 수락했는데 초대 메시지를 받은 지 30초가 지난 상태라면 초대 거절
-        /*if (isAccepted && Duration.between(sendTime, LocalDateTime.now()).getSeconds() > 30) {
-            isAccepted = false;
-            msg = "초대 유효 시간이 지났습니다.";
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }*/
-
-        long groupId = user.getInvitedGroup().getId();  // TODO 초대 받은 group이 null인 경우도 예외 처리 해야하나
-
-        groupService.updateInviteeByIsAccepted(groupId, user.getId(), isAccepted);
-
-        return new ResponseEntity<>(new ResponseDto(groupId, msg), httpStatus);
+        return new ResponseEntity<>(new ResponseDto(groupId, "성공"), HttpStatus.OK);
     }
 
     @Operation(summary = "그룹 추방", description = "그룹에서 그룹원을 추방시킵니다.")

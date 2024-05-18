@@ -1,6 +1,7 @@
 package com.capstone.goat.controller;
 
 import com.capstone.goat.domain.User;
+import com.capstone.goat.dto.request.GameCourtDto;
 import com.capstone.goat.dto.request.GameFinishDto;
 import com.capstone.goat.dto.response.GameFinishedResponseDto;
 import com.capstone.goat.dto.response.GamePlayingResponseDto;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/game")
@@ -58,13 +58,10 @@ public class GameController {
 
     @Operation(summary = "경기장 확정", description = "게임의 경기장을 확정합니다. url 바디에 {court}를 json 형식으로 보내주세요.")
     @PatchMapping({"/{gameId}/court"})
-    public ResponseEntity<?> gameCourtPatch(@PathVariable Long gameId, @RequestBody Map<String, String> param){  // court
+    public ResponseEntity<?> gameCourtPatch(@PathVariable Long gameId, @Valid @RequestBody GameCourtDto gameCourtDto){
         log.info("경기장 확정 조회 gameId:{} ",gameId);
-        // 파라미터 검증
-        String court = param.get("court");
-        if (court == null) throw new IllegalArgumentException("court 형식이 잘못되었습니다.");
 
-        gameService.determineCourt(gameId, court);
+        gameService.determineCourt(gameId, gameCourtDto.getCourt());
 
         return new ResponseEntity<>(new ResponseDto(gameId,"성공"), HttpStatus.OK);
     }

@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,14 +19,19 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class MatchingConditionDto {
 
+    @NotBlank(message = "sport는 공백으로 입력할 수 없습니다.")
     private String sport;
 
+    @NotNull(message = "latitude는 비어있을 수 없습니다.")
     private float latitude;
 
+    @NotNull(message = "longitude는 비어있을 수 없습니다.")
     private float longitude;
 
+    @NotNull(message = "matchingStartTime은 비어있을 수 없습니다.")
     private LocalDateTime matchingStartTime;
 
+    @NotNull(message = "matchStartTimes는 비어있을 수 없습니다.")
     private List<String> matchStartTimes;
 
     private String preferCourt;

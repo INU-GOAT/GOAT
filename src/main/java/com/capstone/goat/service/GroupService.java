@@ -2,6 +2,7 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
+import com.capstone.goat.dto.request.GroupAcceptDto;
 import com.capstone.goat.dto.response.UserResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
@@ -14,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 
@@ -72,10 +70,10 @@ public class GroupService {
     }
 
     @Transactional
-    public void addInviteeToGroup(long groupId, String inviteeNickname) {
+    public void addInviteeToGroup(long groupId, Long inviteeUserId) {
 
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
-        User user = userRepository.findByNickname(inviteeNickname).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
+        User user = userRepository.findById(inviteeUserId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
 
         if (user.getGroup() != null)
             throw new CustomException(CustomErrorCode.USER_BELONG_GROUP);
@@ -92,15 +90,24 @@ public class GroupService {
     }
 
     @Transactional
-    public void updateInviteeByIsAccepted(long groupId, long userId, boolean isAccepted) {
+    public long updateInvitee(long userId, GroupAcceptDto groupAcceptDto) {
 
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
         User invitee = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
-
-        if (isAccepted) // 수락이면 그룹에 추가
-            group.addMember(invitee);
+        Group group = Optional.ofNullable(invitee.getInvitedGroup()).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
 
         group.excludeInvitee(invitee); // 초대 목록에서 삭제
+
+        if (groupAcceptDto.getIsAccepted()) {
+
+            // 만약 초대를 수락했는데 초대 메시지를 받은 지 30초가 지난 상태라면 초대 거절
+            /*if (Duration.between(groupAcceptDto.getSendTime(), LocalDateTime.now()).getSeconds() > 30) {
+                throw new CustomException(CustomErrorCode.GROUP_INVITE_TIME_OVER);
+            }*/
+
+            group.addMember(invitee);
+        }
+
+        return group.getId();
     }
 
     @Transactional
