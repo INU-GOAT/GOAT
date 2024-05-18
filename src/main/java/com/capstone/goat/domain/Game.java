@@ -31,26 +31,19 @@ public class Game {
 
     private String court;
 
-    private Integer winTeam;    // null이면 게임 중 / 1이면 1팀 / 2면 2팀
-
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PreferCourt> preferCourts = new ArrayList<>();
 
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VotedWinTeam> votedWinTeams = new ArrayList<>();
+    private List<VotedWinTeam> votedWinTeams = new ArrayList<>();   // Court 투표로 변경
 
     @Builder
-    public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court, Integer winTeam) {
+    public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court) {
         this.sport = sport;
         this.startTime = startTime;
         this.latitude = latitude;
         this.longitude = longitude;
         this.court = court;
-        this.winTeam = winTeam;
-    }
-
-    public void voteWinTeam(VotedWinTeam votedWinTeam) {
-        this.votedWinTeams.add(votedWinTeam);
     }
 
     public void addPreferCourts(PreferCourt preferCourt) {
@@ -61,7 +54,7 @@ public class Game {
         this.court = court;
     }
 
-    public void determineWinTeam(int winTeam) {
-        this.winTeam = winTeam;
+    public void voteWinTeam(VotedWinTeam votedWinTeam) {
+        this.votedWinTeams.add(votedWinTeam);
     }
 }

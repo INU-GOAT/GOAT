@@ -14,4 +14,6 @@ public interface TeammateRepository extends JpaRepository<Teammate,Long> {
     List<Teammate> findAllByGameIdAndTeamNumber(Long gameId, Integer teamNumber);
     @Query("select t.user from Teammate t where t.game.id = :gameId")
     List<User> findUsersByGameId(Long gameId);
+    Optional<Teammate> findByUserIdAndGameId(Long userId, Long gameId);
+    List<Teammate> findByGameId(Long gameId);
 }

@@ -24,6 +24,8 @@ public class Rating {
 
     private Integer lose;   // 패 수
 
+    private Integer draw;   // 비김 수
+
     private Integer winStreak;  // 연승
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,11 +33,12 @@ public class Rating {
     private User user;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Rating(Sport sport, int ratingScore, int win, int lose, int winStreak, User user) {
+    private Rating(Sport sport, int ratingScore, int win, int lose, int draw, int winStreak, User user) {
         this.sport = sport;
         this.ratingScore = ratingScore;
         this.win = win;
         this.lose = lose;
+        this.draw = draw;
         this.winStreak = winStreak;
         this.user = user;
     }
@@ -76,5 +79,12 @@ public class Rating {
         }
 
         ratingScore = ratingScore - 15 + winStreak * 5;
+    }
+
+    public void updateRatingByDraw() {
+
+        draw++;
+
+        winStreak = 0;
     }
 }

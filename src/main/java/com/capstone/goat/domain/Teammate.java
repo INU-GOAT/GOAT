@@ -1,21 +1,27 @@
 package com.capstone.goat.domain;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Teammate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
     private Integer teamNumber;
+
+    private Integer result; // 패: -1, 무: 0, 승: 1
+
+    @Column(columnDefinition = "text")
+    private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -26,9 +32,16 @@ public class Teammate {
     private Game game;
 
     @Builder
-    public Teammate(int teamNumber, User user, Game game) {
+    private Teammate(Integer teamNumber, Integer result, String comment, User user, Game game) {
         this.teamNumber = teamNumber;
+        this.result = result;
+        this.comment = comment;
         this.user = user;
         this.game = game;
+    }
+
+    public void updateGameReport(Integer result, String comment) {
+        this.result = result;
+        this.comment = comment;
     }
 }

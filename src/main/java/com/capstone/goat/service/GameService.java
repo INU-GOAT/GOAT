@@ -1,7 +1,11 @@
 package com.capstone.goat.service;
 
 import com.capstone.goat.domain.*;
-import com.capstone.goat.dto.response.GameResponseDto;
+import com.capstone.goat.dto.request.GameFinishDto;
+import com.capstone.goat.dto.response.GameFinishedResponseDto;
+import com.capstone.goat.dto.response.GamePlayingResponseDto;
+import com.capstone.goat.dto.response.TeammateResponseDto;
+import com.capstone.goat.dto.response.UserInfoDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GameRepository;
@@ -23,49 +27,64 @@ public class GameService {
     private final UserRepository userRepository;
     private final TeammateRepository teammateRepository;
 
-    private GameResponseDto toDto (Game game) {
+    private GamePlayingResponseDto toGamePlayingDto(Game game) {
 
         List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
         List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
 
-        List<User> team1UserList = team1.stream().map(Teammate::getUser).toList();
-        List<User> team2UserList = team2.stream().map(Teammate::getUser).toList();
+        List<UserInfoDto> team1UserInfoList = team1.stream()
+                .map(teammate -> UserInfoDto.of(teammate.getUser(), game.getSport()))
+                .toList();
+        List<UserInfoDto> team2UserInfoList = team2.stream()
+                .map(teammate -> UserInfoDto.of(teammate.getUser(), game.getSport()))
+                .toList();
 
-        return GameResponseDto.of(game, game.getPreferCourts(), team1UserList, team2UserList);
+
+        return GamePlayingResponseDto.of(game, game.getPreferCourts(), team1UserInfoList, team2UserInfoList);
     }
 
-    public GameResponseDto getPlayingGame(long userId) {
+    private GameFinishedResponseDto toGameFinishedDto(Game game, Integer result) {
+
+        List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
+        List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
+
+        return GameFinishedResponseDto.of(game, result);
+    }
+
+    public GamePlayingResponseDto getPlayingGame(long userId) {
 
         User user = userRepository.getReferenceById(userId);
         Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user).orElseThrow(() -> new NoSuchElementException("해당하는 유저의 teammate가 존재하지 않습니다."));
         Game game = userTeammate.getGame();
 
-        GameResponseDto gameResponseDto = null; // 이미 종료된 게임이면 null 객체 반환
+        GamePlayingResponseDto gamePlayingResponseDto = null; // 이미 종료된 게임이면 null 객체 반환
 
         // 진행 중인 게임일 경우 GameResponseDto 로 변환
-        if (game.getWinTeam() == null) {
-            gameResponseDto = toDto(game);
+        if (user.getStatus() == Status.GAMING) {
+            gamePlayingResponseDto = toGamePlayingDto(game);
         }
 
-        return gameResponseDto;
+        return gamePlayingResponseDto;
     }
 
-    public List<GameResponseDto> getFinishedGame(long userId) {
+    public List<GameFinishedResponseDto> getFinishedGameList(long userId) {
 
         User user = userRepository.getReferenceById(userId);
         List<Teammate> teammateList = teammateRepository.findAllByUserOrderByIdDesc(user);
 
         return teammateList.stream()
-                .filter(teammate -> teammate.getGame().getWinTeam() != null)    // 종료된 Game 만
-                .map(teammate -> toDto(teammate.getGame()))    // GameResponseDto 로 변환
+                .filter(teammate -> teammate.getGame().getCourt() != null)    // 종료된 Game만 -> 경기장 확정된 게임까지는 포함
+                .map(teammate -> toGameFinishedDto(teammate.getGame(), teammate.getResult()))    // GameResponseDto 로 변환
                 .toList();
     }
 
-    public GameResponseDto getFinishedGameDetails(long gameId) {
+    public List<TeammateResponseDto> getFinishedGameTeammates(long gameId) {
 
-        Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
+        List<Teammate> teammateList = teammateRepository.findByGameId(gameId);
 
-        return toDto(game);
+        return teammateList.stream()
+                .map(teammate -> TeammateResponseDto.of(teammate, teammate.getUser()))
+                .toList();
     }
 
     @Transactional
@@ -77,73 +96,33 @@ public class GameService {
     }
 
     @Transactional
-    public void determineWinTeam(long gameId, long userId, int winTeam) {
+    public void finishGame(long gameId, long userId, GameFinishDto gameFinishDto) {
 
-        Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
+        Teammate teammate = teammateRepository.findByUserIdAndGameId(userId, gameId)
+                .orElseThrow(() -> new NoSuchElementException("해당하는 Teammate가 존재하지 않습니다"));
+        teammate.updateGameReport(gameFinishDto.getResult(), gameFinishDto.getComment());
 
-        VotedWinTeam votedWinTeam = VotedWinTeam.builder()
-                .userId(userId)
-                .winTeam(winTeam)
-                .game(game)
-                .build();
-
-        game.voteWinTeam(votedWinTeam);
-        
         // 대기 중으로 유저 상태 변경
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다"));
         user.changeStatus(Status.WAITING);
 
-        int player = game.getSport().getPlayer();
-        if (game.getVotedWinTeams().size() == player * 2) {
-            int winTeam1Count = 0;
-
-            for (VotedWinTeam userWinTeam : game.getVotedWinTeams()) {
-                if (userWinTeam.getWinTeam() == 1) {
-                    winTeam1Count++;
-                }
-            }
-
-            if (winTeam1Count < player) {
-                game.determineWinTeam(2);
-            } else if (winTeam1Count > player) {
-                game.determineWinTeam(1);
-            } else {
-                game.determineWinTeam(0);
-            }
-
-            // 각 팀의 승리/패배에 따른 점수 조정
-            updateRating(game);
-        }
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
+        updateRating(user, game.getSport(), gameFinishDto.getResult());
     }
 
-    private void updateRating(Game game) {
+    private void updateRating(User user, Sport sport, Integer result) {
 
-        Sport sport = game.getSport();
-        int winTeam = game.getWinTeam();
-
-        List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
-        List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
-
-        if (winTeam == 1) {
-            team1.forEach(teammate -> {
-                Rating rating = teammate.getUser().getRatings().get(sport);
-                rating.updateRatingByWin();
-            });
-            team2.forEach(teammate -> {
-                Rating rating = teammate.getUser().getRatings().get(sport);
-                rating.updateRatingByLose();
-            });
-        } else if (winTeam == 2) {
-            team1.forEach(teammate -> {
-                Rating rating = teammate.getUser().getRatings().get(sport);
-                rating.updateRatingByLose();
-            });
-            team2.forEach(teammate -> {
-                Rating rating = teammate.getUser().getRatings().get(sport);
-                rating.updateRatingByWin();
-            });
-        } else if (winTeam != 0){
-            throw new CustomException(CustomErrorCode.INVALID_TEAM_NUMBER);
+        // 승리/패배에 따른 점수 조정
+        Rating rating = user.getRatings().get(sport);
+        if (result == 1) {
+            rating.updateRatingByWin();
+        } else if (result == -1) {
+            rating.updateRatingByLose();
+        } else if (result == 0) {
+            rating.updateRatingByDraw();
+        } else {
+            throw new CustomException(CustomErrorCode.INVALID_GAME_RESULT);
         }
     }
 

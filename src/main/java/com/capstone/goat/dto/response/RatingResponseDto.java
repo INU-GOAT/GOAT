@@ -16,14 +16,17 @@ public class RatingResponseDto {
 
     private final int lose;
 
+    private final int draw;
+
     private final int winStreak;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private RatingResponseDto(String sportName, int ratingScore, int win, int lose, int winStreak) {
+    private RatingResponseDto(String sportName, int ratingScore, int win, int lose, int draw, int winStreak) {
         this.sportName = sportName;
         this.ratingScore = ratingScore;
         this.win = win;
         this.lose = lose;
+        this.draw = draw;
         this.winStreak = winStreak;
     }
 
@@ -33,6 +36,7 @@ public class RatingResponseDto {
                 .ratingScore(rating.getRatingScore())
                 .win(rating.getWin())
                 .lose(rating.getLose())
+                .draw(rating.getDraw())
                 .winStreak(rating.getWinStreak())
                 .build();
     }

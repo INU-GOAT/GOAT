@@ -177,7 +177,6 @@ public class MatchMakingService {
                 .latitude(matchMaking.getLatitude())
                 .longitude(matchMaking.getLongitude())
                 .court(null)
-                .winTeam(null)
                 .build();
         Game game = gameRepository.save(newGame);
 
