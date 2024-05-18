@@ -6,7 +6,11 @@ import com.capstone.goat.dto.response.RatingResponseDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.service.RatingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,10 @@ public class RatingController {
     private final RatingService ratingService;
 
     @Operation(summary = "레이팅 목록 조회", description = "사용자의 레이팅을 모두 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RatingResponseDto.class)))),
+            @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] 존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @GetMapping
     public ResponseEntity<?> ratingDetails(@Schema(hidden = true) @AuthenticationPrincipal User user) {
 
@@ -38,6 +46,10 @@ public class RatingController {
     }
 
     @Operation(summary = "레이팅 상세 조회", description = "사용자 레이팅 중 하나를 상세 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "조회 성공",content = @Content(schema = @Schema(implementation = RatingResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] 존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @GetMapping("/{sportName}")
     public ResponseEntity<?> ratingBySport(@Schema(hidden = true) @AuthenticationPrincipal User user, @PathVariable String sportName) {
 
@@ -49,6 +61,9 @@ public class RatingController {
     }
 
     @Operation(summary = "레이팅 랜덤 생성", description = "사용자에 레이팅을 랜덤한 점수로 추가합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "생성 성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+    })
     @PostMapping
     public ResponseEntity<?> ratingAdd(@Schema(hidden = true) @AuthenticationPrincipal User user) {
 
@@ -60,7 +75,7 @@ public class RatingController {
         ratingService.initRating(user.getId(), Sport.BADMINTON, random.nextInt(60));
         ratingService.initRating(user.getId(), Sport.TABLE_TENNIS, random.nextInt(60));
 
-        return new ResponseEntity<>(new ResponseDto<>(null,"성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(null,"성공"), HttpStatus.CREATED);
     }
 
 }
