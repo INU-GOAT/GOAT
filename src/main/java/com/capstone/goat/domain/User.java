@@ -38,6 +38,7 @@ public class User implements UserDetails {
     private Integer basketball_tier;
     private Integer tableTennis_tier;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
