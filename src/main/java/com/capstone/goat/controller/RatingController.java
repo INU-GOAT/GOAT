@@ -29,7 +29,9 @@ public class RatingController {
     @Operation(summary = "레이팅 목록 조회", description = "사용자의 레이팅을 모두 조회합니다.")
     @GetMapping
     public ResponseEntity<?> ratingDetails(@Schema(hidden = true) @AuthenticationPrincipal User user) {
+
         log.info("레이팅 목록 조회가 id : {}",user.getId());
+
         List<RatingResponseDto> ratingResponseDtoList = ratingService.getRatingList(user.getId());
 
         return new ResponseEntity<>(new ResponseDto<>(ratingResponseDtoList,"성공"), HttpStatus.OK);
@@ -38,7 +40,9 @@ public class RatingController {
     @Operation(summary = "레이팅 상세 조회", description = "사용자 레이팅 중 하나를 상세 조회합니다.")
     @GetMapping("/{sportName}")
     public ResponseEntity<?> ratingBySport(@Schema(hidden = true) @AuthenticationPrincipal User user, @PathVariable String sportName) {
+
         log.info("레이팅 상세 조회 id : {}",user.getId());
+
         RatingResponseDto ratingResponseDto = ratingService.getRatingBySport(user.getId(), sportName);
 
         return new ResponseEntity<>(new ResponseDto<>(ratingResponseDto,"성공"), HttpStatus.OK);

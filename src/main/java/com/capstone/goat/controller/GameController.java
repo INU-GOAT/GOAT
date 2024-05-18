@@ -32,7 +32,9 @@ public class GameController {
     @Operation(summary = "진행 중인 게임 조회", description = "사용자가 현재 진행 중인 게임을 조회합니다. 진행 중인 게임이 없을 경우 null을 반환합니다.")
     @GetMapping
     public ResponseEntity<?> gamePlaying(@Schema(hidden = true) @AuthenticationPrincipal User user){
+
         log.info("진행중인 게임 조회 id:{}",user.getId());
+
         GamePlayingResponseDto gamePlayingResponseDto = gameService.getPlayingGame(user.getId());
 
         return new ResponseEntity<>(new ResponseDto<>(gamePlayingResponseDto,"성공"), HttpStatus.OK);
@@ -41,7 +43,9 @@ public class GameController {
     @Operation(summary = "게임 전적 목록 조회", description = "사용자의 전적 목록을 조회합니다.")
     @GetMapping("/finished")
     public ResponseEntity<?> gameFinishedList(@Schema(hidden = true) @AuthenticationPrincipal User user){
+
         log.info("게임전적조회 조회 id : {}",user.getId());
+
         List<GameFinishedResponseDto> gameFinishedResponseDtoList = gameService.getFinishedGameList(user.getId());
 
         return new ResponseEntity<>(new ResponseDto<>(gameFinishedResponseDtoList,"성공"), HttpStatus.OK);
@@ -50,7 +54,9 @@ public class GameController {
     @Operation(summary = "게임 전적 선수 목록 조회", description = "사용자 전적의 선수들 정보 목록을 조회합니다.")
     @GetMapping("/{gameId}")
     public ResponseEntity<?> gameFinishedTeammates(@PathVariable Long gameId){
+
         log.info("게임 전적 상세조회 gameId:{}",gameId);
+
         List<TeammateResponseDto> teammateResponseDtoList = gameService.getFinishedGameTeammates(gameId);
 
         return new ResponseEntity<>(new ResponseDto(teammateResponseDtoList,"성공"), HttpStatus.OK);
@@ -59,6 +65,7 @@ public class GameController {
     @Operation(summary = "경기장 확정", description = "게임의 경기장을 확정합니다. url 바디에 {court}를 json 형식으로 보내주세요.")
     @PatchMapping({"/{gameId}/court"})
     public ResponseEntity<?> gameCourtPatch(@PathVariable Long gameId, @Valid @RequestBody GameCourtDto gameCourtDto){
+
         log.info("경기장 확정 조회 gameId:{} ",gameId);
 
         gameService.determineCourt(gameId, gameCourtDto.getCourt());

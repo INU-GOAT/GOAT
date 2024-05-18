@@ -15,9 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
-
-import static java.util.Optional.ofNullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,24 +30,28 @@ public class GroupService {
     private final NotificationRepository notificationRepository;
 
     @Transactional
-    public Group addGroup(long userId) {  // 엔드포인트에서 파라미터로 받아온 엔티티는 더티 체킹이 불가능
+    public Group getGroup(long userId) {  // 사용자에게 그룹이 없으면 생성해서 반환
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
+        User user = getUser(userId);
 
-        // 그룹장이 user인 그룹 생성
-        Group group = Group.builder()
-                .masterId(user.getId())
-                .build();
+        return Optional.ofNullable(user.getGroup())
+                .orElseGet(() -> {
+                    // 그룹장이 user인 그룹 생성
+                    Group group = Group.builder()
+                            .masterId(user.getId())
+                            .build();
 
-        // group에 member로 추가
-        group.addMember(user);
+                    // group에 member로 추가
+                    group.addMember(user);
 
-        return groupRepository.save(group);
+                    return groupRepository.save(group);
+                });
     }
 
-    public List<UserResponseDto> getMembersFromGroup(long groupId) {
+    public List<UserResponseDto> getMembersFromGroup(long userId) {
 
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
+        User user = getUser(userId);
+        Group group = getNullCheckedGroup(user.getGroup());
 
         long masterId = group.getMasterId();
         List<UserResponseDto> memberList = new ArrayList<>();
@@ -70,30 +75,34 @@ public class GroupService {
     }
 
     @Transactional
-    public void addInviteeToGroup(long groupId, Long inviteeUserId) {
+    public long addInviteeToGroup(long userId, long inviteeUserId) {
 
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
-        User user = userRepository.findById(inviteeUserId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
+        User user = getUser(userId);
+        User invitee = getUser(inviteeUserId);
 
-        if (user.getGroup() != null)
+        // 초대 받는 유저가 가입 중인 그룹이 있으면 예외
+        if (invitee.getGroup() != null) {
             throw new CustomException(CustomErrorCode.USER_BELONG_GROUP);
-
-        // 유저가 그룹 초대를 받는 중이면 예외
-        for (LocalDateTime sendTime : notificationRepository.findSendTimeByReceiverIdAndType(user.getId(), 2)) {
-            if (Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)
-                throw new CustomException(CustomErrorCode.USER_INVITED_GROUP);
         }
 
-        // 초대 중인 인원에 추가
-        group.addInvitee(user);
+        // 초대 받는 유저가 다른 그룹의 초대를 받는 중이면 예외
+        if (notificationRepository.findSendTimeByReceiverIdAndType(inviteeUserId, 2).stream()
+                .anyMatch(sendTime -> Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)) {
+            throw new CustomException(CustomErrorCode.USER_INVITED_GROUP);
+        }
+
+        Group group = getGroup(userId);  // 사용자에게 그룹이 없으면 그룹 생성
+        group.addInvitee(invitee); // 초대 중인 인원에 추가
         // TODO 알림 기능 추가
+
+        return group.getId();
     }
 
     @Transactional
     public long updateInvitee(long userId, GroupAcceptDto groupAcceptDto) {
 
-        User invitee = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
-        Group group = Optional.ofNullable(invitee.getInvitedGroup()).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
+        User invitee = getUser(userId);
+        Group group = getNullCheckedGroup(invitee.getInvitedGroup());
 
         group.excludeInvitee(invitee); // 초대 목록에서 삭제
 
@@ -111,34 +120,49 @@ public class GroupService {
     }
 
     @Transactional
-    public void kickMemberFromGroup(long groupId, long userId) {
+    public void kickMemberFromGroup(long userId, long memberId) {
 
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다."));
-        User member = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
+        User user = getUser(userId);
+        User member = getUser(memberId);
+        Group group = getNullCheckedGroup(user.getGroup());
 
         group.kickMember(member);
     }
 
     @Transactional
-    public void removeMemberFromGroup(long userId) {
+    public void removeUserFromGroup(long userId) {
 
-        User member = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
-        Group group = ofNullable(member.getGroup()).orElseThrow(() -> new NoSuchElementException("가입된 그룹을 찾을 수 없습니다"));
-
-        member.leaveGroup();    // 그룹 탈퇴
+        User user = getUser(userId);
+        Group group = getNullCheckedGroup(user.getGroup());
 
         if (Objects.equals(group.getMasterId(), userId)) {    // 그룹장이 탈퇴하는 경우
 
             if (group.getMembers().size() == 1) {
-                group.excludeAllInvitees(); // 초대 중인 유저 목록 제거
-                // TODO 알림 구현 시 알림 삭제도 추가
-                groupRepository.deleteById(group.getId());  // 그룹 삭제
+                disbandGroup(group);    // 그룹 해체
             } else {
                 group.handOverMaster(group.getMembers().get(0).getId());    // 다른 그룹원에게 그룹장 양도
+                user.leaveGroup();    // 그룹 탈퇴
             }
         }
 
     }
 
+    public void disbandGroup(Group group) {
+
+        group.kickAllMembers();
+        group.excludeAllInvitees(); // 초대 중인 유저 목록 제거
+        // TODO 알림 구현 시 알림 삭제도 추가
+        groupRepository.deleteById(group.getId());  // 그룹 삭제
+    }
+
+    private User getUser(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+    }
+
+    private Group getNullCheckedGroup(Group group) {
+        return Optional.ofNullable(group)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
+    }
 
 }

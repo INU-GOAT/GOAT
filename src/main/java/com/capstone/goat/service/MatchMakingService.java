@@ -2,6 +2,8 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.*;
 import com.capstone.goat.dto.request.MatchingConditionDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,34 +25,47 @@ public class MatchMakingService {
 
     private final MatchingRepository matchingRepository;
     private final MatchMakingRepository matchMakingRepository;
+    private final UserRepository userRepository;
+    private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final GameRepository gameRepository;
     private final TeammateRepository teammateRepository;
 
     @Transactional
-    public void addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
+    public long addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long userId, int rating) {
 
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
+        // 사용자에게 그룹이 없을 경우 생성
+        Group group = groupService.getGroup(userId);
+        // 그룹장이 아닌 경우 매칭 시작 불가능
+        if (!Objects.equals(group.getMasterId(), userId)) {
+            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
+        }
+
         int userCount = group.getMembers().size();
 
         log.info("[로그] 매칭 DB 추가, userCount = " + userCount);
 
         // Matching Repository에 저장
         Matching matching = matchingConditionDto.toEntity(rating, group);
-        // Dto의 List<String> matchStartTimes를 List<MatchStartTime>으로 변환
-        List<MatchStartTime> matchStartTimeList = matchingConditionDto.getMatchStartTimes().stream().map(stringStartTime ->
-            MatchStartTime.builder().startTime(stringStartTime).matching(matching).build()
-        ).toList();
+        List<MatchStartTime> matchStartTimeList = matchingConditionDto.getMatchStartTimes().stream()
+                .map(stringStartTime ->
+                        MatchStartTime.builder()
+                                .startTime(stringStartTime)
+                                .matching(matching)
+                                .build()
+                )
+                .toList();  // Dto의 List<String> matchStartTimes를 List<MatchStartTime>으로 변환
         matching.addMatchStartTimes(matchStartTimeList);
         matchingRepository.save(matching);
 
         // MatchMaking Repository에 저장
-        matchingConditionDto.toMatchMakingList(userCount, rating, groupId)  // List<MatchMaking>
+        matchingConditionDto.toMatchMakingList(userCount, rating, group.getId())  // List<MatchMaking>
                 .forEach(matchMakingRepository::save);
 
         // 그룹원 모두 매칭 중으로 상태 변경
-        group.getMembers().forEach(user -> user.changeStatus(Status.MATCHING));
+        group.getMembers().forEach(member -> member.changeStatus(Status.MATCHING));
+
+        return group.getId();
     }
 
     @Async
@@ -97,7 +112,7 @@ public class MatchMakingService {
                 changeUserStateToGaming(gameId);
 
                 // 매칭된 그룹 모두 해체
-                disbandGroup(team1GroupId, team2GroupId);
+                disbandGroupAll(team1GroupId, team2GroupId);
 
                 return;
             }
@@ -220,33 +235,45 @@ public class MatchMakingService {
     }
 
     // 매칭된 그룹 모두 삭제
-    private void disbandGroup(List<Long> team1, List<Long> team2) {
+    private void disbandGroupAll(List<Long> team1, List<Long> team2) {
 
         for (long groupId: team1) {
             groupRepository.findById(groupId)
-                    .ifPresent(Group::kickAllMembers);
+                    .ifPresent(groupService::disbandGroup);
         }
 
         for (Long groupId : team2) {
             groupRepository.findById(groupId)
-                    .ifPresent(Group::kickAllMembers);
+                    .ifPresent(groupService::disbandGroup);
         }
     }
 
     @Transactional
-    public void deleteMatching(long groupId) {
+    public void deleteMatching(long userId) {
 
-        Matching foundMatching = matchingRepository.findByGroupId(groupId).orElseThrow(() -> new NoSuchElementException("해당 그룹 id에 해당하는 매칭이 없습니다. 매칭 중이 아닙니다"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        Group group = Optional.ofNullable(user.getGroup())
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
 
+        // 그룹장이 아닌 경우 매칭 종료 불가능
+        if (!Objects.equals(group.getMasterId(), user.getId()))
+            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
+
+        // 매칭 삭제
+        long groupId = group.getId();
+        Matching foundMatching = matchingRepository.findByGroupId(groupId).
+                orElseThrow(() -> new CustomException(CustomErrorCode.NO_MATCHING));
         matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, foundMatching.getLatitude(), foundMatching.getLongitude());
-
         matchingRepository.deleteByGroupId(groupId);
 
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 그룹이 존재하지 않습니다."));
-
         // 그룹원 모두 대기 중으로 상태 변경
-        group.getMembers().forEach(user -> user.changeStatus(Status.WAITING));
+        group.getMembers().forEach(member -> member.changeStatus(Status.WAITING));
+
+        // 그룹 인원이 1명인 경우 그룹 삭제
+        if(group.getMembers().size() == 1){
+            groupService.disbandGroup(group);
+        }
     }
 
 }

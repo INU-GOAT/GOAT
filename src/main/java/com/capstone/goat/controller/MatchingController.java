@@ -1,6 +1,5 @@
 package com.capstone.goat.controller;
 
-import com.capstone.goat.domain.Group;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.MatchingConditionDto;
 import com.capstone.goat.dto.response.MatchingResponseDto;
@@ -28,9 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
-
-import static java.util.Optional.ofNullable;
 
 @RestController
 @RequestMapping("/api/matching")
@@ -54,31 +50,22 @@ public class MatchingController {
     })
     @PostMapping
     public ResponseEntity<?> matchingStart(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody MatchingConditionDto matchingConditionDto) {
-        log.info("매칭 시작 id : {}",user.getId());
-        // 그룹원을 초대 중일 때에는 매칭 시작 불가능
-        notificationRepository.findSendTimeBySenderIdAndType(user.getId(), 2).forEach(sendTime -> {
-            if (Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)
-                throw new CustomException(CustomErrorCode.GROUP_INVITING_ON_GOING);
-        });
 
-        // TODO user 에서 groupId 가져오지 말고 groupId를 받아오는 방식으로 변경해야 함
         long userId = user.getId();
-        user = userRepository.findById(userId).orElseThrow();
+        log.info("매칭 시작 id : {}", userId);
 
-        Group group = ofNullable(user.getGroup())
-                .orElseGet(() -> groupService.addGroup(userId));  // 사용자에게 그룹이 없으면 그룹 생성
-
-        // TODO 도메인 내부로 이동
-        // 그룹장이 아닌 경우 매칭 시작 불가능
-        if (!Objects.equals(group.getMasterId(), userId)) {
-            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
+        // 그룹원을 초대 중일 때에는 매칭 시작 불가능
+        if (notificationRepository.findSendTimeBySenderIdAndType(userId, 2).stream()
+                .anyMatch(sendTime -> Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)) {
+            throw new CustomException(CustomErrorCode.GROUP_INVITING_ON_GOING);
         }
 
-        log.info("[로그] userId = " + userId + " groupId = " + group.getId() + " 매칭 시작");
         // 그룹원의 평균 rating을 계산
-        int rating = ratingService.getRatingMean(group.getId(), matchingConditionDto.getSport());  // (long groupId, String sport)
-        matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, group.getId(), rating);  // Controller to Service 용 dto 만드는 것도 좋음
-        matchMakingService.findMatching(matchingConditionDto, group.getId(), rating);
+        int rating = ratingService.getRatingMean(userId, matchingConditionDto.getSport());
+        log.info("[로그] rating : {}", rating);
+        long groupId = matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, userId, rating);
+        log.info("[로그] groupId : {}", groupId);
+        matchMakingService.findMatching(matchingConditionDto, groupId, rating);
 
         return new ResponseEntity<>(new ResponseDto(user.getNickname(), "매칭 시작 성공"), HttpStatus.CREATED);
     }
@@ -86,14 +73,10 @@ public class MatchingController {
     @Operation(summary = "매칭 중인 조건 조회", description = "사용자가 현재 매칭 중인 조건을 조회합니다. 매칭 중이 아닐 경우 null을 반환합니다.")
     @GetMapping
     public ResponseEntity<?> matchingCondition(@Schema(hidden = true) @AuthenticationPrincipal User user){
-        log.info("매칭 중인 조건 조회 id : {}",user.getId());
-        user = userRepository.findById(user.getId()).orElseThrow();
 
-        Group group = user.getGroup();
-        MatchingResponseDto matchingResponseDto = null;
-        if(group != null) {
-            matchingResponseDto = matchingService.getMatchingCondition(user.getGroup().getId());
-        }
+        log.info("매칭 중인 조건 조회 id : {}", user.getId());
+
+        MatchingResponseDto matchingResponseDto = matchingResponseDto = matchingService.getMatchingCondition(user.getId());
 
         return new ResponseEntity<>(new ResponseDto<>(matchingResponseDto,"성공"), HttpStatus.OK);
     }
@@ -106,23 +89,10 @@ public class MatchingController {
     })
     @DeleteMapping
     public ResponseEntity<?> matchingRemove(@Schema(hidden = true) @AuthenticationPrincipal User user){
+
         log.info("매칭 중단 id : {}",user.getId());
-        user = userRepository.findById(user.getId()).orElseThrow();
 
-        // 그룹이 존재하지 않을 경우 예외
-        Group group = ofNullable(user.getGroup())
-                .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
-
-        // 그룹장이 아닌 경우 매칭 종료 불가능
-        if (!Objects.equals(group.getMasterId(), user.getId()))
-            throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
-
-        matchMakingService.deleteMatching(group.getId());
-        
-        // 그룹 인원이 1명인 경우 그룹 삭제
-        if(user.getGroup().getMembers().size() == 1){
-            groupService.removeMemberFromGroup(user.getId());
-        }
+        matchMakingService.deleteMatching(user.getId());
 
         return new ResponseEntity<>(new ResponseDto(user.getNickname(),"매칭 중단 성공"), HttpStatus.OK);
     }

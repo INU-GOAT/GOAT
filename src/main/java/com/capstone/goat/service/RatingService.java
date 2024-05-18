@@ -4,6 +4,8 @@ import com.capstone.goat.domain.Rating;
 import com.capstone.goat.domain.Sport;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.response.RatingResponseDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GroupRepository;
 import com.capstone.goat.repository.RatingRepository;
 import com.capstone.goat.repository.UserRepository;
@@ -14,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,19 +37,26 @@ public class RatingService {
     }
 
     // 그룹원의 평균 rating을 계산
-    public int getRatingMean(long groupId, String sport) {
+    public int getRatingMean(long userId, String sport) {
 
-        List<User> userList = groupRepository.findUsersById(groupId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+        // 그룹이 없으면 새 List에 user를 담아서 대입
+        List<User> userList = Optional.ofNullable(user.getGroup())
+                .map(group -> groupRepository.findUsersById(group.getId()))
+                .orElseGet(() -> new ArrayList<>(List.of(user)));
 
         return (int) userList.stream()
-                .mapToInt(user -> user.getRatings().get(Sport.getSport(sport)).getRatingScore()) // Integer 형식으로 매핑
+                .mapToInt(groupUser -> groupUser.getRatings().get(Sport.getSport(sport)).getRatingScore()) // Integer 형식으로 매핑
                 .average() // OptionalDouble 반환
-                .orElseThrow(() -> new NoSuchElementException("그룹원의 rating 평균을 계산하는 중 오류가 생겼습니다. 그룹이 비어있습니다."));
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GROUP_NOT_FOUND));
     }
 
     public List<RatingResponseDto> getRatingList(long userId) {
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
         Map<Sport, Rating> ratingMap = user.getRatings();
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
@@ -58,11 +67,12 @@ public class RatingService {
 
     public RatingResponseDto getRatingBySport(long userId, String sportName) {
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다."));
-        
-        Sport sport = Sport.getSport(sportName);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
+        Sport sport = Sport.getSport(sportName);
         Rating rating = user.getRatings().get(sport);
+
         return RatingResponseDto.from(rating);
     }
     

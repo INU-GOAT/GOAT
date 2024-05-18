@@ -6,6 +6,8 @@ import com.capstone.goat.dto.response.GameFinishedResponseDto;
 import com.capstone.goat.dto.response.GamePlayingResponseDto;
 import com.capstone.goat.dto.response.TeammateResponseDto;
 import com.capstone.goat.dto.response.UserInfoDto;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GameRepository;
 import com.capstone.goat.repository.TeammateRepository;
 import com.capstone.goat.repository.UserRepository;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -52,17 +53,15 @@ public class GameService {
     public GamePlayingResponseDto getPlayingGame(long userId) {
 
         User user = userRepository.getReferenceById(userId);
-        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user).orElseThrow(() -> new NoSuchElementException("해당하는 유저의 teammate가 존재하지 않습니다."));
+        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.TEAMMATE_NOT_FOUND));
         Game game = userTeammate.getGame();
 
-        GamePlayingResponseDto gamePlayingResponseDto = null; // 이미 종료된 게임이면 null 객체 반환
-
-        // 진행 중인 게임일 경우 GameResponseDto 로 변환
-        if (user.getStatus() == Status.GAMING) {
-            gamePlayingResponseDto = toGamePlayingDto(game);
+        if (user.getStatus() != Status.GAMING) {
+            throw new CustomException(CustomErrorCode.USER_NOT_GAMING);
         }
 
-        return gamePlayingResponseDto;
+        return toGamePlayingDto(game);
     }
 
     public List<GameFinishedResponseDto> getFinishedGameList(long userId) {
@@ -88,7 +87,8 @@ public class GameService {
     @Transactional
     public void determineCourt(long gameId, String court) {
 
-        Game game = gameRepository.findById(gameId).orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
 
         game.determineCourt(court);
     }
@@ -96,16 +96,24 @@ public class GameService {
     @Transactional
     public void finishGame(long gameId, long userId, GameFinishDto gameFinishDto) {
 
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        // 게임 시작 전이면 예외
+        if (game.getCourt() == null) {
+            throw new CustomException(CustomErrorCode.GAME_NOT_STARTED);
+        }
+
+        // 게임 결과 입력
         Teammate teammate = teammateRepository.findByUserIdAndGameId(userId, gameId)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 Teammate가 존재하지 않습니다"));
+                .orElseThrow(() -> new CustomException(CustomErrorCode.TEAMMATE_NOT_FOUND));
         teammate.updateGameReport(gameFinishDto.getResult(), gameFinishDto.getComment());
 
         // 대기 중으로 유저 상태 변경
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("해당하는 유저가 존재하지 않습니다"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.changeStatus(Status.WAITING);
 
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 게임이 존재하지 않습니다"));
+        // 점수 조정
         updateRating(user, game.getSport(), gameFinishDto.getResult());
     }
 
