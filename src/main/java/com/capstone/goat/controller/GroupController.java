@@ -1,12 +1,13 @@
 package com.capstone.goat.controller;
 
+import com.capstone.goat.domain.NotificationType;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.GroupAcceptDto;
 import com.capstone.goat.dto.request.GroupInviteDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.dto.response.UserResponseDto;
-import com.capstone.goat.repository.UserRepository;
 import com.capstone.goat.service.GroupService;
+import com.capstone.goat.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +32,7 @@ import java.util.List;
 public class GroupController {
 
     private final GroupService groupService;
-    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /*@Operation(summary = "새로운 그룹 생성", description = "새로운 그룹을 생성합니다.")
     @PostMapping
@@ -63,7 +64,7 @@ public class GroupController {
     // TODO 알림 추가 하면 완성됨
     @Operation(summary = "그룹에 초대", description = "사용자의 그룹에 새로운 유저를 초대합니다. url 바디에 {inviteeUserId}를 json 형태로 넣어주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "초대 성공, 그룹 Id 반환", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+            @ApiResponse(responseCode = "200", description = "초대 성공, 알림 Id 반환", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "[USER_BELONG_GROUP] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] 존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -76,8 +77,9 @@ public class GroupController {
         log.info("[로그] inviteeUserId : {} ", groupInviteDto.getInviteeUserId());
 
         long groupId = groupService.addInviteeToGroup(user.getId(), groupInviteDto.getInviteeUserId());
+        long notificationId = notificationService.sendNotification(user.getId(), groupInviteDto.getInviteeUserId(), NotificationType.GROUP_INVITE);
 
-        return new ResponseEntity<>(new ResponseDto(groupId,"성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto(notificationId,"성공"), HttpStatus.OK);
     }
 
     /*@Operation(summary = "그룹장 조회", description = "그룹장을 조회합니다.")
@@ -91,13 +93,15 @@ public class GroupController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "그룹원 추가 성공, 그룹 Id 반환", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "[GROUP_INVITE_TIME_OVER] 초대 유효 시간이 지났습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] 존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[NO_JOINING_GROUP] 가입된 그룹을 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "[NOTIFICATION_NOT_FOUND] 존재하지 않는 알림입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PatchMapping("/members")
     public ResponseEntity<?> groupUpdate(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody GroupAcceptDto groupAcceptDto){ // isAccepted와 sendTime 받음
 
-        log.info("초대 수락에 따른 그룹원 추가 id : {}, sendTime : {}, isAccepted : {}", user.getId(), groupAcceptDto.getSendTime(), groupAcceptDto.getIsAccepted());
+        log.info("초대 수락에 따른 그룹원 추가 id : {}, notificationId : {}, isAccepted : {}", user.getId(), groupAcceptDto.getNotificationId(), groupAcceptDto.getIsAccepted());
 
         long groupId = groupService.updateInvitee(user.getId(), groupAcceptDto);
 
@@ -131,7 +135,7 @@ public class GroupController {
 
         log.info("그룹 탈퇴 id : {}",user.getId());
 
-        groupService.removeUserFromGroup(user.getId());
+        groupService.leaveGroup(user.getId());
 
         return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
     }

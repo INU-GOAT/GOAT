@@ -1,6 +1,7 @@
 package com.capstone.goat.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,7 +17,7 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer type;   // matching 알림이면 1, group 알림이면 2, club 알림이면 3
+    private NotificationType type;
 
     private String comment;
 
@@ -30,4 +31,13 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private User sender;
+
+    @Builder
+    private Notification(NotificationType type, String comment, User receiver, User sender) {
+        this.type = type;
+        this.comment = comment;
+        this.sendTime = LocalDateTime.now();
+        this.receiver = receiver;
+        this.sender = sender;
+    }
 }

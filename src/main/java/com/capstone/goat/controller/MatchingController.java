@@ -1,5 +1,6 @@
 package com.capstone.goat.controller;
 
+import com.capstone.goat.domain.NotificationType;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.MatchingConditionDto;
 import com.capstone.goat.dto.response.MatchingResponseDto;
@@ -42,6 +43,7 @@ public class MatchingController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "매칭 시작 성공, 그룹 Id 반환", content = @Content(schema = @Schema(implementation = Long.class))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "[NOT_WAITING_STATE] 유저가 매칭 가능한 상태가 아닙니다. 이미 매칭 중이거나 게임이 종료되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] USER_NOT_FOUND", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[GROUP_NOT_FOUND] 존재하지 않는 그룹입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[MATCHING_ACCESS_DENIED 그룹장이 아닙니다. 그룹장만 매칭 조작을 할 수 있습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -54,7 +56,7 @@ public class MatchingController {
         log.info("매칭 시작 id : {}", userId);
 
         // 그룹원을 초대 중일 때에는 매칭 시작 불가능
-        if (notificationRepository.findSendTimeBySenderIdAndType(userId, 2).stream()
+        if (notificationRepository.findSendTimeBySenderIdAndType(userId, NotificationType.GROUP_INVITE).stream()
                 .anyMatch(sendTime -> Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)) {
             throw new CustomException(CustomErrorCode.GROUP_INVITING_ON_GOING);
         }

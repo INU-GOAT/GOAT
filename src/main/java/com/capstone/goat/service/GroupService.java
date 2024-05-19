@@ -1,6 +1,8 @@
 package com.capstone.goat.service;
 
 import com.capstone.goat.domain.Group;
+import com.capstone.goat.domain.Notification;
+import com.capstone.goat.domain.NotificationType;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.GroupAcceptDto;
 import com.capstone.goat.dto.response.UserResponseDto;
@@ -27,6 +29,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
 
     @Transactional
@@ -81,12 +84,12 @@ public class GroupService {
         User invitee = getUser(inviteeUserId);
 
         // 초대 받는 유저가 가입 중인 그룹이 있으면 예외
-        if (invitee.getGroup() != null) {
+        if (invitee.getGroup() != null && invitee.getGroup().getMembers().size() > 1) {
             throw new CustomException(CustomErrorCode.USER_BELONG_GROUP);
         }
 
         // 초대 받는 유저가 다른 그룹의 초대를 받는 중이면 예외
-        if (notificationRepository.findSendTimeByReceiverIdAndType(inviteeUserId, 2).stream()
+        if (notificationRepository.findSendTimeByReceiverIdAndType(inviteeUserId, NotificationType.GROUP_INVITE).stream()
                 .anyMatch(sendTime -> Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)) {
             throw new CustomException(CustomErrorCode.USER_INVITED_GROUP);
         }
@@ -101,20 +104,36 @@ public class GroupService {
     @Transactional
     public long updateInvitee(long userId, GroupAcceptDto groupAcceptDto) {
 
-        User invitee = getUser(userId);
-        Group group = getNullCheckedGroup(invitee.getInvitedGroup());
-
-        group.excludeInvitee(invitee); // 초대 목록에서 삭제
+        User user = getUser(userId);
+        Group group = getNullCheckedGroup(user.getInvitedGroup());
+        Notification notification = notificationRepository.findById(groupAcceptDto.getNotificationId())
+                .orElseThrow(() -> new CustomException(CustomErrorCode.NOTIFICATION_NOT_FOUND));
 
         if (groupAcceptDto.getIsAccepted()) {
+            // 해당 유저에게 온 알림이 아니면 예외
+            if (notification.getReceiver().getId() != userId) {
+                throw new CustomException(CustomErrorCode.NO_AUTHORITY);
+            }
 
             // 만약 초대를 수락했는데 초대 메시지를 받은 지 30초가 지난 상태라면 초대 거절
-            /*if (Duration.between(groupAcceptDto.getSendTime(), LocalDateTime.now()).getSeconds() > 30) {
+            if (Duration.between(notification.getSendTime(), LocalDateTime.now()).getSeconds() > 30) {
                 throw new CustomException(CustomErrorCode.GROUP_INVITE_TIME_OVER);
-            }*/
+            }
 
-            group.addMember(invitee);
+            // 그룹이 존재하면 탈퇴
+            if (user.getGroup() != null) {
+                leaveGroup(user.getId());
+            }
+
+            // 초대 수락 메시지 전송 후 그룹에 유저 추가
+            notificationService.sendNotification(userId, notification.getSender().getId(), NotificationType.GROUP_ACCEPT);
+            group.addMember(user);
+        } else {
+            notificationService.sendNotification(userId, notification.getSender().getId(), NotificationType.GROUP_REJECT);
         }
+
+        group.excludeInvitee(user); // 초대 목록에서 삭제
+        notificationRepository.delete(notification);    // 초대 메시지 삭제
 
         return group.getId();
     }
@@ -130,7 +149,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void removeUserFromGroup(long userId) {
+    public void leaveGroup(long userId) {
 
         User user = getUser(userId);
         Group group = getNullCheckedGroup(user.getGroup());

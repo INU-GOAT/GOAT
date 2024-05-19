@@ -30,19 +30,29 @@ public class MatchMakingService {
     private final GroupRepository groupRepository;
     private final GameRepository gameRepository;
     private final TeammateRepository teammateRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public long addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long userId, int rating) {
 
         // 사용자에게 그룹이 없을 경우 생성
         Group group = groupService.getGroup(userId);
+
         // 그룹장이 아닌 경우 매칭 시작 불가능
         if (!Objects.equals(group.getMasterId(), userId)) {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
         }
 
-        int userCount = group.getMembers().size();
+        // 그룹원 모두 매칭 중으로 상태 변경, 매칭 대기 상태가 아니면 예외 발생
+        group.getMembers().forEach(member -> {
+            if (Status.WAITING == member.getStatus()) {
+                member.changeStatus(Status.MATCHING);
+            } else {
+                throw new CustomException(CustomErrorCode.NOT_WAITING_STATE);
+            }
+        });
 
+        int userCount = group.getMembers().size();
         log.info("[로그] 매칭 DB 추가, userCount = " + userCount);
 
         // Matching Repository에 저장
@@ -61,9 +71,6 @@ public class MatchMakingService {
         // MatchMaking Repository에 저장
         matchingConditionDto.toMatchMakingList(userCount, rating, group.getId())  // List<MatchMaking>
                 .forEach(matchMakingRepository::save);
-
-        // 그룹원 모두 매칭 중으로 상태 변경
-        group.getMembers().forEach(member -> member.changeStatus(Status.MATCHING));
 
         return group.getId();
     }
@@ -108,8 +115,8 @@ public class MatchMakingService {
                 // Game에 추가
                 Long gameId = addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
 
-                // 매칭된 모든 유저를 게임 중으로 상태 변경
-                changeUserStateToGaming(gameId);
+                // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
+                initiateUserGaming(gameId);
 
                 // 매칭된 그룹 모두 해체
                 disbandGroupAll(team1GroupId, team2GroupId);
@@ -226,11 +233,12 @@ public class MatchMakingService {
         return game.getId();
     }
 
-    private void changeUserStateToGaming(Long gameId) {
+    private void initiateUserGaming(Long gameId) {
 
-        // 매칭된 모든 유저를 게임 중으로 상태 변경
+        // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
         teammateRepository.findUsersByGameId(gameId).forEach(user -> {
             user.changeStatus(Status.GAMING);
+            notificationService.sendNotification(null, user.getId(), NotificationType.MATCHING);
         });
     }
 

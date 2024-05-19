@@ -5,15 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GroupAcceptDto {
 
+    @NotNull(message = "notificationId는 비어있을 수 없습니다.")
+    private Long notificationId;
+
     @NotNull(message = "isAccepted는 비어있을 수 없습니다.")
     private Boolean isAccepted;
-
-    @NotNull(message = "sendTime은 비어있을 수 없습니다.")
-    private LocalDateTime sendTime;
 }

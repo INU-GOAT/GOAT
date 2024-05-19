@@ -11,9 +11,12 @@ public enum CustomErrorCode {
     // 사용자 인증 및 권한 관련
     // 200
     NEED_JOIN(HttpStatus.OK,"회원가입이 필요합니다."),
+    // 400
+    NOT_WAITING_STATE(HttpStatus.BAD_REQUEST, "유저가 매칭 가능한 상태가 아닙니다. 이미 매칭 중이거나 게임이 종료되지 않았습니다."),
     // 401
     ID_NOT_FOUND(HttpStatus.UNAUTHORIZED,"아이디가 존재하지 않습니다."),
     PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED,"비밀번호가 틀립니다."),
+    NO_AUTHORITY(HttpStatus.UNAUTHORIZED,"권한이 없습니다."),
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 유저입니다."),
 
@@ -63,9 +66,12 @@ public enum CustomErrorCode {
     // 400
     USER_NOT_GAMING(HttpStatus.BAD_REQUEST, "유저가 게임 중이 아닙니다."),
     GAME_NOT_STARTED(HttpStatus.BAD_REQUEST, "게임이 아직 시작하지 않았습니다."),
-
     // 404
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게임입니다."),
+
+    // Notification 관련
+    // 404
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 알림입니다."),
 
     // 기타
     // 400
