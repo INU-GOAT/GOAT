@@ -1,6 +1,8 @@
 package com.capstone.goat.repository;
 
 import com.capstone.goat.domain.MatchMaking;
+import com.capstone.goat.exception.ex.CustomErrorCode;
+import com.capstone.goat.exception.ex.CustomException;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
@@ -30,11 +32,8 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
 
     @Override
     public void save(MatchMaking matchMaking) {
-        int latIndex = (int) ( matchMaking.getLatitude() * 100 - LATINIT );  // 위도를 배열의 인덱스로 변환
-        int lngIndex = (int) ( matchMaking.getLongitude() * 100 - LNGINIT ); // 경도를 배열의 인덱스로 변환
-
-        // 위도, 경도 인덱스 범위 검사
-        checkArrayIndexOutOfBoundsException(latIndex, lngIndex);
+        int latIndex = getLatIndex(matchMaking.getLatitude());
+        int lngIndex = getLngIndex(matchMaking.getLongitude());
 
         store[latIndex][lngIndex].add(matchMaking);
 
@@ -42,11 +41,8 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
 
     @Override
     public List<MatchMaking> findByMatching(MatchMaking newMatchMaking) {
-        int latIndex = (int) ( newMatchMaking.getLatitude() * 100 - LATINIT );  // 위도를 배열의 인덱스로 변환
-        int lngIndex = (int) ( newMatchMaking.getLongitude() * 100 - LNGINIT ); // 경도를 배열의 인덱스로 변환
-
-        // 위도, 경도 인덱스 범위 검사
-        checkArrayIndexOutOfBoundsException(latIndex, lngIndex);
+        int latIndex = getLatIndex(newMatchMaking.getLatitude());
+        int lngIndex = getLngIndex(newMatchMaking.getLongitude());
 
         List<MatchMaking> matchedList = new ArrayList<>();
 
@@ -66,11 +62,8 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
 
     @Override
     public void deleteByGroupIdAndLatitudeAndLongitude(long groupId, float latitude, float longitude) {
-        int latIndex = (int) ( latitude * 100 - LATINIT );  // 위도를 배열의 인덱스로 변환
-        int lngIndex = (int) ( longitude * 100 - LNGINIT ); // 경도를 배열의 인덱스로 변환
-
-        // 위도, 경도 인덱스 범위 검사
-        checkArrayIndexOutOfBoundsException(latIndex, lngIndex);
+        int latIndex = getLatIndex(latitude);
+        int lngIndex = getLngIndex(longitude);
 
         List<MatchMaking> removed = new ArrayList<>();
 
@@ -84,10 +77,24 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         store[latIndex][lngIndex].removeAll(removed);
     }
 
-    private void checkArrayIndexOutOfBoundsException(int latIndex, int lngIndex) {
-        if (latIndex >= 550 || latIndex < 0 || lngIndex >= 725 || lngIndex < 0)
-            throw new ArrayIndexOutOfBoundsException("위도와 경도 값이 대한민국 내의 값이 아닙니다.");
+    // 위도를 배열의 인덱스로 변환
+    private int getLatIndex(float latitude) {
+        int latIndex = (int) (latitude * 100 - LATINIT);
 
+        if (latIndex >= 550 || latIndex < 0)
+            throw new CustomException(CustomErrorCode.LATITUDE_NOT_IN_KOREA);
+
+        return latIndex;
+    }
+
+    // 경도를 배열의 인덱스로 변환
+    private int getLngIndex(float longitude) {
+        int lngIndex = (int) ( longitude * 100 - LNGINIT );
+
+        if (lngIndex >= 725 || lngIndex < 0)
+            throw new CustomException(CustomErrorCode.LONGITUDE_NOT_IN_KOREA);
+
+        return lngIndex;
     }
 
     private int calculateRatingWeight(LocalDateTime matchingStartTime) {

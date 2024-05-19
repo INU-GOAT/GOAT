@@ -71,6 +71,8 @@ public enum CustomErrorCode {
     // 400
     EXIST_NICKNAME(HttpStatus.BAD_REQUEST,"이미 존재하는 닉네임입니다."),
     EXIST_ID(HttpStatus.BAD_REQUEST,"이미 존재하는 id값 입니다."),
+    LATITUDE_NOT_IN_KOREA(HttpStatus.BAD_REQUEST, "위도 값이 대한민국 내의 값이 아닙니다."),
+    LONGITUDE_NOT_IN_KOREA(HttpStatus.BAD_REQUEST, "경도 값이 대한민국 내의 값이 아닙니다."),
     // 401
     CODE_ERROR(HttpStatus.UNAUTHORIZED,"이미 한번 사용된 코드이거나, 코드 형식에 문제가 있습니다."),
 
