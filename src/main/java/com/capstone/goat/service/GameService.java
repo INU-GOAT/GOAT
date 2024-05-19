@@ -2,20 +2,20 @@ package com.capstone.goat.service;
 
 import com.capstone.goat.domain.*;
 import com.capstone.goat.dto.request.GameFinishDto;
-import com.capstone.goat.dto.response.GameFinishedResponseDto;
-import com.capstone.goat.dto.response.GamePlayingResponseDto;
-import com.capstone.goat.dto.response.TeammateResponseDto;
-import com.capstone.goat.dto.response.UserInfoDto;
+import com.capstone.goat.dto.response.*;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.GameRepository;
 import com.capstone.goat.repository.TeammateRepository;
 import com.capstone.goat.repository.UserRepository;
+import com.capstone.goat.repository.VotedCourtRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +25,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final TeammateRepository teammateRepository;
+    private final VotedCourtRepository votedCourtRepository;
 
     private GamePlayingResponseDto toGamePlayingDto(Game game) {
 
@@ -129,5 +130,53 @@ public class GameService {
             rating.updateRatingByDraw();
         }
     }
+
+    @Transactional
+    public void voteCourt(Long gameId, String court){
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        if(votedCourtRepository.existsByCourt(court)){
+            VotedCourt votedCourt = votedCourtRepository.findByCourt(court).get();
+            votedCourt.upCount();
+        }
+        else {
+            votedCourtRepository.save(VotedCourt.builder().court(court).game(game).build());
+        }
+    }
+
+    @Transactional
+    public VoteTotalResponseDto getVoteMessage(Long gameId){
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
+        int voteCount = 0;
+        List<VotedCourtResponseDto> list = new ArrayList<>();
+        for(VotedCourt court : courts){
+            voteCount += court.getCount();
+            list.add(VotedCourtResponseDto.of(court));
+        }
+        if(voteCount==game.getSport().getPlayer()){
+            determineCourt(gameId);
+        }
+         return VoteTotalResponseDto.of(list,game.getSport().getPlayer()-voteCount);
+    }
+
+    @Transactional
+    public void determineCourt(Long gameId){
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
+        int max = courts.get(0).getCount();
+        String courtName =courts.get(0).getCourt();
+        for(VotedCourt court : courts) {
+            if(court.getCount()>max){
+                max = court.getCount();
+                courtName = court.getCourt();
+            }
+        }
+        game.determineCourt(courtName);
+    }
+
+
 
 }
