@@ -4,8 +4,11 @@ import com.capstone.goat.domain.Chat;
 import com.capstone.goat.dto.request.ChatDto;
 import com.capstone.goat.dto.response.ChatResponseDto;
 import com.capstone.goat.dto.response.ResponseDto;
+import com.capstone.goat.dto.response.VoteTotalResponseDto;
+import com.capstone.goat.dto.response.VotedCourtResponseDto;
 import com.capstone.goat.repository.ChatRepository;
 import com.capstone.goat.service.ChatService;
+import com.capstone.goat.service.GameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +34,7 @@ import java.util.List;
 public class ChatController {
     private final SimpMessagingTemplate template;
     private final ChatService chatService;
+    private final GameService gameService;
 
 
     @MessageMapping("/enter/{gameId}")
@@ -46,6 +50,14 @@ public class ChatController {
         template.convertAndSend("/room/"+gameId,chatResponseDto);
     }
 
+    @MessageMapping("/vote/{gameId}")
+    public void vote(@DestinationVariable Long gameId, ChatDto chatDto){
+        log.info("투표 경기장 : {}",chatDto.getComment());
+        gameService.voteCourt(gameId,chatDto.getComment());
+        VoteTotalResponseDto dto = gameService.getVoteMessage(gameId);
+        template.convertAndSend("/room/"+gameId,dto);
+    }
+
     @ResponseBody
     @GetMapping("/api/chats/{gameId}")
     @Operation(summary = "채팅 기록 가져오기", description = "url 변수에 gameId를 보내주세요")
@@ -55,5 +67,20 @@ public class ChatController {
     public ResponseEntity<ResponseDto<List<ChatResponseDto>>> getChatList(@PathVariable Long gameId){
         return new ResponseEntity<>(new ResponseDto<>(chatService.getChatList(gameId),"채팅 기록 가져오기 성공"), HttpStatus.OK);
     }
+
+    @ResponseBody
+    @PutMapping("/api/chats/{gameId}")
+    @Operation(summary = "경기장 투표 종료하기", description = "url 변수에 gameId를 보내주세요")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "경기장 투표 종료하기 성공",content = @Content(schema = @Schema(implementation = ChatResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "[GAME_NOT_FOUND] 존재하지 않는 게임입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<ResponseDto<Long>> closeVote(@PathVariable Long gameId){
+        gameService.determineCourt(gameId);
+        return new ResponseEntity<>(new ResponseDto<>(gameId,"경기장 투표 종료하기 성공"),HttpStatus.OK);
+    }
+
+
+
 
 }

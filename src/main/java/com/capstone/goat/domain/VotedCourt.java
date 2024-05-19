@@ -10,24 +10,28 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class VotedWinTeam {
+public class VotedCourt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
 
-    private Integer winTeam;
+    private String court;
+    private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private Game game;
 
     @Builder
-    private VotedWinTeam(Long userId, Integer winTeam, Game game) {
-        this.userId = userId;
-        this.winTeam = winTeam;
+    private VotedCourt(Game game, String court) {
+        this.court = court;
+        this.count = 1;
         this.game = game;
+    }
+
+    public void upCount(){
+        this.count++;
     }
 }

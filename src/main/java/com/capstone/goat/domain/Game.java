@@ -35,7 +35,7 @@ public class Game {
     private final List<PreferCourt> preferCourts = new ArrayList<>();
 
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<VotedWinTeam> votedWinTeams = new ArrayList<>();   // Court 투표로 변경
+    private final List<VotedCourt> votedCourts = new ArrayList<>();   // Court 투표로 변경
 
     @Builder
     public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court) {
@@ -54,7 +54,7 @@ public class Game {
         this.court = court;
     }
 
-    public void voteWinTeam(VotedWinTeam votedWinTeam) {
-        this.votedWinTeams.add(votedWinTeam);
+    public void voteWinTeam(VotedCourt votedCourt) {
+        this.votedCourts.add(votedCourt);
     }
 }
