@@ -62,22 +62,23 @@ public class GroupController {
     }
 
     // TODO 알림 추가 하면 완성됨
-    @Operation(summary = "그룹에 초대", description = "사용자의 그룹에 새로운 유저를 초대합니다. url 바디에 {inviteeUserId}를 json 형태로 넣어주세요.")
+    @Operation(summary = "그룹에 초대", description = "사용자의 그룹에 새로운 유저를 초대합니다. url 바디에 {inviteeNickname}를 json 형태로 넣어주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "초대 성공, 알림 Id 반환", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "[USER_BELONG_GROUP] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] 존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "[INVITEE_NOT_FOUND] 존재하지 않는 유저입니다. 초대하려는 유저의 닉네임을 다시 확인해주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_INVITED_GROUP] 그룹에 초대할 수 없습니다. 해당 유저가 그룹 초대를 받는 중입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
     })
     @PatchMapping
     public ResponseEntity<?> userInvitedModify(@Schema(hidden = true) @AuthenticationPrincipal User user, @Valid @RequestBody GroupInviteDto groupInviteDto){  // inviteeUserId 하나만 받음
 
         log.info("[로그] 그룹 초대 메서드 시작");
-        log.info("[로그] inviteeUserId : {} ", groupInviteDto.getInviteeUserId());
+        log.info("[로그] inviteeUserId : {} ", groupInviteDto.getInviteeNickname());
 
-        long groupId = groupService.addInviteeToGroup(user.getId(), groupInviteDto.getInviteeUserId());
-        long notificationId = notificationService.sendNotification(user.getId(), groupInviteDto.getInviteeUserId(), NotificationType.GROUP_INVITE);
+        long groupId = groupService.addInviteeToGroup(user.getId(), groupInviteDto.getInviteeNickname());
+        long notificationId = notificationService.sendNotification(user.getId(), groupInviteDto.getInviteeNickname(), NotificationType.GROUP_INVITE);
 
         return new ResponseEntity<>(new ResponseDto(notificationId,"성공"), HttpStatus.OK);
     }

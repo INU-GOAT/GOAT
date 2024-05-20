@@ -26,13 +26,14 @@ public class NotificationService {
     private final UserRepository userRepository;
 
     @Transactional
-    public long sendNotification(Long senderId, long receiverId, NotificationType type) {
+    public long sendNotification(Long senderId, String receiverNickname, NotificationType type) {
 
         User sender = Optional.ofNullable(senderId)
                 .map(this::getUser)
                 .orElse(null);
 
-        User receiver = getUser(receiverId);
+        User receiver = userRepository.findByNickname(receiverNickname)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
         String message;
         if (NotificationType.MATCHING == type) {

@@ -78,10 +78,11 @@ public class GroupService {
     }
 
     @Transactional
-    public long addInviteeToGroup(long userId, long inviteeUserId) {
+    public long addInviteeToGroup(long userId, String inviteeNickname) {
 
         User user = getUser(userId);
-        User invitee = getUser(inviteeUserId);
+        User invitee = userRepository.findByNickname(inviteeNickname)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.INVITEE_NOT_FOUND));
 
         // 초대 받는 유저가 가입 중인 그룹이 있으면 예외
         if (invitee.getGroup() != null && invitee.getGroup().getMembers().size() > 1) {
@@ -89,7 +90,7 @@ public class GroupService {
         }
 
         // 초대 받는 유저가 다른 그룹의 초대를 받는 중이면 예외
-        if (notificationRepository.findSendTimeByReceiverIdAndType(inviteeUserId, NotificationType.GROUP_INVITE).stream()
+        if (notificationRepository.findSendTimeByReceiverIdAndType(invitee.getId(), NotificationType.GROUP_INVITE).stream()
                 .anyMatch(sendTime -> Duration.between(sendTime, LocalDateTime.now()).getSeconds() <= 30)) {
             throw new CustomException(CustomErrorCode.USER_INVITED_GROUP);
         }
@@ -126,10 +127,10 @@ public class GroupService {
             }
 
             // 초대 수락 메시지 전송 후 그룹에 유저 추가
-            notificationService.sendNotification(userId, notification.getSender().getId(), NotificationType.GROUP_ACCEPT);
+            notificationService.sendNotification(userId, notification.getSender().getNickname(), NotificationType.GROUP_ACCEPT);
             group.addMember(user);
         } else {
-            notificationService.sendNotification(userId, notification.getSender().getId(), NotificationType.GROUP_REJECT);
+            notificationService.sendNotification(userId, notification.getSender().getNickname(), NotificationType.GROUP_REJECT);
         }
 
         group.excludeInvitee(user); // 초대 목록에서 삭제

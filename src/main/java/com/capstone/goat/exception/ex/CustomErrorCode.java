@@ -19,6 +19,7 @@ public enum CustomErrorCode {
     NO_AUTHORITY(HttpStatus.UNAUTHORIZED,"권한이 없습니다."),
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 유저입니다."),
+    INVITEE_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 유저입니다. 초대하려는 유저의 닉네임을 다시 확인해주세요."),
 
     // 토큰 관련
     // 400

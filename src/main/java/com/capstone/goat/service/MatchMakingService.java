@@ -238,7 +238,7 @@ public class MatchMakingService {
         // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
         teammateRepository.findUsersByGameId(gameId).forEach(user -> {
             user.changeStatus(Status.GAMING);
-            notificationService.sendNotification(null, user.getId(), NotificationType.MATCHING);
+            notificationService.sendNotification(null, user.getNickname(), NotificationType.MATCHING);
         });
     }
 

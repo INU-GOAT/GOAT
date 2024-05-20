@@ -10,6 +10,6 @@ import javax.validation.constraints.NotNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class GroupInviteDto {
 
-    @NotNull(message = "InviteeUserId는 비어있을 수 없습니다.")
-    private Long inviteeUserId;
+    @NotNull(message = "inviteeNickname는 비어있을 수 없습니다.")
+    private String inviteeNickname;
 }
