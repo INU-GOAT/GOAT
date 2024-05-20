@@ -93,7 +93,7 @@ public class UserController {
 
     @Operation(summary = "유저 정보 가져오기", description = "url 파라미터에 유저의 데이터베이스 id 값을 보내주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200",description = "유저 정보 가져오기성공",content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200",description = "유저 정보 가져오기성공",content = @Content(schema = @Schema(implementation = UserResponseDto.class))),
             @ApiResponse(responseCode = "400",description = "잘못된 입력",content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
     @GetMapping("")
