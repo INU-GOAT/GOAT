@@ -114,6 +114,7 @@ public class GameService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.changeStatus(Status.WAITING);
+        user.changeVoteAfterEndGame();
 
         // 점수 조정
         updateRating(user, game.getSport(), gameFinishDto.getResult());
@@ -133,15 +134,24 @@ public class GameService {
     }
 
     @Transactional
-    public void voteCourt(Long gameId, String court){
+    public boolean voteCourt(Long gameId, String court,String userNickname){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        if(votedCourtRepository.existsByCourt(court)){
-            VotedCourt votedCourt = votedCourtRepository.findByCourt(court).get();
-            votedCourt.upCount();
+        User user = userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        if(user.getIsVoted()){
+            return false;
         }
         else {
-            votedCourtRepository.save(VotedCourt.builder().court(court).game(game).build());
+            if (votedCourtRepository.existsByCourt(court)) {
+                VotedCourt votedCourt = votedCourtRepository.findByCourt(court).get();
+                votedCourt.upCount();
+            } else {
+                votedCourtRepository.save(VotedCourt.builder().court(court).game(game).build());
+            }
+
+            user.vote();
+            return true;
         }
     }
 
@@ -149,7 +159,7 @@ public class GameService {
     public VoteTotalResponseDto getVoteMessage(Long gameId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
+        List<VotedCourt> courts = votedCourtRepository.findAllByGame(game);
         int voteCount = 0;
         List<VotedCourtResponseDto> list = new ArrayList<>();
         for(VotedCourt court : courts){
@@ -166,7 +176,7 @@ public class GameService {
     public void determineCourt(Long gameId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
+        List<VotedCourt> courts = votedCourtRepository.findAllByGame(game);
         int max = courts.get(0).getCount();
         String courtName =courts.get(0).getCourt();
         for(VotedCourt court : courts) {

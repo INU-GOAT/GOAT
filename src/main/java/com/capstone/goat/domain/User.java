@@ -41,6 +41,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private Boolean isVoted;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "sport")
     private Map<Sport,Rating> ratings;
@@ -77,6 +79,7 @@ public class User implements UserDetails {
         this.basketball_tier = basketball_tier;
         this.status = Status.WAITING;
         this.roles = roles;
+        this.isVoted = false;
     }
 
     public void join(String nickname, int age, String gender, String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier){
@@ -126,6 +129,15 @@ public class User implements UserDetails {
     public void denyInvitedGroup() {
         this.invitedGroup = null;
     }
+
+    public void vote(){
+        this.isVoted = true;
+    }
+
+    public void changeVoteAfterEndGame(){
+        this.isVoted = false;
+    }
+
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
