@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,14 +52,16 @@ public class GameService {
 
     public GamePlayingResponseDto getPlayingGame(long userId) {
 
-        User user = userRepository.getReferenceById(userId);
-        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.TEAMMATE_NOT_FOUND));
-        Game game = userTeammate.getGame();
-
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        // 유저가 게임 중이 아니면 예외
         if (user.getStatus() != Status.GAMING) {
             throw new CustomException(CustomErrorCode.USER_NOT_GAMING);
         }
+
+        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.TEAMMATE_NOT_FOUND));
+        Game game = userTeammate.getGame();
 
         return toGamePlayingDto(game);
     }
