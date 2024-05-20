@@ -53,9 +53,14 @@ public class ChatController {
     @MessageMapping("/vote/{gameId}")
     public void vote(@DestinationVariable Long gameId, ChatDto chatDto){
         log.info("투표 경기장 : {}",chatDto.getComment());
-        gameService.voteCourt(gameId,chatDto.getComment());
-        VoteTotalResponseDto dto = gameService.getVoteMessage(gameId);
-        template.convertAndSend("/room/"+gameId,dto);
+        if(gameService.voteCourt(gameId,chatDto.getComment(),chatDto.getUserNickname())) {
+            VoteTotalResponseDto dto = gameService.getVoteMessage(gameId);
+            template.convertAndSend("/room/" + gameId, dto);
+        }
+        else{
+            template.convertAndSend("/room/" + gameId, "이미 투표를 했습니다.");
+        }
+
     }
 
     @ResponseBody

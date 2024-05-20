@@ -33,6 +33,8 @@ public class UserResponseDto {
     private Integer tableTennis_tier;
     @Schema(description = "유저상태")
     private Status status;
+    @Schema(description = "경기장 투표 여부")
+    private Boolean isVoted;
     @Builder
     private UserResponseDto (User user, String club){
         this.id = user.getId();
@@ -46,6 +48,7 @@ public class UserResponseDto {
         this.basketball_tier = user.getBasketball_tier();
         this.tableTennis_tier = user.getTableTennis_tier();
         this.status = user.getStatus();
+        this.isVoted=user.getIsVoted();
     }
 
     public static UserResponseDto of(User user,String club){
