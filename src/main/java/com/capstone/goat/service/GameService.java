@@ -136,7 +136,7 @@ public class GameService {
     public boolean voteCourt(Long gameId, String court,String userNickname){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        User user = userRepository.findByUsername(userNickname)
+        User user = userRepository.findByNickname(userNickname)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         if(user.getIsVoted()){
             return false;
