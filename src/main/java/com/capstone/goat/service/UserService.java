@@ -84,10 +84,12 @@ public class UserService {
         }
         User user1 = userRepository.findById(user.getId()).orElseThrow(()->new CustomException(CustomErrorCode.USER_NOT_FOUND));
         String club  ="없음";
+        long clubId = -1L;
         if(user.getClub()!=null){
             club = user1.getClub().getName();
+            clubId = user1.getClub().getId();
         }
-        return UserResponseDto.of(user1,club);
+        return UserResponseDto.of(user1,club,clubId);
     }
 
     @Transactional
