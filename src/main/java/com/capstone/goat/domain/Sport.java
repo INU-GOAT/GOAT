@@ -12,7 +12,7 @@ public enum Sport {
     SOCCER("축구",11),
     BASKETBALL("농구",5),
     BADMINTON("배드민턴",2),
-    TABLE_TENNIS("탁구",2);
+    TABLE_TENNIS("탁구",1);
 
     private final String name;
     private final int player;
