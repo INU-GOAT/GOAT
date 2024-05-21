@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -31,7 +30,6 @@ public class Matching {
 
     private String preferCourt;
 
-    @CreationTimestamp
     private LocalDateTime matchingStartTime;
 
     @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})

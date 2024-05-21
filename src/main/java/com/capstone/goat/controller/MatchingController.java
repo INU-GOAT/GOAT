@@ -39,7 +39,7 @@ public class MatchingController {
     private final RatingService ratingService;
     private final NotificationRepository notificationRepository;;
 
-    @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchingStartTime,matchStartTimes,preferCourt}을 json형식으로 보내주세요.")
+    @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchStartTimes,preferCourt}을 json형식으로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "매칭 시작 성공, 그룹 Id 반환", content = @Content(schema = @Schema(implementation = Long.class))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),

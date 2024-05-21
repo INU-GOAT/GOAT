@@ -28,9 +28,6 @@ public class MatchingConditionDto {
     @NotNull(message = "longitude는 비어있을 수 없습니다.")
     private float longitude;
 
-    @NotNull(message = "matchingStartTime은 비어있을 수 없습니다.")
-    private LocalDateTime matchingStartTime;
-
     @NotNull(message = "matchStartTimes는 비어있을 수 없습니다.")
     private List<String> matchStartTimes;
 
@@ -43,7 +40,6 @@ public class MatchingConditionDto {
                 .latitude(latitude)
                 .longitude(longitude)
                 .preferCourt(preferCourt)
-                .matchingStartTime(matchingStartTime)
                 .group(group)
                 .build();
     }
@@ -57,7 +53,7 @@ public class MatchingConditionDto {
                         .latitude(latitude)
                         .longitude(longitude)
                         .preferCourt(preferCourt)
-                        .matchingStartTime(matchingStartTime)
+                        .matchingStartTime(LocalDateTime.now())
                         .matchStartTime(matchStartTime)
                         .groupId(groupId)
                         .build()).collect(Collectors.toList());
