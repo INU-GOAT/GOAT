@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VotedCourtRepository extends JpaRepository<VotedCourt,Long> {
-    List<VotedCourt> findAllByGame(Game game);
+    List<VotedCourt> findAllByGameId(Long gameId);
     Optional<VotedCourt> findByCourt(String court);
     boolean existsByCourt(String court);
 }

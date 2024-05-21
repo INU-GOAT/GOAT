@@ -58,6 +58,7 @@ public class ChatController {
             template.convertAndSend("/room/" + gameId, dto);
         }
         else{
+            log.info("이미 투표한 인원 : {}",chatDto.getUserNickname());
             template.convertAndSend("/room/" + gameId, "이미 투표를 했습니다.");
         }
 
