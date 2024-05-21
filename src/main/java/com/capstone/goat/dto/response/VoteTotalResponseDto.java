@@ -2,10 +2,14 @@ package com.capstone.goat.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Schema(description = "투표된 경기장 정보들 응답 Dto")
+@Getter
+@NoArgsConstructor
 public class VoteTotalResponseDto {
     @Schema(description = "현재까지 투표된 경기장들의 정보")
     private List<VotedCourtResponseDto> votedCourts;
