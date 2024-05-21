@@ -6,6 +6,7 @@ import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.ClubSaveDto;
 import com.capstone.goat.dto.request.ClubUpdateDte;
 import com.capstone.goat.dto.response.ApplicantListResponseDto;
+import com.capstone.goat.dto.response.ClubListResponseDto;
 import com.capstone.goat.dto.response.ClubResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
@@ -124,6 +125,11 @@ public class ClubService {
     public void deleteApplicant(Long userId){
         User user = userRepository.findById(userId).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.fineApply();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClubListResponseDto> getClubList(){
+        return clubRepository.findClubsWithLessThan20Members().stream().map(ClubListResponseDto::of).collect(Collectors.toList());
     }
 
 
