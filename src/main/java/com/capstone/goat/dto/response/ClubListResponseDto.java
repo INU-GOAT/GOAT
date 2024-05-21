@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ClubListResponseDto {
+    @Schema(description = "클럽의 데이터베이스 아이디 값")
+    private Long clubId;
     @Schema(description = "클럽 이름")
     private String name;
     @Schema(description = "클럽의 스포츠 종목")
@@ -18,10 +20,11 @@ public class ClubListResponseDto {
     @Schema(description = "패수")
     private Long lose;
     @Schema(description = "인원수")
-    private Long memberNumber;
+    private Integer memberNumber;
 
     @Builder
-    private ClubListResponseDto(String name, String sport, long win, long lose, long memberNumber){
+    private ClubListResponseDto(Long clubId, String name, String sport, Long win, Long lose, int memberNumber){
+        this.clubId = clubId;
         this.name = name;
         this.sport = sport;
         this.win = win;
@@ -30,7 +33,7 @@ public class ClubListResponseDto {
     }
 
     public static ClubListResponseDto of(Club club){
-        return ClubListResponseDto.builder().name(club.getName()).sport(club.getSport()).win(club.getWin()).lose(club.getLose()).memberNumber(club.getMembers().size()).build();
+        return ClubListResponseDto.builder().clubId(club.getId()).name(club.getName()).sport(club.getSport()).win(club.getWin()).lose(club.getLose()).memberNumber(club.getMembers().size()).build();
     }
 
 }

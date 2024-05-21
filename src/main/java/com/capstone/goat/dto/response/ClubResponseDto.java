@@ -28,11 +28,11 @@ public class ClubResponseDto {
     @Schema(description = "인원수")
     private Long memberNumber;
 
-    @Schema(description = "클럽 회원 명단")
-    private List<String> members;
+    @Schema(description = "클럽 회원의 데이터베이스아이디 값 명단")
+    private List<ClubMemberResponseDto> members;
 
     @Builder
-    private ClubResponseDto(String name, String clubMaster,String sport, Long memberNumber, List<String> members,long win, long lose){
+    private ClubResponseDto(String name, String clubMaster,String sport, Long memberNumber, List<ClubMemberResponseDto> members,long win, long lose){
         this.name = name;
         this.clubMaster = clubMaster;
         this.sport =sport;
@@ -42,7 +42,7 @@ public class ClubResponseDto {
         this.lose = lose;
     }
 
-    public static ClubResponseDto of(Club club,String clubMaster, List<String> members){
+    public static ClubResponseDto of(Club club,String clubMaster, List<ClubMemberResponseDto> members){
         return ClubResponseDto.builder()
                 .name(club.getName())
                 .clubMaster(clubMaster)
