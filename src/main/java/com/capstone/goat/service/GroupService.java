@@ -61,11 +61,13 @@ public class GroupService {
 
         group.getMembers().forEach(member -> {
             // UserResponseDto로 변환
+            Long clubId = -1L;
             String club = "없음";
             if (member.getClub() != null) {
                 club = member.getClub().getName();
+                clubId = member.getClub().getId();
             }
-            UserResponseDto memberDto = UserResponseDto.of(member, club);
+            UserResponseDto memberDto = UserResponseDto.of(member, club,clubId);
 
             // memberList에 추가
             if (member.getId().equals(masterId))    // 그룹장이면 맨 앞에 추가
