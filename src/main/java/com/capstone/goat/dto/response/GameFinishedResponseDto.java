@@ -15,7 +15,7 @@ public class GameFinishedResponseDto {
 
     private final String sportName;
 
-    private final LocalDateTime startDate;
+    private final LocalDateTime startTime;
 
     private final String parsedDate;
 
@@ -26,12 +26,12 @@ public class GameFinishedResponseDto {
     private final Integer result;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GameFinishedResponseDto(long gameId, String sportName, LocalDateTime startDate, String court, Integer result) {
+    private GameFinishedResponseDto(long gameId, String sportName, LocalDateTime startTime, String court, Integer result) {
         this.gameId = gameId;
         this.sportName = sportName;
-        this.startDate = startDate;
-        this.parsedDate = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        this.parsedTime = startDate.format(DateTimeFormatter.ofPattern("HH:mm"));
+        this.startTime = startTime;
+        this.parsedDate = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.parsedTime = startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.court = court;
         this.result = result;
     }
@@ -41,7 +41,7 @@ public class GameFinishedResponseDto {
         return GameFinishedResponseDto.builder()
                 .gameId(game.getId())
                 .sportName(game.getSport().getName())
-                .startDate(game.getStartTime())
+                .startTime(game.getStartTime())
                 .court(game.getCourt())
                 .result(result)
                 .build();
