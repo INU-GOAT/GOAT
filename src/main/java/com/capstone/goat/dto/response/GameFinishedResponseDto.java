@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 public class GameFinishedResponseDto {
@@ -14,17 +15,23 @@ public class GameFinishedResponseDto {
 
     private final String sportName;
 
-    private final LocalDateTime startTime;
+    private final LocalDateTime startDate;
+
+    private final String parsedDate;
+
+    private final String parsedTime;
 
     private final String court;
 
     private final Integer result;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GameFinishedResponseDto(long gameId, String sportName, LocalDateTime startTime, String court, Integer result) {
+    private GameFinishedResponseDto(long gameId, String sportName, LocalDateTime startDate, String court, Integer result) {
         this.gameId = gameId;
         this.sportName = sportName;
-        this.startTime = startTime;
+        this.startDate = startDate;
+        this.parsedDate = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.parsedTime = startDate.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.court = court;
         this.result = result;
     }
@@ -34,7 +41,7 @@ public class GameFinishedResponseDto {
         return GameFinishedResponseDto.builder()
                 .gameId(game.getId())
                 .sportName(game.getSport().getName())
-                .startTime(game.getStartTime())
+                .startDate(game.getStartTime())
                 .court(game.getCourt())
                 .result(result)
                 .build();
