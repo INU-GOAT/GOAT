@@ -31,6 +31,7 @@ public class MatchMakingService {
     private final GameRepository gameRepository;
     private final TeammateRepository teammateRepository;
     private final NotificationService notificationService;
+    private final VotedCourtRepository votedCourtRepository;
 
     @Transactional
     public long addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long userId, int rating) {
@@ -245,6 +246,7 @@ public class MatchMakingService {
         preferCourtList.forEach(preferCourt -> {
             preferCourt.determineGame(game);
             game.addPreferCourt(preferCourt);
+            votedCourtRepository.save(VotedCourt.builder().court(preferCourt.getCourt()).game(game).build());
         });
 
         return game.getId();
