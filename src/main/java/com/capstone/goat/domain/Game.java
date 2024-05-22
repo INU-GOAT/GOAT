@@ -38,23 +38,21 @@ public class Game {
     private final List<VotedCourt> votedCourts = new ArrayList<>();   // Court 투표로 변경
 
     @Builder
-    public Game(Sport sport, LocalDateTime startTime, float latitude, float longitude, String court) {
+    public Game(Sport sport, LocalDateTime startTime) {
         this.sport = sport;
         this.startTime = startTime;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.court = court;
+        this.latitude = null;
+        this.longitude = null;
+        this.court = null;
     }
 
-    public void addPreferCourts(PreferCourt preferCourt) {
+    public void addPreferCourt(PreferCourt preferCourt) {
         this.preferCourts.add(preferCourt);
     }
 
-    public void determineCourt(String court) {
+    public void determineCourt(String court, float latitude, float longitude) {
         this.court = court;
-    }
-
-    public void voteWinTeam(VotedCourt votedCourt) {
-        this.votedCourts.add(votedCourt);
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

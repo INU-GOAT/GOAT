@@ -5,10 +5,7 @@ import com.capstone.goat.dto.request.GameFinishDto;
 import com.capstone.goat.dto.response.*;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
-import com.capstone.goat.repository.GameRepository;
-import com.capstone.goat.repository.TeammateRepository;
-import com.capstone.goat.repository.UserRepository;
-import com.capstone.goat.repository.VotedCourtRepository;
+import com.capstone.goat.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,7 @@ public class GameService {
     private final UserRepository userRepository;
     private final TeammateRepository teammateRepository;
     private final VotedCourtRepository votedCourtRepository;
+    private final PreferCourtRepository preferCourtRepository;
 
     private GamePlayingResponseDto toGamePlayingDto(Game game) {
 
@@ -94,7 +92,10 @@ public class GameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
 
-        game.determineCourt(court);
+        PreferCourt preferCourt = preferCourtRepository.findByCourtAndGameId(court, gameId);
+        float latitude = preferCourt.getLatitude();
+        float longitude = preferCourt.getLongitude();
+        game.determineCourt(court, latitude, longitude);
     }
 
     @Transactional
@@ -182,7 +183,11 @@ public class GameService {
                 courtName = court.getCourt();
             }
         }
-        game.determineCourt(courtName);
+
+        PreferCourt preferCourt = preferCourtRepository.findByCourtAndGameId(courtName, gameId);
+        float latitude = preferCourt.getLatitude();
+        float longitude = preferCourt.getLongitude();
+        game.determineCourt(courtName, latitude, longitude);
     }
 
 

@@ -31,6 +31,7 @@ public class MatchingConditionDto {
     @NotNull(message = "matchStartTimes는 비어있을 수 없습니다.")
     private List<String> matchStartTimes;
 
+    @NotNull(message = "preferCourt는 비어있을 수 없습니다.")
     private String preferCourt;
 
     public Matching toEntity(int rating, Group group) {

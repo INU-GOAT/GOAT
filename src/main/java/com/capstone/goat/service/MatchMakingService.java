@@ -103,9 +103,7 @@ public class MatchMakingService {
             if (!team2.isEmpty()) {
                 List<Long> team1GroupId = team1.stream().map(MatchMaking::getGroupId).toList();
                 List<Long> team2GroupId = team2.stream().map(MatchMaking::getGroupId).toList();
-                List<String> preferCourtList = new ArrayList<>();
-                preferCourtList.addAll(team1.stream().map(MatchMaking::getPreferCourt).toList());
-                preferCourtList.addAll(team2.stream().map(MatchMaking::getPreferCourt).toList());
+                List<PreferCourt> preferCourtList = getPerferCourtList(team1, team2);
 
                 log.info("[로그] : team1GroupId: " + team1GroupId + " team2GroupId: " + team2GroupId);
 
@@ -167,6 +165,33 @@ public class MatchMakingService {
         return subset;
     }
 
+    // MatchMaking 리스트를 중복이 제거된 PreferCourt 리스트로 변환
+    private List<PreferCourt> getPerferCourtList(List<MatchMaking> team1, List<MatchMaking> team2) {
+
+        Set<PreferCourt> preferCourtSet = new HashSet<>();
+
+        preferCourtSet.addAll(
+            team1.stream().map(matchMaking ->
+                    PreferCourt.builder()
+                            .court(matchMaking.getPreferCourt())
+                            .latitude(matchMaking.getLatitude())
+                            .longitude(matchMaking.getLongitude())
+                            .build()
+            ).toList()
+        );
+        preferCourtSet.addAll(
+                team2.stream().map(matchMaking ->
+                        PreferCourt.builder()
+                                .court(matchMaking.getPreferCourt())
+                                .latitude(matchMaking.getLatitude())
+                                .longitude(matchMaking.getLongitude())
+                                .build()
+                ).toList()
+        );
+
+        return new ArrayList<>(preferCourtSet);
+    }
+
     // Matching과 MatchMaking에서 매칭된 그룹 제거
     private void deleteMatchedGroup(List<Long> team1, List<Long> team2, float latitude, float longitude) {
 
@@ -183,7 +208,7 @@ public class MatchMakingService {
     }
 
     // 게임 생성
-    private Long addGame(List<Long> team1, List<Long> team2, MatchMaking matchMaking, List<String> preferCourtList) {
+    private Long addGame(List<Long> team1, List<Long> team2, MatchMaking matchMaking, List<PreferCourt> preferCourtList) {
 
         log.info("[로그] addGame() 시작");
 
@@ -196,9 +221,6 @@ public class MatchMakingService {
         Game newGame = Game.builder()
                 .sport(matchMaking.getSport())
                 .startTime(matchStartDateTime)
-                .latitude(matchMaking.getLatitude())
-                .longitude(matchMaking.getLongitude())
-                .court(null)
                 .build();
         Game game = gameRepository.save(newGame);
 
@@ -222,13 +244,10 @@ public class MatchMakingService {
                     );
         }
 
-        for (String preferCourtString : preferCourtList) {
-            PreferCourt preferCourt = PreferCourt.builder()
-                    .court(preferCourtString)
-                    .game(game)
-                    .build();
-            game.addPreferCourts(preferCourt);
-        }
+        preferCourtList.forEach(preferCourt -> {
+            preferCourt.determineGame(game);
+            game.addPreferCourt(preferCourt);
+        });
 
         return game.getId();
     }

@@ -8,7 +8,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 public class GamePlayingResponseDto {
@@ -19,13 +18,13 @@ public class GamePlayingResponseDto {
 
     private final LocalDateTime startTime;
 
-    private final float latitude;
+    private final Float latitude;
 
-    private final float longitude;
+    private final Float longitude;
 
     private final String court;
 
-    private final List<String> preferCourts;
+    private final List<PreferCourtDto> preferCourts;
 
     private final List<UserInfoDto> team1;
 
@@ -33,7 +32,7 @@ public class GamePlayingResponseDto {
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, float latitude, float longitude, String court, List<String> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
+    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, Float latitude, Float longitude, String court, List<PreferCourtDto> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
         this.gameId = gameId;
         this.sportName = sportName;
         this.startTime = startTime;
@@ -46,10 +45,14 @@ public class GamePlayingResponseDto {
     }
 
     public static GamePlayingResponseDto of(Game game, List<PreferCourt> preferCourtList, List<UserInfoDto> team1, List<UserInfoDto> team2) {
-        List<String> preferCourts = preferCourtList.stream()
-                .map(PreferCourt::getCourt)
-                .filter(Objects::nonNull)
-                .toList();
+        List<PreferCourtDto> preferCourts = preferCourtList.stream()
+                .map(preferCourt ->
+                        PreferCourtDto.builder()
+                                .court(preferCourt.getCourt())
+                                .latitude(preferCourt.getLatitude())
+                                .longitude(preferCourt.getLongitude())
+                                .build()
+                ).toList();
 
         return GamePlayingResponseDto.builder()
                 .gameId(game.getId())
@@ -64,5 +67,20 @@ public class GamePlayingResponseDto {
                 .build();
     }
 
+    @Getter
+    private static class PreferCourtDto {
 
+        private final String court;
+
+        private final float latitude;
+
+        private final float longitude;
+
+        @Builder(access = AccessLevel.PRIVATE)
+        private PreferCourtDto(String court, float latitude, float longitude) {
+            this.court = court;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
 }
