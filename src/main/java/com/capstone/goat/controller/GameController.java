@@ -3,10 +3,7 @@ package com.capstone.goat.controller;
 import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.GameCourtDto;
 import com.capstone.goat.dto.request.GameFinishDto;
-import com.capstone.goat.dto.response.GameFinishedResponseDto;
-import com.capstone.goat.dto.response.GamePlayingResponseDto;
-import com.capstone.goat.dto.response.ResponseDto;
-import com.capstone.goat.dto.response.TeammateResponseDto;
+import com.capstone.goat.dto.response.*;
 import com.capstone.goat.service.GameService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -112,7 +109,16 @@ public class GameController {
 
         gameService.finishGame(gameId, user.getId(), gameFinishDto);
 
-        return new ResponseEntity<>(new ResponseDto(null,"성공"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseDto<>(null,"성공"), HttpStatus.OK);
+    }
+
+    @Operation(summary = "경기장 투표 내역 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "경기장 투표 내역 조회 성공", content = @Content(schema = @Schema(implementation = VoteTotalResponseDto.class)))
+    })
+    @GetMapping("/vote/{gameId}")
+    public ResponseEntity<ResponseDto<VoteTotalResponseDto>> getVoteNow(@PathVariable Long gameId){
+        return new ResponseEntity<>(new ResponseDto<>(gameService.getVoteMessage(gameId),"경기장 투표 내역 조회"),HttpStatus.OK);
     }
 
 
