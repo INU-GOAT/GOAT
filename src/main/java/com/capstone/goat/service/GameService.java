@@ -141,7 +141,7 @@ public class GameService {
         }
         else {
             if (votedCourtRepository.existsByCourt(court)) {
-                VotedCourt votedCourt = votedCourtRepository.findByCourt(court).get();
+                VotedCourt votedCourt = votedCourtRepository.findByCourtAndGameId(court,gameId).get();
                 votedCourt.upCount();
             } else {
                 votedCourtRepository.save(VotedCourt.builder().court(court).game(game).build());
