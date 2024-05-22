@@ -28,7 +28,7 @@ public class VotedCourt {
     @Builder
     private VotedCourt(Game game, String court) {
         this.court = court;
-        this.count = 1;
+        this.count = 0;
         this.game = game;
     }
 
