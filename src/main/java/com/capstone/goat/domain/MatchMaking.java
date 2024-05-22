@@ -17,9 +17,9 @@ public class MatchMaking {
 
     private Integer rating;  // MatchMaking Rating
 
-    private Float latitude;
+    private Double latitude;
 
-    private Float longitude;
+    private Double longitude;
 
     private String preferCourt;
 
@@ -30,7 +30,7 @@ public class MatchMaking {
     private Long groupId;
 
     @Builder
-    public MatchMaking(Sport sport, int userCount, int rating, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, String matchStartTime, long groupId) {
+    public MatchMaking(Sport sport, int userCount, int rating, double latitude, double longitude, String preferCourt, LocalDateTime matchingStartTime, String matchStartTime, long groupId) {
         this.sport = sport;
         this.userCount = userCount;
         this.rating = rating;

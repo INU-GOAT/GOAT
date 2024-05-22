@@ -23,10 +23,10 @@ public class MatchingConditionDto {
     private String sport;
 
     @NotNull(message = "latitude는 비어있을 수 없습니다.")
-    private float latitude;
+    private double latitude;
 
     @NotNull(message = "longitude는 비어있을 수 없습니다.")
-    private float longitude;
+    private double longitude;
 
     @NotNull(message = "matchStartTimes는 비어있을 수 없습니다.")
     private List<String> matchStartTimes;

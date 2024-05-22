@@ -61,7 +61,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     }
 
     @Override
-    public void deleteByGroupIdAndLatitudeAndLongitude(long groupId, float latitude, float longitude) {
+    public void deleteByGroupIdAndLatitudeAndLongitude(long groupId, double latitude, double longitude) {
         int latIndex = getLatIndex(latitude);
         int lngIndex = getLngIndex(longitude);
 
@@ -78,7 +78,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     }
 
     // 위도를 배열의 인덱스로 변환
-    private int getLatIndex(float latitude) {
+    private int getLatIndex(double latitude) {
         int latIndex = (int) (latitude * 100 - LATINIT);
 
         if (latIndex >= 550 || latIndex < 0)
@@ -88,7 +88,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     }
 
     // 경도를 배열의 인덱스로 변환
-    private int getLngIndex(float longitude) {
+    private int getLngIndex(double longitude) {
         int lngIndex = (int) ( longitude * 100 - LNGINIT );
 
         if (lngIndex >= 725 || lngIndex < 0)

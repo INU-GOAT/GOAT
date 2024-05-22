@@ -13,9 +13,9 @@ public class MatchingResponseDto {
 
     private final String sport;
 
-    private final float latitude;
+    private final double latitude;
 
-    private final float longitude;
+    private final double longitude;
 
     private final LocalDateTime matchingStartTime;
 
@@ -24,7 +24,7 @@ public class MatchingResponseDto {
     private final String preferCourt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private MatchingResponseDto(String sport, float latitude, float longitude, LocalDateTime matchingStartTime, List<String> matchStartTimes, String preferCourt) {
+    private MatchingResponseDto(String sport, double latitude, double longitude, LocalDateTime matchingStartTime, List<String> matchStartTimes, String preferCourt) {
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;

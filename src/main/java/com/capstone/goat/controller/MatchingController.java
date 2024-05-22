@@ -82,7 +82,7 @@ public class MatchingController {
 
         log.info("매칭 중인 조건 조회 id : {}", user.getId());
 
-        MatchingResponseDto matchingResponseDto = matchingResponseDto = matchingService.getMatchingCondition(user.getId());
+        MatchingResponseDto matchingResponseDto = matchingService.getMatchingCondition(user.getId());
 
         return new ResponseEntity<>(new ResponseDto<>(matchingResponseDto,"성공"), HttpStatus.OK);
     }

@@ -10,5 +10,5 @@ public interface MatchMakingRepository {
 
     List<MatchMaking> findByMatching(MatchMaking matchMaking);
 
-    void deleteByGroupIdAndLatitudeAndLongitude(long groupId, float latitude, float longitude);
+    void deleteByGroupIdAndLatitudeAndLongitude(long groupId, double latitude, double longitude);
 }

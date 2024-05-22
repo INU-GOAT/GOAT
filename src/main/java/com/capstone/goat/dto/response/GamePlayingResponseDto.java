@@ -18,9 +18,9 @@ public class GamePlayingResponseDto {
 
     private final LocalDateTime startTime;
 
-    private final Float latitude;
+    private final Double latitude;
 
-    private final Float longitude;
+    private final Double longitude;
 
     private final String court;
 
@@ -32,7 +32,7 @@ public class GamePlayingResponseDto {
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, Float latitude, Float longitude, String court, List<PreferCourtDto> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
+    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, Double latitude, Double longitude, String court, List<PreferCourtDto> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
         this.gameId = gameId;
         this.sportName = sportName;
         this.startTime = startTime;
@@ -72,12 +72,12 @@ public class GamePlayingResponseDto {
 
         private final String court;
 
-        private final float latitude;
+        private final double latitude;
 
-        private final float longitude;
+        private final double longitude;
 
         @Builder(access = AccessLevel.PRIVATE)
-        private PreferCourtDto(String court, float latitude, float longitude) {
+        private PreferCourtDto(String court, double latitude, double longitude) {
             this.court = court;
             this.latitude = latitude;
             this.longitude = longitude;

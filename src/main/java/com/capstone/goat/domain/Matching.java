@@ -24,9 +24,9 @@ public class Matching {
     @Enumerated(EnumType.STRING)
     private Sport sport;
 
-    private Float latitude;
+    private Double latitude;
 
-    private Float longitude;
+    private Double longitude;
 
     private String preferCourt;
 
@@ -40,7 +40,7 @@ public class Matching {
     private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해야 함
 
     @Builder
-    public Matching(int rating, Sport sport, float latitude, float longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
+    public Matching(int rating, Sport sport, double latitude, double longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
         this.rating = rating;
         this.sport = sport;
         this.latitude = latitude;

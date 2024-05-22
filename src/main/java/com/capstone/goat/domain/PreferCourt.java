@@ -19,16 +19,16 @@ public class PreferCourt {
 
     private String court;
 
-    private float latitude;
+    private double latitude;
 
-    private float longitude;
+    private double longitude;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private Game game;
 
     @Builder
-    private PreferCourt(String court, float latitude, float longitude, Game game) {
+    private PreferCourt(String court, double latitude, double longitude, Game game) {
         this.court = court;
         this.latitude = latitude;
         this.longitude = longitude;

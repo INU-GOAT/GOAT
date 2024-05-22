@@ -92,8 +92,8 @@ public class MatchMakingService {
             // 검색한 리스트가 비어있으면 다음으로
             if (matchMakingList.size() <= 1) continue;
 
-            float latitude = matchingConditionDto.getLatitude();
-            float longitude = matchingConditionDto.getLongitude();
+            double latitude = matchingConditionDto.getLatitude();
+            double longitude = matchingConditionDto.getLongitude();
             int player = Sport.getSport(matchingConditionDto.getSport()).getPlayer();
 
             // 스포츠 인원에 맞는 팀 구성이 되는지 확인
@@ -192,7 +192,7 @@ public class MatchMakingService {
     }
 
     // Matching과 MatchMaking에서 매칭된 그룹 제거
-    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, float latitude, float longitude) {
+    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, double latitude, double longitude) {
 
         log.info("[로그] deleteByGroupId 시작");
 

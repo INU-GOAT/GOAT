@@ -25,9 +25,9 @@ public class Game {
 
     private LocalDateTime startTime;
 
-    private Float latitude;
+    private Double latitude;
 
-    private Float longitude;
+    private Double longitude;
 
     private String court;
 
@@ -50,7 +50,7 @@ public class Game {
         this.preferCourts.add(preferCourt);
     }
 
-    public void determineCourt(String court, float latitude, float longitude) {
+    public void determineCourt(String court, double latitude, double longitude) {
         this.court = court;
         this.latitude = latitude;
         this.longitude = longitude;
