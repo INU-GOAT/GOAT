@@ -140,7 +140,7 @@ public class GameService {
             return false;
         }
         else {
-            if (votedCourtRepository.existsByCourt(court)) {
+            if (votedCourtRepository.existsByCourtAndGameId(court,gameId)) {
                 VotedCourt votedCourt = votedCourtRepository.findByCourtAndGameId(court,gameId).get();
                 votedCourt.upCount();
             } else {
@@ -163,10 +163,10 @@ public class GameService {
             voteCount += court.getCount();
             list.add(VotedCourtResponseDto.of(court));
         }
-        if(voteCount==game.getSport().getPlayer()){
+        if(voteCount==game.getSport().getPlayer()*2){
             determineCourt(gameId);
         }
-         return VoteTotalResponseDto.of(list,game.getSport().getPlayer()-voteCount);
+         return VoteTotalResponseDto.of(list,game.getSport().getPlayer()*2-voteCount);
     }
 
     @Transactional
