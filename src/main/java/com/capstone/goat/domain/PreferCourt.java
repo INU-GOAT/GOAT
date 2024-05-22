@@ -46,4 +46,9 @@ public class PreferCourt {
         PreferCourt that = (PreferCourt) obj;
         return Objects.equals(court, that.court);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(court);
+    }
 }
