@@ -20,7 +20,7 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     private static final int LATINIT = 3311;     // 최서단 위도 38.611111     최동단 위도 33.111944    550
     private static final int LNGINIT = 12461;    // 최북단 경도 124.610000    최남단 경도 131.869556   725
 
-    private static final int RATINGVALUE = 25;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
+    private static final int RATINGVALUE = 100;   // 함께 매칭할 최대 점수 범위, 매칭 이후 시간에 따라 증가
 
     public MemoryMatchMakingRepository() {
         for (int i = 0; i < store.length; i++) {
