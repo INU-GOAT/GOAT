@@ -92,7 +92,7 @@ public class GameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
 
-        PreferCourt preferCourt = preferCourtRepository.findByCourtAndGameId(court, gameId);
+        PreferCourt preferCourt = preferCourtRepository.findFirstByCourtAndGameId(court, gameId);
         float latitude = preferCourt.getLatitude();
         float longitude = preferCourt.getLongitude();
         game.determineCourt(court, latitude, longitude);
@@ -183,7 +183,7 @@ public class GameService {
             }
         }
 
-        PreferCourt preferCourt = preferCourtRepository.findByCourtAndGameId(courtName, gameId);
+        PreferCourt preferCourt = preferCourtRepository.findFirstByCourtAndGameId(courtName, gameId);
         float latitude = preferCourt.getLatitude();
         float longitude = preferCourt.getLongitude();
         game.determineCourt(courtName, latitude, longitude);
