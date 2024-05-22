@@ -17,7 +17,11 @@ public class GameFinishDto {
 
     private String comment;
 
-    public Integer getResult() {
+    @NotNull(message = "feedback은 비어있을 수 없습니다.")
+    @Pattern(regexp = "^-1|0|1$", message = "feedback 값은 -1, 0, 1 중 하나여야 합니다.")
+    private String feedback;
+
+    public int getResult() {
 
         return Integer.parseInt(result);
     }
@@ -27,5 +31,10 @@ public class GameFinishDto {
         return comment == null
                 ? ""
                 : comment;
+    }
+
+    public int getFeedback() {
+
+        return Integer.parseInt(feedback);
     }
 }

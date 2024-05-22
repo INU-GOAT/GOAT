@@ -55,36 +55,24 @@ public class Rating {
                 .build();
     }
 
-    public void updateRatingByWin() {
+    public void updateRating(int result, int feedback) {
 
-        win++;
+        // 승/패/무 횟수 추가
+        if (result == 1) win++;
+        else if (result == -1) lose++;
+        else draw++;
 
-        if (winStreak < 0) {
-            winStreak = 1;
-        } else {
-            winStreak++;
-        }
+        // 연승 수 조정
+        winStreak = (winStreak * result <= 0)
+                ? result
+                : winStreak + result;
 
-        ratingScore = ratingScore + 15 + winStreak * 5;
-    }
+        System.out.println("[로그] ratingScore: " + ratingScore + " , result: " + result + " , winStreak: " + winStreak + " , feedback: " + feedback);
 
-    public void updateRatingByLose() {
+        // rating 점수 조정
+        ratingScore += (result * 15) + (winStreak * 5) + (feedback * 10);
 
-        lose++;
-
-        if (winStreak > 0) {
-            winStreak = -1;
-        } else {
-            winStreak--;
-        }
-
-        ratingScore = ratingScore - 15 + winStreak * 5;
-    }
-
-    public void updateRatingByDraw() {
-
-        draw++;
-
-        winStreak = 0;
+        if (ratingScore > 1000) ratingScore = 1000; // Max Value
+        else if (ratingScore < 0) ratingScore = 0;  // Min Value
     }
 }

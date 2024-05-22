@@ -117,20 +117,14 @@ public class GameService {
         user.changeVoteAfterEndGame();
 
         // 점수 조정
-        updateRating(user, game.getSport(), gameFinishDto.getResult());
+        updateRating(user, game.getSport(), gameFinishDto.getResult(), gameFinishDto.getFeedback());
     }
 
-    private void updateRating(User user, Sport sport, Integer result) {
+    private void updateRating(User user, Sport sport, int result, int feedback) {
 
         // 승리/패배에 따른 점수 조정
         Rating rating = user.getRatings().get(sport);
-        if (result == 1) {
-            rating.updateRatingByWin();
-        } else if (result == -1) {
-            rating.updateRatingByLose();
-        } else if (result == 0) {
-            rating.updateRatingByDraw();
-        }
+        rating.updateRating(result, feedback);
     }
 
     @Transactional

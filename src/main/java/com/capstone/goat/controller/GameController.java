@@ -95,7 +95,7 @@ public class GameController {
         return new ResponseEntity<>(new ResponseDto(gameId,"성공"), HttpStatus.OK);
     }
 
-    @Operation(summary = "진행 중인 게임 종료", description = "사용자가 현재 진행하던 게임을 종료합니다. url 바디에 {result, comment}을 json 형식으로 보내주세요. result는 경기 결과를 받아 승리 시 1, 패배 시 -1, 무승부 시 0을 적어주세요.")
+    @Operation(summary = "진행 중인 게임 종료", description = "사용자가 현재 진행하던 게임을 종료합니다. url 바디에 {result, comment, feedback}을 json 형식으로 보내주세요. result는 경기 결과를 받아 승리 시 1, 패배 시 -1, 무승부 시 0을 적어주세요. feedback은 사용자에게 매칭된 게임의 수준을 묻고 쉬웠다는 1, 만족한다는 0, 어려웠다는 -1을 적어주세요")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게임 종료 성공", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
