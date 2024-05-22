@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface VotedCourtRepository extends JpaRepository<VotedCourt,Long> {
     List<VotedCourt> findAllByGameId(Long gameId);
     Optional<VotedCourt> findByCourtAndGameId(String court,Long gameId);
-    boolean existsByCourt(String court);
+    boolean existsByCourtAndGameId(String court, Long gameId);
 }

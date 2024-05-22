@@ -66,6 +66,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "receiver",fetch = FetchType.LAZY)
     private List<Notification> receivedNotification;
 
+
     @Builder
     public User(String nickname,Long id, int age,String gender,String prefer_sport, int soccer_tier,int badminton_tier, int basketball_tier,int tableTennis_tier, List<String> roles){
         this.nickname = nickname;
