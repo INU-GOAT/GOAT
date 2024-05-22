@@ -4,6 +4,7 @@ import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.ClubSaveDto;
 import com.capstone.goat.dto.request.ClubUpdateDte;
 import com.capstone.goat.dto.response.ApplicantListResponseDto;
+import com.capstone.goat.dto.response.ClubListResponseDto;
 import com.capstone.goat.dto.response.ClubResponseDto;
 import com.capstone.goat.dto.response.ResponseDto;
 import com.capstone.goat.service.ClubService;
@@ -124,6 +125,16 @@ public class ClubController {
     public ResponseEntity<ResponseDto<List<ApplicantListResponseDto>>> getApplicant(@PathVariable Long clubId, @Schema(hidden = true)@AuthenticationPrincipal User user){
         log.info("클럽 가입 신청신청자 목록 가져오기 id = {}",clubId);
         return new ResponseEntity<>(new ResponseDto<>(clubService.getApplicantList(clubId),"클럽 가입 신청자 목록 가져오기 성공"), HttpStatus.OK);
+    }
+
+    @Operation(summary = "가입 가능한 클럽 리스트 가져오기")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "가입 가능한 클럽 리스트 가져오기",content = @Content(schema = @Schema(implementation = ClubResponseDto.class))),
+    })
+    @GetMapping("")
+    public ResponseEntity<ResponseDto<List<ClubListResponseDto>>> getClub(){
+        log.info("가입 가능한 클럽 리스트 가져오기 호출");
+        return new ResponseEntity<>(new ResponseDto<>(clubService.getClubList(),"가입 가능한 클럽 리스트 가져오기 성공"), HttpStatus.OK);
     }
 
 

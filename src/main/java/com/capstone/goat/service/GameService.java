@@ -10,6 +10,7 @@ import com.capstone.goat.repository.TeammateRepository;
 import com.capstone.goat.repository.UserRepository;
 import com.capstone.goat.repository.VotedCourtRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class GameService {
 
     private final GameRepository gameRepository;
@@ -153,7 +155,8 @@ public class GameService {
     public VoteTotalResponseDto getVoteMessage(Long gameId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        List<VotedCourt> courts = votedCourtRepository.findAllByGame(game);
+        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
+        log.info("리스트 : {}",courts);
         int voteCount = 0;
         List<VotedCourtResponseDto> list = new ArrayList<>();
         for(VotedCourt court : courts){
@@ -170,7 +173,7 @@ public class GameService {
     public void determineCourt(Long gameId){
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        List<VotedCourt> courts = votedCourtRepository.findAllByGame(game);
+        List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
         int max = courts.get(0).getCount();
         String courtName =courts.get(0).getCourt();
         for(VotedCourt court : courts) {

@@ -6,6 +6,8 @@ import com.capstone.goat.domain.User;
 import com.capstone.goat.dto.request.ClubSaveDto;
 import com.capstone.goat.dto.request.ClubUpdateDte;
 import com.capstone.goat.dto.response.ApplicantListResponseDto;
+import com.capstone.goat.dto.response.ClubListResponseDto;
+import com.capstone.goat.dto.response.ClubMemberResponseDto;
 import com.capstone.goat.dto.response.ClubResponseDto;
 import com.capstone.goat.exception.ex.CustomErrorCode;
 import com.capstone.goat.exception.ex.CustomException;
@@ -62,7 +64,7 @@ public class ClubService {
 
     public ClubResponseDto getClub (Long id){
         Club club = clubRepository.findById(id).orElseThrow(()->new CustomException(CustomErrorCode.CLUB_NOT_FOUND));
-        List<String> members = club.getMembers().stream().map(User::getNickname).toList();
+        List<ClubMemberResponseDto> members = club.getMembers().stream().map(ClubMemberResponseDto::of).toList();
         User master = userRepository.findById(club.getMaster_id()).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         return ClubResponseDto.of(club,master.getNickname(),members);
     }
@@ -124,6 +126,11 @@ public class ClubService {
     public void deleteApplicant(Long userId){
         User user = userRepository.findById(userId).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.fineApply();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClubListResponseDto> getClubList(){
+        return clubRepository.findClubsWithLessThan20Members().stream().map(ClubListResponseDto::of).collect(Collectors.toList());
     }
 
 

@@ -43,7 +43,7 @@ public class SecurityConfig  {
                 .antMatchers(HttpMethod.POST,"/api/users").hasRole("USER")
                 .antMatchers("/api/users/club").hasRole("USER")
                 .antMatchers("/api/users","/api/users/*").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/clubs/*").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/clubs**").permitAll()
                 .antMatchers("/api/clubs","/api/clubs/*").hasRole("USER")
                 .anyRequest().permitAll();
         http

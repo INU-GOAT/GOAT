@@ -23,6 +23,8 @@ public class UserResponseDto {
     private String prefer_sport;
     @Schema(description = "가입된 클럽")
     private String club;
+    @Schema(description = "가입된 클럽의 데이터베이스 아이디값")
+    private Long clubId;
     @Schema(description = "축구 실력")
     private Integer soccer_tier;
     @Schema(description = "배드민턴 실력")
@@ -36,23 +38,24 @@ public class UserResponseDto {
     @Schema(description = "경기장 투표 여부")
     private Boolean isVoted;
     @Builder
-    private UserResponseDto (User user, String club){
+    private UserResponseDto (User user, String club,long clubId){
         this.id = user.getId();
         this.nickname = user.getNickname();
         this.age = user.getAge();
         this.gender = user.getGender();
-        this.club =club;
+        this.club = club;
+        this.clubId = clubId;
         this.prefer_sport = user.getPrefer_sport();
         this.soccer_tier = user.getSoccer_tier();
         this.badminton_tier = user.getBadminton_tier();
         this.basketball_tier = user.getBasketball_tier();
         this.tableTennis_tier = user.getTableTennis_tier();
         this.status = user.getStatus();
-        this.isVoted=user.getIsVoted();
+        this.isVoted = user.getIsVoted();
     }
 
-    public static UserResponseDto of(User user,String club){
-        return  UserResponseDto.builder().user(user).club(club).build();
+    public static UserResponseDto of(User user,String club, long clubId){
+        return  UserResponseDto.builder().user(user).club(club).clubId(clubId).build();
     }
 
 }
