@@ -66,7 +66,7 @@ public class MatchingController {
         log.info("[로그] rating : {}", rating);
         long groupId = matchMakingService.addMatchingAndMatchMaking(matchingConditionDto, userId, rating);
         log.info("[로그] groupId : {}", groupId);
-        matchMakingService.findMatching(matchingConditionDto, groupId, rating);
+        matchMakingService.findMatching(matchingConditionDto, groupId, rating, 0);
 
         return new ResponseEntity<>(new ResponseDto(groupId, "매칭 시작 성공"), HttpStatus.CREATED);
     }

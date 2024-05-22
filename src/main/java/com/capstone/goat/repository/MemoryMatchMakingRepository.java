@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,13 +41,23 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
     }
 
     @Override
-    public List<MatchMaking> findByMatching(MatchMaking newMatchMaking) {
+    public List<MatchMaking> findByMatchingAndMatchingRange(MatchMaking newMatchMaking, int matchingRange) {
         int latIndex = getLatIndex(newMatchMaking.getLatitude());
         int lngIndex = getLngIndex(newMatchMaking.getLongitude());
 
         List<MatchMaking> matchedList = new ArrayList<>();
 
-        for (MatchMaking matchMaking : store[latIndex][lngIndex]) {
+        List<MatchMaking>[][] subArray = getSubArray(latIndex, lngIndex, matchingRange);
+        List<MatchMaking> subList = new ArrayList<>();
+        for (List<MatchMaking>[] row : subArray) {
+            for (List<MatchMaking> element : row) {
+                subList.addAll(element);
+            }
+        }
+        // 매칭 시작 시간을 기준으로 정렬
+        subList.sort(Comparator.comparing(MatchMaking::getMatchingStartTime));
+
+        for (MatchMaking matchMaking : subList) {
 
             int ratingMaxDiff = RATINGVALUE * calculateRatingWeight(newMatchMaking.getMatchingStartTime());
 
@@ -58,6 +69,25 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         }
 
         return matchedList;
+    }
+
+    private List<MatchMaking>[][] getSubArray(int x, int y, int range) {
+        int startX = Math.max(0, x - range);
+        int startY = Math.max(0, y - range);
+        int endX = Math.min(store.length - 1, x + range);
+        int endY = Math.min(store[0].length - 1, y + range);
+        int sizeX = endX - startX + 1;
+        int sizeY = endY - startY + 1;
+
+        List<MatchMaking>[][] subArray = new List[sizeX][sizeY];
+
+        for (int i = startX; i <= endX; i++) {
+            for (int j = startY; j <= endY; j++) {
+                subArray[i - startX][j - startY] = store[i][j];
+            }
+        }
+
+        return subArray;
     }
 
     @Override

@@ -78,14 +78,14 @@ public class MatchMakingService {
 
     @Async
     @Transactional
-    public void findMatching(MatchingConditionDto matchingConditionDto, long groupId, int rating) {
+    public void findMatching(MatchingConditionDto matchingConditionDto, long groupId, int rating, int matchingRange) {
 
         for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(0, rating, groupId)) {
 
-            log.info("[로그] 매치메이킹 시작, groupId = " + groupId);
+            log.info("[로그] 매치메이킹 시작, groupId = {}, matchingRange = {}", groupId, matchingRange);
 
             // 조건에 맞는 매칭 중인 유저 검색
-            List<MatchMaking> matchMakingList = matchMakingRepository.findByMatching(matchMaking);
+            List<MatchMaking> matchMakingList = matchMakingRepository.findByMatchingAndMatchingRange(matchMaking, matchingRange);
 
             log.info("[로그] 조건에 맞는 매칭 중인 유저, matchMakingList = " + matchMakingList);
 

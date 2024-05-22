@@ -34,6 +34,10 @@ public class MatchingConditionDto {
     @NotNull(message = "preferCourt는 비어있을 수 없습니다.")
     private String preferCourt;
 
+    public static MatchingConditionDto of(String sport, double latitude, double longitude, List<String> matchStartTimes, String preferCourt) {
+        return new MatchingConditionDto(sport, latitude, longitude, matchStartTimes, preferCourt);
+    }
+
     public Matching toEntity(int rating, Group group) {
         return Matching.builder()
                 .rating(rating)
@@ -41,6 +45,7 @@ public class MatchingConditionDto {
                 .latitude(latitude)
                 .longitude(longitude)
                 .preferCourt(preferCourt)
+                .matchingStartTime(LocalDateTime.now())
                 .group(group)
                 .build();
     }
@@ -59,5 +64,4 @@ public class MatchingConditionDto {
                         .groupId(groupId)
                         .build()).collect(Collectors.toList());
     }
-
 }
