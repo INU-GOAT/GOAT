@@ -23,20 +23,18 @@ public class Teammate {
     @Column(columnDefinition = "text")
     private String comment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private Game game;
 
     @Builder
-    private Teammate(Integer teamNumber, Integer result, String comment, User user, Game game) {
+    private Teammate(Integer teamNumber, Integer result, String comment, Long userId, Game game) {
         this.teamNumber = teamNumber;
         this.result = result;
         this.comment = comment;
-        this.user = user;
+        this.userId = userId;
         this.game = game;
     }
 

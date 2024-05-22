@@ -1,7 +1,5 @@
 package com.capstone.goat.dto.response;
 
-import com.capstone.goat.domain.Sport;
-import com.capstone.goat.domain.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,11 +20,11 @@ public class UserInfoDto {
         this.ratingScore = ratingScore;
     }
 
-    public static UserInfoDto of(User user, Sport sport) {
+    public static UserInfoDto of(Long userId, String userNickname, int ratingScore) {
         return UserInfoDto.builder()
-                .userId(user.getId())
-                .nickname(user.getNickname())
-                .ratingScore(user.getRatings().get(sport).getRatingScore())
+                .userId(userId)
+                .nickname(userNickname)
+                .ratingScore(ratingScore)
                 .build();
     }
 }

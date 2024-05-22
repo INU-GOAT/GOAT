@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,21 +32,34 @@ public class GameService {
         List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
         List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
 
-        List<UserInfoDto> team1UserInfoList = team1.stream()
-                .map(teammate -> UserInfoDto.of(teammate.getUser(), game.getSport()))
-                .toList();
-        List<UserInfoDto> team2UserInfoList = team2.stream()
-                .map(teammate -> UserInfoDto.of(teammate.getUser(), game.getSport()))
-                .toList();
-
+        List<UserInfoDto> team1UserInfoList = getUserInfoDtoList(team1, game.getSport());
+        List<UserInfoDto> team2UserInfoList = getUserInfoDtoList(team2, game.getSport());
 
         return GamePlayingResponseDto.of(game, game.getPreferCourts(), team1UserInfoList, team2UserInfoList);
     }
 
-    private GameFinishedResponseDto toGameFinishedDto(Game game, Integer result) {
+    private List<UserInfoDto> getUserInfoDtoList(List<Teammate> teammates, Sport sport) {
+        // 탈퇴한 유저는 닉네임을 "탈퇴한 유저", rating 점수를 0으로 설정
+        return teammates.stream()
+                .map(teammate -> {
+                    String userNickname;
+                    int ratingScore;
+                    Optional<User> userOptional = userRepository.findById(teammate.getUserId());
+                    if (userOptional.isEmpty()) {
+                        userNickname = "탈퇴한_유저";
+                        ratingScore = 0;
+                    } else {
+                        User user = userOptional.get();
+                        userNickname = user.getNickname();
+                        Rating rating = user.getRatings().get(sport);
+                        ratingScore = rating != null ? rating.getRatingScore() : 0;
+                    }
+                    return UserInfoDto.of(teammate.getUserId(), userNickname, ratingScore);
+                })
+                .toList();
+    }
 
-        List<Teammate> team1 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 1);
-        List<Teammate> team2 = teammateRepository.findAllByGameIdAndTeamNumber(game.getId(), 2);
+    private GameFinishedResponseDto toGameFinishedDto(Game game, Integer result) {
 
         return GameFinishedResponseDto.of(game, result);
     }
@@ -59,7 +73,7 @@ public class GameService {
             throw new CustomException(CustomErrorCode.USER_NOT_GAMING);
         }
 
-        Teammate userTeammate = teammateRepository.findFirstByUserOrderByIdDesc(user)
+        Teammate userTeammate = teammateRepository.findFirstByUserIdOrderByIdDesc(user.getId())
                 .orElseThrow(() -> new CustomException(CustomErrorCode.TEAMMATE_NOT_FOUND));
         Game game = userTeammate.getGame();
 
@@ -69,7 +83,7 @@ public class GameService {
     public List<GameFinishedResponseDto> getFinishedGameList(long userId) {
 
         User user = userRepository.getReferenceById(userId);
-        List<Teammate> teammateList = teammateRepository.findAllByUserOrderByIdDesc(user);
+        List<Teammate> teammateList = teammateRepository.findAllByUserIdOrderByIdDesc(user.getId());
 
         return teammateList.stream()
                 .filter(teammate -> teammate.getGame().getCourt() != null)    // 종료된 Game만 -> 경기장 확정된 게임까지는 포함
@@ -82,7 +96,10 @@ public class GameService {
         List<Teammate> teammateList = teammateRepository.findByGameId(gameId);
 
         return teammateList.stream()
-                .map(teammate -> TeammateResponseDto.of(teammate, teammate.getUser()))
+                .map(teammate -> {
+                    String userNickname = userRepository.findNicknameById(teammate.getUserId()).orElse("탈퇴한_유저");
+                    return TeammateResponseDto.of(teammate, teammate.getUserId(), userNickname);
+                })
                 .toList();
     }
 

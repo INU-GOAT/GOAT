@@ -49,7 +49,7 @@ public class NotificationService {
                 .sender(sender)
                 .receiver(receiver)
                 .type(type)
-                .comment(message)
+                .content(message)
                 .build();
 
         return notificationRepository.save(notification).getId();

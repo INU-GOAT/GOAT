@@ -1,7 +1,6 @@
 package com.capstone.goat.dto.response;
 
 import com.capstone.goat.domain.Teammate;
-import com.capstone.goat.domain.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,13 +24,13 @@ public class TeammateResponseDto {
         this.userNickname = userNickname;
     }
 
-    public static TeammateResponseDto of(Teammate teammate, User user) {
+    public static TeammateResponseDto of(Teammate teammate, Long userId, String userNickname) {
 
         return TeammateResponseDto.builder()
                 .teamNumber(teammate.getTeamNumber())
                 .comment(teammate.getComment())
-                .userId(user.getId())
-                .userNickname(user.getNickname())
+                .userId(userId)
+                .userNickname(userNickname)
                 .build();
     }
 }

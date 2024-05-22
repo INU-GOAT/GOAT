@@ -19,7 +19,7 @@ public class Notification {
 
     private NotificationType type;
 
-    private String comment;
+    private String content;
 
     @CreationTimestamp
     private LocalDateTime sendTime; // 오래된 그룹 초대 알림이면 알림 조회 시 삭제 후 반환
@@ -33,9 +33,9 @@ public class Notification {
     private User sender;
 
     @Builder
-    private Notification(NotificationType type, String comment, User receiver, User sender) {
+    private Notification(NotificationType type, String content, User receiver, User sender) {
         this.type = type;
-        this.comment = comment;
+        this.content = content;
         this.sendTime = LocalDateTime.now();
         this.receiver = receiver;
         this.sender = sender;

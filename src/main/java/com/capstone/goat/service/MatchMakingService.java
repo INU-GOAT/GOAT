@@ -151,14 +151,12 @@ public class MatchMakingService {
         if (dp[n][target]) {
             int i = n, j = target;
             while (i > 0 && j > 0) {
-                if (dp[i - 1][j]) {
-                    i--;
-                } else {
+                if (!dp[i - 1][j]) {
                     subset.add(matchMakingList.get(i - 1));
                     j -= matchMakingList.get(i - 1).getUserCount();
                     matchMakingList.remove(i - 1);
-                    i--;
                 }
+                i--;
             }
         }
 
@@ -229,7 +227,7 @@ public class MatchMakingService {
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
                             teammateRepository.save(
-                                    Teammate.builder().teamNumber(1).game(game).user(user).build()
+                                    Teammate.builder().teamNumber(1).game(game).userId(user.getId()).build()
                             )
                     );
         }
@@ -239,7 +237,7 @@ public class MatchMakingService {
                     .stream().flatMap(Collection::stream)
                     .forEach(user ->
                             teammateRepository.save(
-                                    Teammate.builder().teamNumber(2).game(game).user(user).build()
+                                    Teammate.builder().teamNumber(2).game(game).userId(user.getId()).build()
                             )
                     );
         }
@@ -255,7 +253,8 @@ public class MatchMakingService {
     private void initiateUserGaming(Long gameId) {
 
         // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
-        teammateRepository.findUsersByGameId(gameId).forEach(user -> {
+        teammateRepository.findUserIdsByGameId(gameId).forEach(userId -> {
+            User user = getUser(userId);
             user.changeStatus(Status.GAMING);
             notificationService.sendNotification(null, user.getNickname(), NotificationType.MATCHING);
         });
@@ -278,8 +277,7 @@ public class MatchMakingService {
     @Transactional
     public void deleteMatching(long userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        User user = getUser(userId);
         Group group = Optional.ofNullable(user.getGroup())
                 .orElseThrow(() -> new CustomException(CustomErrorCode.NO_JOINING_GROUP));
 
@@ -301,6 +299,11 @@ public class MatchMakingService {
         if(group.getMembers().size() == 1){
             groupService.disbandGroup(group);
         }
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
     }
 
 }

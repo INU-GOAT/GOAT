@@ -15,7 +15,7 @@ public class NotificationResponseDto {
 
     private final NotificationType type;
 
-    private final String comment;
+    private final String content;
 
     @CreationTimestamp
     private final LocalDateTime sendTime; // 오래된 그룹 초대 알림이면 알림 조회 시 삭제 후 반환
@@ -23,10 +23,10 @@ public class NotificationResponseDto {
     private final String senderNickname;
 
     @Builder
-    private NotificationResponseDto(Long id, NotificationType type, String comment, LocalDateTime sendTime, String senderNickname) {
+    private NotificationResponseDto(Long id, NotificationType type, String content, LocalDateTime sendTime, String senderNickname) {
         this.id = id;
         this.type = type;
-        this.comment = comment;
+        this.content = content;
         this.sendTime = sendTime;
         this.senderNickname = senderNickname;
     }
@@ -36,7 +36,7 @@ public class NotificationResponseDto {
         return NotificationResponseDto.builder()
                 .id(notification.getId())
                 .type(notification.getType())
-                .comment(notification.getComment())
+                .content(notification.getContent())
                 .sendTime(notification.getSendTime())
                 .senderNickname(senderNickname)
                 .build();
