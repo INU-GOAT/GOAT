@@ -157,7 +157,6 @@ public class GameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
         List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
-        log.info("리스트 : {}",courts);
         int voteCount = 0;
         List<VotedCourtResponseDto> list = new ArrayList<>();
         for(VotedCourt court : courts){
