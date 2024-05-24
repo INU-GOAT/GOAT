@@ -14,12 +14,14 @@ import com.capstone.goat.exception.ex.CustomException;
 import com.capstone.goat.repository.ClubRepository;
 import com.capstone.goat.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -98,7 +100,8 @@ public class ClubService {
         User user = userRepository.findById(applicantId).orElseThrow(()-> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.fineApply();
         if(accept) {
-            user.applyClub(club);
+            log.info("[로그] 클럽 가입 승인 - applicant: {}, club: {}", user.getNickname(), club.getName());
+            user.joinClub(club);
         }
         if(club.getMembers().size()==20){
             for(int i = 0 ; i < club.getApplicants().size();i++){
