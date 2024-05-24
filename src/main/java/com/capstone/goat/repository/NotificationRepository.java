@@ -14,6 +14,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<LocalDateTime> findSendTimeBySenderIdAndType(Long userId, NotificationType type);
     @Query("SELECT n.sendTime FROM Notification n WHERE n.receiver.id = :userId and n.type = :type")
     List<LocalDateTime> findSendTimeByReceiverIdAndType(Long userId, NotificationType type);
-    List<Notification> findAllByReceiverId(Long receiverId);
+    List<Notification> findAllByReceiverIdOrderByIdDesc(Long receiverId);
 
 }

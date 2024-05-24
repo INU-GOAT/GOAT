@@ -31,6 +31,9 @@ public class Game {
 
     private String court;
 
+    @Embedded
+    private ClubGame clubGame;
+
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PreferCourt> preferCourts = new ArrayList<>();
 
@@ -38,12 +41,17 @@ public class Game {
     private final List<VotedCourt> votedCourts = new ArrayList<>();   // Court 투표로 변경
 
     @Builder
-    public Game(Sport sport, LocalDateTime startTime) {
+    public Game(Sport sport, LocalDateTime startTime, ClubGame clubGame) {
         this.sport = sport;
         this.startTime = startTime;
         this.latitude = null;
         this.longitude = null;
         this.court = null;
+        this.clubGame = clubGame;
+    }
+
+    public void appendClubGame(ClubGame clubGame) {
+        this.clubGame = clubGame;
     }
 
     public void addPreferCourt(PreferCourt preferCourt) {

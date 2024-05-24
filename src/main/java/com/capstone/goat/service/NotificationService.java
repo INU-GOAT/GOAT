@@ -74,7 +74,7 @@ public class NotificationService {
     @Transactional
     public List<NotificationResponseDto> getNotificationList(long userId) {
 
-        List<Notification> notificationList = notificationRepository.findAllByReceiverId(userId);
+        List<Notification> notificationList = notificationRepository.findAllByReceiverIdOrderByIdDesc(userId);
 
         return notificationList.stream()
                 .filter(notification -> {   // 그룹 초대 알림의 경우 발송된지 30초가 지났으면 삭제 후 리스트에 추가하지 않음

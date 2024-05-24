@@ -30,6 +30,8 @@ public class Matching {
 
     private String preferCourt;
 
+    private Boolean isClubMatching;
+
     private LocalDateTime matchingStartTime;
 
     @OneToMany(mappedBy = "matching",fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
@@ -40,12 +42,13 @@ public class Matching {
     private Group group;    // TODO OneToOne 관계니까 Long groupId로 변경해야 함
 
     @Builder
-    public Matching(int rating, Sport sport, double latitude, double longitude, String preferCourt, LocalDateTime matchingStartTime, Group group) {
+    public Matching(int rating, Sport sport, double latitude, double longitude, String preferCourt, Boolean isClubMatching, LocalDateTime matchingStartTime, Group group) {
         this.rating = rating;
         this.sport = sport;
         this.latitude = latitude;
         this.longitude = longitude;
         this.preferCourt = preferCourt;
+        this.isClubMatching = isClubMatching;
         this.matchingStartTime = matchingStartTime;
         this.group = group;
     }

@@ -22,6 +22,8 @@ public class Group {
 
     private Long masterId;
 
+    private Long clubId;
+
     @OneToMany(mappedBy = "group",fetch = FetchType.LAZY)
     private List<User> members = new ArrayList<>();
 
@@ -29,8 +31,9 @@ public class Group {
     private List<User> invitees = new ArrayList<>();
 
     @Builder
-    public Group(Long masterId) {
+    public Group(Long masterId, Long clubId) {
         this.masterId = masterId;
+        this.clubId = clubId;
     }
 
     public void handOverMaster(Long newMasterId) {

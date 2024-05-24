@@ -24,6 +24,8 @@ public class ClubResponseDto {
     private Long win;
     @Schema(description = "패수")
     private Long lose;
+    @Schema(description = "무승부 수")
+    private Long draw;
 
     @Schema(description = "인원수")
     private Long memberNumber;
@@ -32,7 +34,7 @@ public class ClubResponseDto {
     private List<ClubMemberResponseDto> members;
 
     @Builder
-    private ClubResponseDto(String name, String clubMaster,String sport, Long memberNumber, List<ClubMemberResponseDto> members,long win, long lose){
+    private ClubResponseDto(String name, String clubMaster,String sport, Long memberNumber, List<ClubMemberResponseDto> members,long win, long lose, long draw){
         this.name = name;
         this.clubMaster = clubMaster;
         this.sport =sport;
@@ -50,6 +52,7 @@ public class ClubResponseDto {
                 .memberNumber((long) club.getMembers().size())
                 .win(club.getWin())
                 .lose(club.getLose())
+                .lose(club.getDraw())
                 .members(members)
                 .build();
     }

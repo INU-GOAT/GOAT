@@ -39,10 +39,11 @@ public class MatchingController {
     private final RatingService ratingService;
     private final NotificationRepository notificationRepository;;
 
-    @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchStartTimes,preferCourt}을 json형식으로 보내주세요.")
+    @Operation(summary = "매칭 시작", description = "url 바디에 {sport,latitude,longitude,matchStartTimes,preferCourt, isClubMatching}을 json형식으로 보내주세요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "매칭 시작 성공, 그룹 Id 반환", content = @Content(schema = @Schema(implementation = Long.class))),
             @ApiResponse(responseCode = "400", description = "[BAD_REQUEST] 유효성 검사 예외 발생", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "[NOT_ENOUGH_GROUP_MEMBERS] 그룹원의 수가 해당 스포츠의 한 팀 최소 인원보다 적습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "[NOT_WAITING_STATE] 유저가 매칭 가능한 상태가 아닙니다. 이미 매칭 중이거나 게임이 종료되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[USER_NOT_FOUND] USER_NOT_FOUND", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "[GROUP_NOT_FOUND] 존재하지 않는 그룹입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),

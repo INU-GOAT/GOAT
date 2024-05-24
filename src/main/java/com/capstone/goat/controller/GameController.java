@@ -122,4 +122,29 @@ public class GameController {
     }
 
 
+    private static final String CLUB_GAME_DATA = """
+            {
+              "data": [
+                {
+                  "gameId": 1,
+                  "sportName": "탁구",
+                  "startTime": "2024-05-25T01:30:00",
+                  "parsedDate": "2024-05-25",
+                  "parsedTime": "01:30",
+                  "court": "청와대 본관",
+                  "clubGame": {
+                    "team1Master": 1,
+                    "team2Master": 4,
+                    "team1ClubId": 1,
+                    "team2ClubId": 2,
+                    "team1Result": -1,
+                    "team2Result": 1,
+                    "winClubId": 2
+                  },
+                  "result": -1
+                }
+              ],
+              "msg": "성공"
+            }
+            """;
 }

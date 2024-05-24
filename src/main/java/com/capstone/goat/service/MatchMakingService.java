@@ -37,11 +37,29 @@ public class MatchMakingService {
     public long addMatchingAndMatchMaking(MatchingConditionDto matchingConditionDto, long userId, int rating) {
 
         // 사용자에게 그룹이 없을 경우 생성
-        Group group = groupService.getGroup(userId);
+        Group group = groupService.getGroup(userId, false);
+
+        int userCount = group.getMembers().size();
+        log.info("[로그] 매칭 DB 추가, userCount = " + userCount);
 
         // 그룹장이 아닌 경우 매칭 시작 불가능
         if (!Objects.equals(group.getMasterId(), userId)) {
             throw new CustomException(CustomErrorCode.MATCHING_ACCESS_DENIED);
+        }
+
+        // 클럽 매칭의 경우 그룹원이 해당 스포츠 인원보다 적으면 매칭 불가능
+        // 일반 매칭의 경우 그룹원이 해당 스프츠 인원보다 많으면 매칭 불가능
+        String sportName = matchingConditionDto.getSport();
+        Sport sport = Sport.getSport(sportName);
+        log.info("[로그] 스포츠 이름: {}, 스포츠 인원 수: {}", sport.getName(), sport.getPlayer());
+        if (matchingConditionDto.getIsClubMatching()) {
+            if (userCount < sport.getPlayer()) {
+                throw new CustomException(CustomErrorCode.NOT_ENOUGH_GROUP_MEMBERS);
+            }
+        } else {
+            if (userCount > sport.getPlayer()) {
+                throw new CustomException(CustomErrorCode.TOO_MANY_GROUP_MEMBERS);
+            }
         }
 
         // 그룹원 모두 매칭 중으로 상태 변경, 매칭 대기 상태가 아니면 예외 발생
@@ -52,9 +70,6 @@ public class MatchMakingService {
                 throw new CustomException(CustomErrorCode.NOT_WAITING_STATE);
             }
         });
-
-        int userCount = group.getMembers().size();
-        log.info("[로그] 매칭 DB 추가, userCount = " + userCount);
 
         // Matching Repository에 저장
         Matching matching = matchingConditionDto.toEntity(rating, group);
@@ -82,7 +97,7 @@ public class MatchMakingService {
 
         for (MatchMaking matchMaking : matchingConditionDto.toMatchMakingList(0, rating, groupId)) {
 
-            log.info("[로그] 매치메이킹 시작, groupId = {}, matchingRange = {}", groupId, matchingRange);
+            log.info("[로그] 매치메이킹 시작, groupId = {}, isClubMatching = {}, matchingRange = {}", groupId, matchMaking.getIsClubMatching(), matchingRange);
 
             // 조건에 맞는 매칭 중인 유저 검색
             List<MatchMaking> matchMakingList = matchMakingRepository.findByMatchingAndMatchingRange(matchMaking, matchingRange);
@@ -90,13 +105,57 @@ public class MatchMakingService {
             log.info("[로그] 조건에 맞는 매칭 중인 유저, matchMakingList = " + matchMakingList);
 
             // 검색한 리스트가 비어있으면 다음으로
-            if (matchMakingList.size() <= 1) continue;
+            if (matchMakingList.size() < 2) continue;
 
             double latitude = matchingConditionDto.getLatitude();
             double longitude = matchingConditionDto.getLongitude();
-            int player = Sport.getSport(matchingConditionDto.getSport()).getPlayer();
 
+            /*--클럽 매칭-----------------------------------------------------------------------------------*/
+            if (matchingConditionDto.getIsClubMatching()) {
+                MatchMaking club1 = matchMakingList.get(0);
+                MatchMaking club2 = matchMakingList.get(1);
+
+                List<Long> club1GroupId = new ArrayList<>();
+                club1GroupId.add(club1.getGroupId());
+                List<Long> club2GroupId = new ArrayList<>();
+                club2GroupId.add(club2.getGroupId());
+                Set<PreferCourt> preferCourtSet = new HashSet<>();
+                preferCourtSet.add(
+                        PreferCourt.builder()
+                                .court(club1.getPreferCourt())
+                                .latitude(club1.getLatitude())
+                                .longitude(club1.getLongitude())
+                                .build()
+                );
+                preferCourtSet.add(
+                        PreferCourt.builder()
+                                .court(club2.getPreferCourt())
+                                .latitude(club2.getLatitude())
+                                .longitude(club2.getLongitude())
+                                .build()
+                );
+                List<PreferCourt> preferCourtList = new ArrayList<>(preferCourtSet);
+
+                log.info("[로그] : club1GroupId: " + club1GroupId + " club2GroupId: " + club2GroupId);
+
+                // Matching과 MatchMaking에서 매칭된 그룹 제거
+                deleteMatchedGroup(club1GroupId, club2GroupId, latitude, longitude);
+
+                // Game에 추가
+                Long gameId = addGame(club1GroupId, club2GroupId, matchMaking, preferCourtList);
+
+                // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
+                initiateUserGaming(gameId);
+
+                // 매칭된 그룹 모두 해체
+                disbandGroupAll(club1GroupId, club2GroupId);
+
+                return;
+            }
+
+            /*--일반 매칭--------------------------------------------------------------------------------*/
             // 스포츠 인원에 맞는 팀 구성이 되는지 확인
+            int player = Sport.getSport(matchingConditionDto.getSport()).getPlayer();
             List<MatchMaking> team1 = findSumSubset(matchMakingList, player);
             if (team1.isEmpty()) continue;
             List<MatchMaking> team2 = findSumSubset(matchMakingList, player);
@@ -211,48 +270,92 @@ public class MatchMakingService {
 
         log.info("[로그] addGame() 시작");
 
-        // 시작 시간 파싱
-        LocalTime matchStartTimeParsed = LocalTime.parse(matchMaking.getMatchStartTime(), DateTimeFormatter.ofPattern("HHmm"));
+        LocalDateTime matchStartDateTime = getMatchStartDateTime(matchMaking.getMatchStartTime());
 
+        ClubGame clubGame = initializeClubGame(matchMaking, team1, team2);
+
+        Game game = createAndSaveGame(matchMaking, matchStartDateTime, clubGame);
+
+        saveTeammates(team1, game, 1);
+        saveTeammates(team2, game, 2);
+
+        assignPreferCourts(preferCourtList, game);
+
+        return game.getId();
+    }
+
+    private LocalDateTime getMatchStartDateTime(String matchStartTime) {
+
+        log.info("[로그] getMatchStartDateTime() 시작");
+
+        // 시작 시간 파싱
+        LocalTime matchStartTimeParsed = LocalTime.parse(matchStartTime, DateTimeFormatter.ofPattern("HHmm"));
         // 현재 날짜와 시작 시간을 합쳐서 LocalDateTime 객체 생성
-        LocalDateTime matchStartDateTime = LocalDate.now().atTime(matchStartTimeParsed);
+        return LocalDate.now().atTime(matchStartTimeParsed);
+    }
+
+    private ClubGame initializeClubGame(MatchMaking matchMaking, List<Long> team1, List<Long> team2) {
+
+        log.info("[로그] initializeClubGame() 시작");
+
+        if (matchMaking.getIsClubMatching()) {
+            ClubGame clubGame = new ClubGame();
+            groupRepository.findById(team1.get(0)).ifPresent(group ->
+                    clubGame.appendTeam1Info(group.getMasterId(), group.getClubId())
+            );
+            groupRepository.findById(team2.get(0)).ifPresent(group ->
+                    clubGame.appendTeam2Info(group.getMasterId(), group.getClubId())
+            );
+            return clubGame;
+        }
+        return null;
+    }
+
+    private Game createAndSaveGame(MatchMaking matchMaking, LocalDateTime matchStartDateTime, ClubGame clubGame) {
+
+        log.info("[로그] createAndSaveGame() 시작");
 
         Game newGame = Game.builder()
                 .sport(matchMaking.getSport())
                 .startTime(matchStartDateTime)
+                .clubGame(clubGame)
                 .build();
-        Game game = gameRepository.save(newGame);
+        return gameRepository.save(newGame);
+    }
 
-        for (long groupId: team1) {
-            Optional.ofNullable(groupRepository.findUsersById(groupId))
-                    .stream().flatMap(Collection::stream)
-                    .forEach(user ->
-                            teammateRepository.save(
-                                    Teammate.builder().teamNumber(1).game(game).userId(user.getId()).build()
-                            )
-                    );
-        }
+    private void saveTeammates(List<Long> team, Game game, int teamNumber) {
 
-        for (long groupId: team2) {
-            Optional.ofNullable(groupRepository.findUsersById(groupId))
-                    .stream().flatMap(Collection::stream)
-                    .forEach(user ->
-                            teammateRepository.save(
-                                    Teammate.builder().teamNumber(2).game(game).userId(user.getId()).build()
-                            )
-                    );
-        }
+        log.info("[로그] saveTeammates() 시작");
+
+        team.forEach(groupId ->
+                Optional.ofNullable(groupRepository.findUsersById(groupId))
+                        .stream().flatMap(Collection::stream)
+                        .forEach(user ->
+                                teammateRepository.save(
+                                        Teammate.builder()
+                                                .teamNumber(teamNumber)
+                                                .game(game)
+                                                .userId(user.getId())
+                                                .build()
+                                )
+                        )
+        );
+    }
+
+    private void assignPreferCourts(List<PreferCourt> preferCourtList, Game game) {
+
+        log.info("[로그] assignPreferCourts() 시작");
 
         preferCourtList.forEach(preferCourt -> {
             preferCourt.determineGame(game);
             game.addPreferCourt(preferCourt);
             votedCourtRepository.save(VotedCourt.builder().court(preferCourt.getCourt()).game(game).build());
         });
-
-        return game.getId();
     }
 
     private void initiateUserGaming(Long gameId) {
+
+        log.info("[로그] initiateUserGaming() 시작 - gameId: {}", gameId);
 
         // 매칭된 모든 유저를 게임 중으로 상태 변경 및 매칭 완료 알림 전송
         teammateRepository.findUserIdsByGameId(gameId).forEach(userId -> {
@@ -264,6 +367,8 @@ public class MatchMakingService {
 
     // 매칭된 그룹 모두 삭제
     private void disbandGroupAll(List<Long> team1, List<Long> team2) {
+
+        log.info("[로그] disbandGroupAll() 시작");
 
         for (long groupId: team1) {
             groupRepository.findById(groupId)
@@ -278,6 +383,8 @@ public class MatchMakingService {
 
     @Transactional
     public void deleteMatching(long userId) {
+
+        log.info("[로그] deleteMatching() 시작");
 
         User user = getUser(userId);
         Group group = Optional.ofNullable(user.getGroup())

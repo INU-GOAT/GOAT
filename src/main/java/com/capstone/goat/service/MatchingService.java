@@ -69,7 +69,8 @@ public class MatchingService {
                     matching.getLatitude(),
                     matching.getLongitude(),
                     matching.getMatchStartTimes().stream().map(MatchStartTime::getStartTime).toList(),
-                    matching.getPreferCourt()
+                    matching.getPreferCourt(),
+                    matching.getIsClubMatching()
             );
 
             long minutesElapsed = ChronoUnit.MINUTES.between(matching.getMatchingStartTime(), LocalDateTime.now());

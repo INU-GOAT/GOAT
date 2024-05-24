@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -26,6 +27,7 @@ public class GameService {
     private final TeammateRepository teammateRepository;
     private final VotedCourtRepository votedCourtRepository;
     private final PreferCourtRepository preferCourtRepository;
+    private final ClubRepository clubRepository;
 
     private GamePlayingResponseDto toGamePlayingDto(Game game) {
 
@@ -66,8 +68,7 @@ public class GameService {
 
     public GamePlayingResponseDto getPlayingGame(long userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        User user = getUser(userId);
         // 유저가 게임 중이 아니면 예외
         if (user.getStatus() != Status.GAMING) {
             throw new CustomException(CustomErrorCode.USER_NOT_GAMING);
@@ -106,8 +107,7 @@ public class GameService {
     @Transactional
     public void determineCourt(long gameId, String court) {
 
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        Game game = getGame(gameId);
 
         PreferCourt preferCourt = preferCourtRepository.findFirstByCourtAndGameId(court, gameId);
         double latitude = preferCourt.getLatitude();
@@ -118,12 +118,29 @@ public class GameService {
     @Transactional
     public void finishGame(long gameId, long userId, GameFinishDto gameFinishDto) {
 
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        Game game = getGame(gameId);
         // 게임 시작 전이면 예외
         if (game.getCourt() == null) {
             throw new CustomException(CustomErrorCode.GAME_NOT_STARTED);
         }
+
+        User user = getUser(userId);
+        ClubGame clubGame = game.getClubGame();
+        if (clubGame != null && gameFinishDto.getResult() != null) {
+            // 그룹장인 경우 게임 결과 입력
+            if (Objects.equals(userId, clubGame.getTeam1Master())) {
+                clubGame.inputTeam1Result(gameFinishDto.getResult());
+            } else if (Objects.equals(userId, clubGame.getTeam2Master())) {
+                clubGame.inputTeam2Result(gameFinishDto.getResult());
+            }
+            if (clubGame.determineWinClub()) {
+                updateClubResult(clubGame.getTeam1ClubId(), clubGame.getTeam2ClubId(), clubGame.getWinClubId());
+            }
+        } else if (gameFinishDto.getResult() != null){
+            // 점수 조정
+            updateRating(user, game.getSport(), gameFinishDto.getResult(), gameFinishDto.getFeedback());
+        }
+
 
         // 게임 결과 입력
         Teammate teammate = teammateRepository.findByUserIdAndGameId(userId, gameId)
@@ -131,13 +148,19 @@ public class GameService {
         teammate.updateGameReport(gameFinishDto.getResult(), gameFinishDto.getComment());
 
         // 대기 중으로 유저 상태 변경
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.changeStatus(Status.WAITING);
         user.changeVoteAfterEndGame();
+    }
 
-        // 점수 조정
-        updateRating(user, game.getSport(), gameFinishDto.getResult(), gameFinishDto.getFeedback());
+    private void updateClubResult(Long club1Id, Long club2Id, Long winClubId) {
+
+        Club club1 = clubRepository.findById(club1Id)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.CLUB_NOT_FOUND));
+        Club club2 = clubRepository.findById(club2Id)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.CLUB_NOT_FOUND));
+
+        club1.updateGameRecord(winClubId);
+        club2.updateGameRecord(winClubId);
     }
 
     private void updateRating(User user, Sport sport, int result, int feedback) {
@@ -149,10 +172,8 @@ public class GameService {
 
     @Transactional
     public boolean voteCourt(Long gameId, String court,String userNickname){
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
-        User user = userRepository.findByNickname(userNickname)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+        Game game = getGame(gameId);
+        User user = getUser(userNickname);
         if(user.getIsVoted()){
             return false;
         }
@@ -171,8 +192,7 @@ public class GameService {
 
     @Transactional
     public VoteTotalResponseDto getVoteMessage(Long gameId){
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        Game game = getGame(gameId);
         List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
         int voteCount = 0;
         List<VotedCourtResponseDto> list = new ArrayList<>();
@@ -188,8 +208,7 @@ public class GameService {
 
     @Transactional
     public void determineCourt(Long gameId){
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+        Game game = getGame(gameId);
         List<VotedCourt> courts = votedCourtRepository.findAllByGameId(gameId);
         int max = courts.get(0).getCount();
         String courtName =courts.get(0).getCourt();
@@ -206,6 +225,19 @@ public class GameService {
         game.determineCourt(courtName, latitude, longitude);
     }
 
+    private Game getGame(Long gameId) {
+        return gameRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.GAME_NOT_FOUND));
+    }
 
+    private User getUser(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+    }
+
+    private User getUser(String userNickname) {
+        return userRepository.findByNickname(userNickname)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+    }
 
 }

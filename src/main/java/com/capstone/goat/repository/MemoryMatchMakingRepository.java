@@ -48,25 +48,26 @@ public class MemoryMatchMakingRepository implements MatchMakingRepository {
         List<MatchMaking> matchedList = new ArrayList<>();
 
         List<MatchMaking>[][] subArray = getSubArray(latIndex, lngIndex, matchingRange);
-        List<MatchMaking> subList = new ArrayList<>();
         for (List<MatchMaking>[] row : subArray) {
             for (List<MatchMaking> element : row) {
-                subList.addAll(element);
+                for (MatchMaking matchMaking : element) {
+
+                    int ratingMaxDiff = RATINGVALUE * calculateRatingWeight(newMatchMaking.getMatchingStartTime());
+
+                    // 종목과 게임 시작 시간이 동일하고, 클럽 매칭 여부가 일치하면 리스트에 추가
+                    // 일반 매칭일 경우 rating도 비교하여 비슷할 경우 추가
+                    if (matchMaking.getSport().equals(newMatchMaking.getSport())
+                            && matchMaking.getMatchStartTime().equals(newMatchMaking.getMatchStartTime())
+                            && matchMaking.getIsClubMatching() == newMatchMaking.getIsClubMatching()
+                            && (newMatchMaking.getIsClubMatching() || Math.abs(matchMaking.getRating() - newMatchMaking.getRating()) < ratingMaxDiff)) {
+
+                        matchedList.add(matchMaking);
+                    }
+                }
             }
         }
         // 매칭 시작 시간을 기준으로 정렬
-        subList.sort(Comparator.comparing(MatchMaking::getMatchingStartTime));
-
-        for (MatchMaking matchMaking : subList) {
-
-            int ratingMaxDiff = RATINGVALUE * calculateRatingWeight(newMatchMaking.getMatchingStartTime());
-
-            // 종목과 게임 시작 시간이 동일하고 rating이 비슷하면 리스트에 추가
-            if ( matchMaking.getSport().equals(newMatchMaking.getSport()) &&
-                    matchMaking.getMatchStartTime().equals(newMatchMaking.getMatchStartTime()) &&
-                    Math.abs(matchMaking.getRating() - newMatchMaking.getRating()) < ratingMaxDiff)
-                matchedList.add(matchMaking);
-        }
+        matchedList.sort(Comparator.comparing(MatchMaking::getMatchingStartTime));
 
         return matchedList;
     }

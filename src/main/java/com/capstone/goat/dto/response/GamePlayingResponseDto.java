@@ -1,5 +1,6 @@
 package com.capstone.goat.dto.response;
 
+import com.capstone.goat.domain.ClubGame;
 import com.capstone.goat.domain.Game;
 import com.capstone.goat.domain.PreferCourt;
 import lombok.AccessLevel;
@@ -24,6 +25,8 @@ public class GamePlayingResponseDto {
 
     private final String court;
 
+    private final ClubGame clubGame;
+
     private final List<PreferCourtDto> preferCourts;
 
     private final List<UserInfoDto> team1;
@@ -32,13 +35,14 @@ public class GamePlayingResponseDto {
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, Double latitude, Double longitude, String court, List<PreferCourtDto> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
+    private GamePlayingResponseDto(long gameId, String sportName, LocalDateTime startTime, Double latitude, Double longitude, String court, ClubGame clubGame, List<PreferCourtDto> preferCourts, List<UserInfoDto> team1, List<UserInfoDto> team2) {
         this.gameId = gameId;
         this.sportName = sportName;
         this.startTime = startTime;
         this.latitude = latitude;
         this.longitude = longitude;
         this.court = court;
+        this.clubGame = clubGame;
         this.preferCourts = preferCourts;
         this.team1 = team1;
         this.team2 = team2;
@@ -61,6 +65,7 @@ public class GamePlayingResponseDto {
                 .latitude(game.getLatitude())
                 .longitude(game.getLongitude())
                 .court(game.getCourt())
+                .clubGame(game.getClubGame())
                 .preferCourts(preferCourts)
                 .team1(team1)
                 .team2(team2)

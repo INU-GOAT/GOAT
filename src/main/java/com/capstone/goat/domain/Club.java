@@ -33,6 +33,9 @@ public class Club {
     @Column
     private Long lose;
 
+    @Column
+    private Long draw;
+
     @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<User> members;
 
@@ -53,6 +56,12 @@ public class Club {
     public void update(String name, String sport){
         this.name = name;
         this.sport = sport;
+    }
+
+    public void updateGameRecord(Long winClubId) {
+        if (winClubId == null) draw++;
+        else if (winClubId.equals(this.id)) win++;
+        else lose++;
     }
 
 }

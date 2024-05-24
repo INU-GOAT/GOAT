@@ -11,7 +11,6 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameFinishDto {
 
-    @NotNull(message = "result는 비어있을 수 없습니다.")
     @Pattern(regexp = "^-1|0|1$", message = "result 값은 -1, 0, 1 중 하나여야 합니다.")
     private String result;
 
@@ -21,9 +20,11 @@ public class GameFinishDto {
     @Pattern(regexp = "^-1|0|1$", message = "feedback 값은 -1, 0, 1 중 하나여야 합니다.")
     private String feedback;
 
-    public int getResult() {
+    public Integer getResult() {
 
-        return Integer.parseInt(result);
+        return result != null
+                ? Integer.parseInt(result)
+                : null;
     }
 
     public String getComment() {
