@@ -36,10 +36,10 @@ public class Club {
     @Column
     private Long draw;
 
-    @OneToMany(mappedBy = "club",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "club",fetch = FetchType.LAZY)
     private List<User> members;
 
-    @OneToMany(mappedBy = "applyingClub",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "applyingClub",fetch = FetchType.LAZY)
     private List<User> applicants;
 
 
