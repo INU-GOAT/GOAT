@@ -3,7 +3,6 @@ package com.capstone.goat.config;
 import com.capstone.goat.exception.CustomAccessDeniedHandler;
 import com.capstone.goat.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,12 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +30,7 @@ public class SecurityConfig  {
         http
                 .authorizeRequests()
                 .antMatchers("/","/index.js","/js/**","/css/**","/image/**","/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                 .antMatchers(HttpMethod.PUT,"/api/users").hasRole("USER")
                 .antMatchers(HttpMethod.DELETE,"/api/users").hasRole("USER")
                 .antMatchers(HttpMethod.GET,"/api/users").hasRole("USER")
