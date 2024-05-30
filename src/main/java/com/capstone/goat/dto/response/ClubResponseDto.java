@@ -42,6 +42,7 @@ public class ClubResponseDto {
         this.members = members;
         this.win = win;
         this.lose = lose;
+        this.draw = draw;
     }
 
     public static ClubResponseDto of(Club club,String clubMaster, List<ClubMemberResponseDto> members){
@@ -52,7 +53,7 @@ public class ClubResponseDto {
                 .memberNumber((long) club.getMembers().size())
                 .win(club.getWin())
                 .lose(club.getLose())
-                .lose(club.getDraw())
+                .draw(club.getDraw())
                 .members(members)
                 .build();
     }

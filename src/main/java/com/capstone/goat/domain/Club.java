@@ -51,6 +51,7 @@ public class Club {
         this.sport = sport;
         this.win = 0L;
         this.lose = 0L;
+        this.draw = 0L;
     }
 
     public void update(String name, String sport){
