@@ -351,6 +351,11 @@ public class MatchMakingService {
             game.addPreferCourt(preferCourt);
             votedCourtRepository.save(VotedCourt.builder().court(preferCourt.getCourt()).game(game).build());
         });
+
+        if (game.getClubGame() != null) {
+            PreferCourt court = preferCourtList.get(0);
+            game.determineCourt(court.getCourt(), court.getLatitude(), court.getLongitude());
+        }
     }
 
     private void initiateUserGaming(Long gameId) {
