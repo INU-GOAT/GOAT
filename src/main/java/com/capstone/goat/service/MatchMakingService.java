@@ -139,7 +139,7 @@ public class MatchMakingService {
                 log.info("[로그] : club1GroupId: " + club1GroupId + " club2GroupId: " + club2GroupId);
 
                 // Matching과 MatchMaking에서 매칭된 그룹 제거
-                deleteMatchedGroup(club1GroupId, club2GroupId, latitude, longitude);
+                deleteMatchedClub(club1, club2);
 
                 // Game에 추가
                 Long gameId = addGame(club1GroupId, club2GroupId, matchMaking, preferCourtList);
@@ -168,7 +168,7 @@ public class MatchMakingService {
                 log.info("[로그] : team1GroupId: " + team1GroupId + " team2GroupId: " + team2GroupId);
 
                 // Matching과 MatchMaking에서 매칭된 그룹 제거
-                deleteMatchedGroup(team1GroupId, team2GroupId, latitude, longitude);
+                deleteMatchedGroup(team1, team2);
 
                 // Game에 추가
                 Long gameId = addGame(team1GroupId, team2GroupId, matchMaking, preferCourtList);
@@ -250,18 +250,31 @@ public class MatchMakingService {
         return new ArrayList<>(preferCourtSet);
     }
 
-    // Matching과 MatchMaking에서 매칭된 그룹 제거
-    private void deleteMatchedGroup(List<Long> team1, List<Long> team2, double latitude, double longitude) {
+    // Matching과 MatchMaking에서 매칭된 클럽 제거
+    private void deleteMatchedClub(MatchMaking club1, MatchMaking club2) {
 
         log.info("[로그] deleteByGroupId 시작");
 
-        for (long groupId : team1) {
-            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
-            matchingRepository.deleteByGroupId(groupId);
+        matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(club1.getGroupId(), club1.getLatitude(), club1.getLongitude());
+        matchingRepository.deleteByGroupId(club1.getGroupId());
+
+        matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(club2.getGroupId(), club2.getLatitude(), club2.getLongitude());
+        matchingRepository.deleteByGroupId(club2.getGroupId());
+
+    }
+
+    // Matching과 MatchMaking에서 매칭된 그룹 제거
+    private void deleteMatchedGroup(List<MatchMaking> team1, List<MatchMaking> team2) {
+
+        log.info("[로그] deleteByGroupId 시작");
+
+        for (MatchMaking matchMaking : team1) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchMaking.getGroupId(), matchMaking.getLatitude(), matchMaking.getLongitude());
+            matchingRepository.deleteByGroupId(matchMaking.getGroupId());
         }
-        for (long groupId : team2) {
-            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(groupId, latitude, longitude);
-            matchingRepository.deleteByGroupId(groupId);
+        for (MatchMaking matchMaking : team2) {
+            matchMakingRepository.deleteByGroupIdAndLatitudeAndLongitude(matchMaking.getGroupId(), matchMaking.getLatitude(), matchMaking.getLongitude());
+            matchingRepository.deleteByGroupId(matchMaking.getGroupId());
         }
     }
 
