@@ -74,7 +74,7 @@ public class MatchingService {
             );
 
             long minutesElapsed = ChronoUnit.MINUTES.between(matching.getMatchingStartTime(), LocalDateTime.now());
-            int matchingRange = (int) (minutesElapsed / 30);
+            int matchingRange = (int) (minutesElapsed / 1);
             matchingRange = Math.min(matchingRange, 10);    // 최대 범위 21km x 21km
 
             log.info("[로그] 재매칭 시작, 매칭 id: {}, 매칭 시작 시간: {}", matching.getId(), matching.getMatchingStartTime());
