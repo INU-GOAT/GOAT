@@ -15,6 +15,6 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
 
     void deleteByGroupId(long groupId);
 
-    @Query(value = "select * from matching m where timestampdiff(minute, m.matching_start_time, :now) % 30 = 0 and timestampdiff(minute, m.matching_start_time, :now) != 0", nativeQuery = true)
+    @Query(value = "select * from matching m where timestampdiff(minute, m.matching_start_time, :now) % 1 = 0 and timestampdiff(minute, m.matching_start_time, :now) != 0", nativeQuery = true)
     List<Matching> findOldMatchingList(LocalDateTime now);
 }
